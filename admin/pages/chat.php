@@ -1,46 +1,33 @@
 <?php
 /**
- * Quản lý Chat
+ * Quản lý Chat - Đã chuyển sang Socket.IO để chat Real-time
  * File: admin/pages/chat.php
  */
 
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
 
-// Check permission - Nhân viên Bán Hàng KHÔNG được truy cập
-$currentRoleID = $_SESSION['roleID'] ?? $_SESSION['role_id'] ?? null;
+// Check permission
+$currentRoleID = $_SESSION['roleID'] ?? $_SESSION['user_role_id'] ?? null;
 if ($currentRoleID == 3) {
     die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">Nhân viên Bán Hàng không có quyền truy cập Chat!</div></div>');
 }
 
 // Load Controller
-require_once __DIR__ . '/../../controller/admin/cChat.php';
-$chatController = new cChat();
+require_once __DIR__ . '/../../controller/ChatController.php'; 
+$chatController = new ChatController(); 
 
 $success = '';
 $error = '';
+$currentUserID = $_SESSION['user_id'] ?? 0; 
 
-// Xử lý GỬI TIN NHẮN
-if (isset($_POST['send_message'])) {
-    $data = [
-        'customerID' => intval($_POST['customerID']),
-        'content' => trim($_POST['content'])
-    ];
-    
-    $currentUserID = $_SESSION['userID'] ?? $_SESSION['user_id'] ?? 0;
-    $result = $chatController->sendMessage($data, $currentUserID, $currentRoleID);
-    
-    if ($result['success']) {
-        $success = $result['message'];
-    } else {
-        $error = isset($result['errors']) ? implode('<br>', $result['errors']) : $result['message'];
-    }
-}
+// --- Xử lý DELETE MESSAGE / DELETE CONVERSATION (giữ nguyên) ---
 
 // Xử lý XÓA TIN NHẮN (Chỉ Chủ DN và NVCSKH)
 if (isset($_GET['delete_message']) && ($currentRoleID == 1 || $currentRoleID == 4)) {
     $chatID = intval($_GET['delete_message']);
-    $result = $chatController->deleteMessage($chatID, $currentRoleID);
+    // Hàm này phải được định nghĩa trong ChatController.php của bạn
+    $result = $chatController->deleteMessage($chatID, $currentRoleID); 
     
     if ($result['success']) {
         $success = $result['message'];
@@ -52,7 +39,8 @@ if (isset($_GET['delete_message']) && ($currentRoleID == 1 || $currentRoleID == 
 // Xử lý XÓA HỘI THOẠI (Chỉ Chủ DN và NVCSKH)
 if (isset($_GET['delete_conversation']) && ($currentRoleID == 1 || $currentRoleID == 4)) {
     $customerID = intval($_GET['delete_conversation']);
-    $result = $chatController->deleteConversation($customerID, $currentRoleID);
+    // Hàm này phải được định nghĩa trong ChatController.php của bạn (Ví dụ: deleteConversationByCustomerID)
+    $result = $chatController->deleteConversation($customerID, $currentRoleID); 
     
     if ($result['success']) {
         $success = $result['message'];
@@ -62,8 +50,23 @@ if (isset($_GET['delete_conversation']) && ($currentRoleID == 1 || $currentRoleI
 }
 
 // Lấy danh sách hội thoại
-$conversationsResult = $chatController->getAllConversations($currentRoleID);
+// LƯU Ý: Nếu ChatController::getAllConversations() vẫn chưa tồn tại, lỗi Fatal Error sẽ xảy ra ở đây.
+$conversationsResult = $chatController->getAllConversations($currentRoleID); 
 $conversations = $conversationsResult['success'] ? $conversationsResult['data'] : [];
+
+// Chọn Conversation đầu tiên nếu có để hiển thị ngay (Tùy chọn)
+$currentConversation = null;
+$currentConversationID = 'null';
+$currentCustomerID = 'null';
+$currentCustomerName = 'Khách hàng';
+
+if (!empty($conversations)) {
+    // Lấy Conversation mới nhất để load mặc định
+    $currentConversation = $conversations[0];
+    $currentConversationID = $currentConversation['conversationID'];
+    $currentCustomerID = $currentConversation['customerID'];
+    $currentCustomerName = htmlspecialchars($currentConversation['customerName'] ?? 'Khách #'.$currentCustomerID); // Xử lý trường hợp tên NULL
+}
 
 // Thống kê
 $totalMessages = $chatController->countMessages();
@@ -74,12 +77,9 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="flex h-screen bg-gray-100">
-    <!-- Sidebar -->
     <?php include __DIR__ . '/../includes/sidebar.php'; ?>
     
-    <!-- Main Content -->
     <div class="flex-1 overflow-y-auto ml-64">
-        <!-- Header -->
         <div class="bg-white shadow sticky top-0 z-10">
             <div class="px-4 md:px-6 py-4 flex flex-wrap justify-between items-center gap-4">
                 <div>
@@ -96,28 +96,25 @@ include __DIR__ . '/../includes/header.php';
                     </p>
                 </div>
                 
-                <!-- Quyền hạn hiển thị -->
                 <div class="text-sm">
                     <?php if ($currentRoleID == 1): ?>
                         <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
-                            <i class="fas fa-crown mr-1"></i>Theo dõi tất cả hội thoại
+                            <i class="fas fa-crown mr-1"></i>Chủ Doanh nghiệp
                         </span>
                     <?php elseif ($currentRoleID == 2): ?>
                         <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
-                            <i class="fas fa-user-shield mr-1"></i>Xem và hỗ trợ chat
+                            <i class="fas fa-user-shield mr-1"></i>Nhân viên
                         </span>
                     <?php elseif ($currentRoleID == 4): ?>
                         <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full">
-                            <i class="fas fa-headset mr-1"></i>Toàn quyền quản lý chat
+                            <i class="fas fa-headset mr-1"></i>CSKH
                         </span>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
         
-        <!-- Content -->
         <div class="p-4 md:p-6">
-            <!-- Alerts -->
             <?php if ($success): ?>
             <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded" role="alert">
                 <div class="flex items-center">
@@ -136,26 +133,22 @@ include __DIR__ . '/../includes/header.php';
             </div>
             <?php endif; ?>
             
-            <!-- Chat Layout: 2 cột -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <!-- Danh sách hội thoại -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="bg-blue-600 text-white px-4 py-3 font-bold">
                             <i class="fas fa-users mr-2"></i>
-                            Danh sách hội thoại (<?php echo count($conversations); ?>)
+                            Danh sách hội thoại (<span id="convCount"><?php echo count($conversations); ?></span>)
                         </div>
                         
-                        <!-- Search -->
                         <div class="p-3 border-b">
                             <input type="text" id="searchConversation" placeholder="Tìm khách hàng..." 
-                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         
-                        <!-- List -->
-                        <div class="divide-y max-h-[600px] overflow-y-auto">
+                        <div id="conversationList" class="divide-y max-h-[600px] overflow-y-auto">
                             <?php if (empty($conversations)): ?>
-                            <div class="p-8 text-center text-gray-500">
+                            <div class="p-8 text-center text-gray-500" id="noConversationMessage">
                                 <i class="fas fa-inbox text-4xl mb-2 text-gray-300"></i>
                                 <p>Chưa có hội thoại nào</p>
                             </div>
@@ -163,34 +156,50 @@ include __DIR__ . '/../includes/header.php';
                                 <?php foreach ($conversations as $conv): ?>
                                 <?php
                                 $customerID = $conv['customerID'];
-                                $customerName = htmlspecialchars($conv['customerName']);
+                                $convID = $conv['conversationID'];
+                                // Xử lý trường hợp customerName NULL (nếu chưa có trong bảng customer)
+                                $customerName = htmlspecialchars($conv['customerName'] ?? 'Khách #'.$customerID);
                                 $phone = htmlspecialchars($conv['phone'] ?? '');
                                 $totalMessages = $conv['totalMessages'];
-                                $lastMessage = htmlspecialchars($conv['lastMessage'] ?? '');
-                                $lastMessageDate = $conv['lastMessageDate'];
+                                // ĐÃ SỬA LỖI: Kiểm tra sự tồn tại của lastMessage
+                                $lastMessage = htmlspecialchars($conv['lastMessage'] ?? 'Bắt đầu hội thoại');
+                                
+                                // ĐÃ SỬA LỖI: Luôn sử dụng 'last_message_at' và kiểm tra sự tồn tại
+                                $lastMessageTime = $conv['last_message_at'] ?? date('Y-m-d H:i:s');
+                                
+                                // Lấy số tin chưa đọc cho Staff (User)
+                                $unreadCount = $conv['customer_unread_count'] ?? 0; 
+                                
+                                $isActive = ($convID == $currentConversationID) ? 'bg-blue-50 border-blue-500' : 'border-transparent';
                                 ?>
-                                <div class="conversation-item p-3 hover:bg-blue-50 cursor-pointer border-l-4 border-transparent hover:border-blue-500 transition-all"
-                                     onclick="loadConversation(<?php echo $customerID; ?>, '<?php echo $customerName; ?>')">
+                                <div class="conversation-item p-3 hover:bg-blue-50 cursor-pointer border-l-4 hover:border-blue-500 transition-all <?php echo $isActive; ?>"
+                                    data-conv-id="<?php echo $convID; ?>"
+                                    data-customer-id="<?php echo $customerID; ?>"
+                                    data-customer-name="<?php echo $customerName; ?>"
+                                    onclick="loadConversation(this)">
                                     <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <div class="font-semibold text-gray-800 mb-1">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="font-semibold text-gray-800 mb-1 flex items-center">
                                                 <i class="fas fa-user-circle text-blue-500 mr-1"></i>
-                                                <?php echo $customerName; ?>
+                                                <span class="truncate"><?php echo $customerName; ?></span>
                                             </div>
-                                            <div class="text-xs text-gray-600 mb-1">
-                                                <i class="fas fa-phone mr-1"></i><?php echo $phone; ?>
-                                            </div>
-                                            <div class="text-sm text-gray-500 truncate">
-                                                <?php echo mb_substr($lastMessage, 0, 50) . (mb_strlen($lastMessage) > 50 ? '...' : ''); ?>
+                                            <div class="text-sm text-gray-500 truncate last-message-content" 
+                                                     id="last-message-<?php echo $convID; ?>">
+                                                <?php echo mb_substr($lastMessage, 0, 40) . (mb_strlen($lastMessage) > 40 ? '...' : ''); ?>
                                             </div>
                                         </div>
-                                        <div class="text-right ml-2">
-                                            <div class="text-xs text-gray-500 mb-1">
-                                                <?php echo date('d/m H:i', strtotime($lastMessageDate)); ?>
+                                        <div class="text-right ml-2 flex-shrink-0">
+                                            <div class="text-xs text-gray-500 mb-1 last-message-time" id="last-time-<?php echo $convID; ?>">
+                                                <?php 
+                                                // Format thời gian từ last_message_at
+                                                echo date('H:i', strtotime($lastMessageTime)); 
+                                                ?>
                                             </div>
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                                <?php echo $totalMessages; ?> tin
+                                            <?php if ($unreadCount > 0): ?>
+                                            <span class="unread-badge px-2 py-1 bg-red-500 text-white text-xs rounded-full" id="badge-<?php echo $convID; ?>">
+                                                <?php echo $unreadCount; ?>
                                             </span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -200,14 +209,43 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                 </div>
                 
-                <!-- Khung chat -->
                 <div class="lg:col-span-2">
                     <div id="chatBox" class="bg-white rounded-lg shadow overflow-hidden h-[700px] flex flex-col">
-                        <div class="bg-gray-100 p-8 flex-1 flex items-center justify-center">
-                            <div class="text-center text-gray-400">
-                                <i class="fas fa-comments text-6xl mb-4"></i>
-                                <p class="text-lg">Chọn một hội thoại để bắt đầu</p>
-                            </div>
+                        
+                        <div id="chatHeader" class="bg-blue-600 text-white px-4 py-3 flex justify-between items-center flex-shrink-0">
+                            <?php if ($currentConversationID != 'null'): ?>
+                                <div class="font-bold" id="current-customer-name-display"><i class="fas fa-user-circle mr-2"></i><?php echo $currentCustomerName; ?></div>
+                                <?php if ($currentRoleID == 1 || $currentRoleID == 4): ?>
+                                <button onclick="deleteConversation(<?php echo $currentCustomerID; ?>)" class="text-white hover:text-red-200 text-sm">
+                                    <i class="fas fa-trash mr-1"></i>Xóa hội thoại
+                                </button>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <div class="font-bold">Chọn một hội thoại để bắt đầu</div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Đã thay đổi căn chỉnh mặc định của messagesList thành flex-start -->
+                        <div id="messagesList" class="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col items-start">
+                            <?php if ($currentConversationID == 'null'): ?>
+                                <div class="w-full text-center py-10 text-gray-400">
+                                    <i class="fas fa-comments text-6xl mb-4"></i>
+                                    <p class="text-lg">Chọn một hội thoại để bắt đầu</p>
+                                </div>
+                            <?php else: ?>
+                                <div class="w-full text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải lịch sử chat...</div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div id="chatInputArea" class="border-t p-4 bg-white flex-shrink-0 <?php echo ($currentConversationID == 'null' ? 'hidden' : ''); ?>"> 
+                            <form id="userMessageForm" class="flex gap-2">
+                                <input type="text" id="userMessageInput" placeholder="Nhập tin nhắn..." required
+                                        class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <button type="submit" id="userSendButton"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-paper-plane mr-1"></i>Gửi
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -216,125 +254,122 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
+<div id="admin-metadata" style="display: none;" 
+    data-user-id="<?php echo $currentUserID; ?>"
+    data-user-type="user"
+    data-init-conv-id="<?php echo $currentConversationID; ?>"
+    data-init-customer-id="<?php echo $currentCustomerID; ?>">
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-let currentCustomerID = null;
-let currentCustomerName = '';
-
-// Load hội thoại
-function loadConversation(customerID, customerName) {
-    currentCustomerID = customerID;
-    currentCustomerName = customerName;
+    // Định nghĩa biến để JS client có thể sử dụng
+    const CURRENT_USER_ID = '<?php echo $currentUserID; ?>';
+    const CURRENT_ROLE_ID = '<?php echo $currentRoleID; ?>';
     
-    // Highlight active conversation
-    document.querySelectorAll('.conversation-item').forEach(item => {
-        item.classList.remove('bg-blue-50', 'border-blue-500');
-    });
-    event.currentTarget.classList.add('bg-blue-50', 'border-blue-500');
-    
-    // Load messages via AJAX
-    fetch(`chat_ajax.php?action=load_messages&customerID=${customerID}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                renderChatBox(data.messages);
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Lỗi khi tải tin nhắn!');
-        });
-}
-
-// Render chat box
-function renderChatBox(messages) {
-    let html = `
-        <div class="bg-blue-600 text-white px-4 py-3 flex justify-between items-center">
-            <div class="font-bold">
-                <i class="fas fa-user-circle mr-2"></i>${currentCustomerName}
-            </div>
-            <?php if ($currentRoleID == 1 || $currentRoleID == 4): ?>
-            <button onclick="deleteConversation(${currentCustomerID})" class="text-white hover:text-red-200">
-                <i class="fas fa-trash mr-1"></i>Xóa hội thoại
-            </button>
-            <?php endif; ?>
-        </div>
-        
-        <div id="messagesList" class="flex-1 p-4 overflow-y-auto bg-gray-50" style="max-height: 500px;">
-    `;
-    
-    if (messages.length === 0) {
-        html += `
-            <div class="text-center text-gray-400 py-8">
-                <i class="fas fa-comment-slash text-4xl mb-2"></i>
-                <p>Chưa có tin nhắn</p>
-            </div>
-        `;
-    } else {
-        messages.forEach(msg => {
-            const isCustomer = msg.toUserID == 0 || msg.toUserID == null;
-            const alignClass = isCustomer ? 'justify-start' : 'justify-end';
-            const bgClass = isCustomer ? 'bg-white' : 'bg-blue-100';
-            const name = isCustomer ? currentCustomerName : (msg.staffName || 'Nhân viên');
-            const icon = isCustomer ? 'fa-user' : 'fa-user-tie';
-            
-            html += `
-                <div class="flex ${alignClass} mb-3">
-                    <div class="${bgClass} rounded-lg p-3 max-w-md shadow">
-                        <div class="text-xs text-gray-600 mb-1">
-                            <i class="fas ${icon} mr-1"></i>${name}
-                            <span class="ml-2">${msg.date}</span>
-                        </div>
-                        <div class="text-sm text-gray-800">${msg.chatContent}</div>
-                    </div>
-                </div>
-            `;
-        });
-    }
-    
-    html += `
-        </div>
-        
-        <div class="border-t p-4 bg-white">
-            <form method="POST" class="flex gap-2">
-                <input type="hidden" name="customerID" value="${currentCustomerID}">
-                <input type="text" name="content" placeholder="Nhập tin nhắn..." required
-                       class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button type="submit" name="send_message"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-paper-plane mr-1"></i>Gửi
-                </button>
-            </form>
-        </div>
-    `;
-    
-    document.getElementById('chatBox').innerHTML = html;
-    
-    // Scroll to bottom
-    setTimeout(() => {
-        const messagesList = document.getElementById('messagesList');
-        if (messagesList) {
-            messagesList.scrollTop = messagesList.scrollHeight;
+    // Hàm deleteConversation cần được định nghĩa trong admin_chat_client.js
+    function deleteConversation(customerID) {
+        // Thay window.confirm bằng một modal hoặc pop-up tùy chỉnh theo yêu cầu của dự án.
+        if (confirm('Bạn có chắc chắn muốn xóa hội thoại này và tất cả tin nhắn liên quan?')) {
+            window.location.href = '?delete_conversation=' + customerID;
         }
-    }, 100);
-}
-
-// Xóa hội thoại
-function deleteConversation(customerID) {
-    if (confirm('Bạn có chắc muốn xóa toàn bộ hội thoại với khách hàng này?')) {
-        window.location.href = `?delete_conversation=${customerID}`;
     }
-}
-
-// Tìm kiếm
-document.getElementById('searchConversation')?.addEventListener('input', function(e) {
-    const keyword = e.target.value.toLowerCase();
-    document.querySelectorAll('.conversation-item').forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(keyword) ? 'block' : 'none';
-    });
-});
 </script>
+<script src="/GODIFA/public/js/admin_chat_client.js"></script> 
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+<!-- KHỐI CSS MỚI ĐỂ CĂN CHỈNH VÀ GHI ĐÈ TAILWIND -->
+<style>
+/* 1. KHUNG CHỨA TIN NHẮN (MESSAGES LIST) */
+#messagesList { 
+    display: flex;
+    flex-direction: column; /* Quan trọng: Xếp tin nhắn theo chiều dọc */
+    padding: 1rem;
+    height: 100%;
+    overflow-y: auto; 
+    align-items: stretch; /* Cho phép các hàng tin nhắn chiếm toàn bộ chiều rộng (để align-self hoạt động) */
+}
+
+/* 2. ĐỊNH DẠNG CHUNG CHO MỖI TIN NHẮN (ROW) */
+.message-row {
+    display: flex; 
+    max-width: 100%; /* Chiếm toàn bộ chiều rộng của #messagesList */
+    margin-bottom: 0.5rem;
+    
+    /* Thiết lập Flex container cho nội dung bên trong row (bubble + timestamp) */
+    /* Quan trọng: Dùng flex-end để căn chỉnh nội dung bubble và timestamp theo cùng một hướng */
+    align-items: flex-end; 
+}
+
+/* 3. CĂN CHỈNH TIN NHẮN GỬI ĐI (BÊN PHẢI) - staff/admin */
+.message-row.sent {
+    /* Quan trọng nhất: Đẩy toàn bộ hàng tin nhắn sang phải */
+    align-self: flex-end; 
+    /* Đảm bảo nội dung (bubble) cũng căn sang phải */
+    justify-content: flex-end;
+}
+
+/* 4. CĂN CHỈNH TIN NHẮN NHẬN ĐƯỢC (BÊN TRÁI) - customer */
+.message-row.received {
+    /* Quan trọng nhất: Đảm bảo toàn bộ hàng tin nhắn nằm bên trái */
+    align-self: flex-start; 
+    /* Đảm bảo nội dung (bubble) cũng căn sang trái */
+    justify-content: flex-start;
+}
+
+/* 5. KHUNG BONG BÓNG TIN NHẮN */
+.message-bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    /* Giới hạn chiều rộng thực của bubble để nó không chiếm quá nhiều */
+    max-width: 85%; 
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    /* Căn chỉnh nội dung văn bản bên trong bubble */
+    text-align: left;
+}
+
+/* Tùy chỉnh màu và góc bo cho TIN GỬI ĐI */
+.message-row.sent .message-bubble {
+    background-color: #3b82f6; /* Blue-500 */
+    color: white;
+    /* Loại bỏ bo góc dưới phải (tạo kiểu "chat") */
+    border-bottom-right-radius: 4px; 
+}
+
+/* Tùy chỉnh màu và góc bo cho TIN NHẬN ĐƯỢC */
+.message-row.received .message-bubble {
+    background-color: #ffffff; /* White */
+    color: #1f2937; /* Gray-800 */
+    /* Loại bỏ bo góc dưới trái (tạo kiểu "chat") */
+    border-bottom-left-radius: 4px; 
+}
+
+/* 6. TIMESTAMP */
+.timestamp {
+    display: block;
+    font-size: 10px;
+    margin-top: 3px;
+    opacity: 0.9;
+}
+
+/* Timestamp CĂN PHẢI cho tin nhắn GỬI ĐI */
+.message-row.sent .timestamp {
+    text-align: right; 
+    color: rgba(255, 255, 255, 0.7); /* Xám nhạt trên nền xanh */
+}
+
+/* Timestamp CĂN TRÁI cho tin nhắn NHẬN ĐƯỢC */
+.message-row.received .timestamp {
+    text-align: left; 
+    color: #6b7280; /* Gray-500 trên nền trắng */
+}
+
+/* Cuộn xuống dưới cùng */
+#messagesList:not(:empty) {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Quan trọng: Đẩy nội dung xuống dưới */
+}
+</style>

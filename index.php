@@ -202,7 +202,7 @@ function updateCartCount(count) {
     }
 }
 </script>
-
+<?php include 'view/chat/index.php'; ?>
 <?php include 'view/layout/footer.php'; ?>
 
 

@@ -1,0 +1,68 @@
+/* CSS CHO GIAO DIỆN CHAT - Đặt vào file style.css hoặc main.css */
+
+/* Vùng chứa tin nhắn, đảm bảo dùng flex và căn chỉnh */
+#messagesList, .messages-display { 
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    /* Đảm bảo container này đủ cao để tin nhắn có thể căn chỉnh */
+    flex-grow: 1; 
+}
+
+/* Khung tin nhắn (Container) */
+.message-container {
+    display: flex;
+    margin-bottom: 10px;
+    max-width: 80%; /* Giới hạn chiều rộng tin nhắn */
+}
+
+/* Tin nhắn gửi đi (Bên phải) */
+.message-container.sent {
+    /* Đẩy container tin nhắn về phía bên phải */
+    align-self: flex-end;
+    /* Căn lề bên trái để tạo khoảng trống */
+    margin-left: auto; 
+}
+
+/* Tin nhắn nhận được (Bên trái) */
+.message-container.received {
+    /* Đẩy container tin nhắn về phía bên trái */
+    align-self: flex-start;
+    /* Căn lề bên phải để tạo khoảng trống */
+    margin-right: auto; 
+}
+
+/* Khung nội dung tin nhắn (Bubble) */
+.message-bubble {
+    padding: 8px 12px;
+    border-radius: 18px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+/* CSS cho bong bóng tin nhắn gửi đi (Admin gửi) */
+/* Nếu bạn đang dùng Tailwind CSS, bạn không cần dùng đoạn này,
+   nhưng nếu muốn định dạng cụ thể hơn, hãy dùng nó. */
+.message-container.sent .message-bubble {
+    background-color: #007bff; 
+    color: white;
+    border-bottom-right-radius: 4px; 
+}
+
+/* CSS cho bong bóng tin nhắn nhận được (Khách hàng gửi) */
+.message-container.received .message-bubble {
+    background-color: #e9ecef; 
+    color: #212529; 
+    border: 1px solid #dee2e6;
+    border-bottom-left-radius: 4px; 
+}
+
+.message-bubble .timestamp {
+    display: block;
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 3px;
+    text-align: right;
+}

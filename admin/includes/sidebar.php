@@ -4,13 +4,13 @@ require_once __DIR__ . '/../../model/mOrder.php';
 $orderModel = new Order();
 $pendingOrdersCount = $orderModel->countByStatus('Chờ thanh toán');
 
-// Load số tin nhắn chưa đọc cho badge
-$unreadMessagesCount = 0;
-if (hasPermission('view_chat') || hasPermission('manage_chat')) {
-    require_once __DIR__ . '/../../model/mChat.php';
-    $chatModel = new Chat();
-    $unreadMessagesCount = $chatModel->countUnreadMessages();
-}
+// // Load số tin nhắn chưa đọc cho badge
+// $unreadMessagesCount = 0;
+// if (hasPermission('view_chat') || hasPermission('manage_chat')) {
+//     require_once __DIR__ . '/../../model/mChat.php';
+//     $chatModel = new Chat();
+//     $unreadMessagesCount = $chatModel->countUnreadMessages();
+// }
 ?>
 <aside class="w-64 bg-white h-screen shadow-lg fixed left-0 top-0 overflow-y-auto">
     <!-- Logo -->
@@ -111,11 +111,11 @@ if (hasPermission('view_chat') || hasPermission('manage_chat')) {
         <a href="?page=chat" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
             <i class="fas fa-comments w-5"></i>
             <span>Chat</span>
-            <?php if ($unreadMessagesCount > 0): ?>
+            <!-- <?php if ($unreadMessagesCount > 0): ?>
             <span class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
                 <?php echo $unreadMessagesCount; ?>
             </span>
-            <?php endif; ?>
+            <?php endif; ?> -->
         </a>
         <?php endif; ?>
 
