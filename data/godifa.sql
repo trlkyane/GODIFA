@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Oct 29, 2025 at 03:03 PM
+-- Generation Time: Oct 30, 2025 at 06:27 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -249,66 +249,39 @@ CREATE TABLE IF NOT EXISTS `customer` (
   `customerName` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `phone` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `email` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
-  `birthdate` date DEFAULT NULL COMMENT 'Ngày sinh',
-  `gender` enum('Nam','Nữ','Khác') COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Giới tính',
   `password` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1=Hoạt động, 0=Đã khóa',
   `groupID` int DEFAULT NULL COMMENT 'ID nhóm khách hàng',
   PRIMARY KEY (`customerID`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_status` (`status`),
-  KEY `idx_gender` (`gender`),
-  KEY `idx_birthdate` (`birthdate`),
   KEY `idx_groupID` (`groupID`)
-) ENGINE=MyISAM AUTO_INCREMENT=1223 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1228 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `customer`
 --
 
-INSERT INTO `customer` (`customerID`, `customerName`, `phone`, `email`, `birthdate`, `gender`, `password`, `status`, `groupID`) VALUES
-(1, 'Ngô Hoàng Khải', '0817574722', 'ngok1708@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
-(2, 'Lê Trung Hiếu', '0123222531', 'trunghieu@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
-(3, 'Nguyễn Trung Trực', '0812412573', 'trungtruc@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
-(4, 'nguyễn  thanh tùng', '0313212356', 'tungnguyen@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
-(5, 'lê hồng minh', '0123111444', 'hongminh@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1);
+INSERT INTO `customer` (`customerID`, `customerName`, `phone`, `email`, `password`, `status`, `groupID`) VALUES
+(1, 'Ngô Hoàng Khải', '0817574722', 'ngok1708@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 5),
+(2, 'Lê Trung Hiếu', '0123222531', 'trunghieu@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
+(3, 'Nguyễn Trung Trực', '0812412573', 'trungtruc@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
+(4, 'nguyễn  thanh tùng', '0313212356', 'tungnguyen@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
+(5, 'lê hồng minh', '0123111444', 'hongminh@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
+(1223, 'hhh', '0999666', 'hhh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 8),
+(1224, 'Test Customer 1761798391', '0474708621', 'test_1761798391@godifa.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 8),
+(1225, 'Test 1761799909', '0306592138', 'test1761799909@godifa.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 2),
+(1226, 'Test 1761799991', '0339655073', 'test1761799991@godifa.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 2),
+(1227, 'ttt', '01111111', 'ttt@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 8);
 
 --
 -- Triggers `customer`
 --
-DROP TRIGGER IF EXISTS `after_customer_update`;
+DROP TRIGGER IF EXISTS `before_customer_insert_set_group`;
 DELIMITER $$
-CREATE TRIGGER `after_customer_update` AFTER UPDATE ON `customer` FOR EACH ROW BEGIN
-    DECLARE cust_age INT;
-    DECLARE cust_orders INT;
-    DECLARE cust_spent DECIMAL(15,2);
-    DECLARE best_group_id INT;
-    
-    IF NEW.birthdate IS NOT NULL AND NEW.gender IS NOT NULL THEN
-        SET cust_age = TIMESTAMPDIFF(YEAR, NEW.birthdate, CURDATE());
-        
-        SELECT 
-            COUNT(o.orderID),
-            COALESCE(SUM(o.totalAmount), 0)
-        INTO cust_orders, cust_spent
-        FROM `order` o
-        WHERE o.customerID = NEW.customerID AND o.paymentStatus != 'Đã hủy';
-        
-        SELECT groupID INTO best_group_id
-        FROM customer_group
-        WHERE status = 1 
-          AND autoAssign = 1
-          AND (gender = 'Tất cả' OR gender = NEW.gender)
-          AND (minAge IS NULL OR cust_age >= minAge)
-          AND (maxAge IS NULL OR cust_age <= maxAge)
-          AND (minOrders <= cust_orders)
-          AND (minSpent <= cust_spent)
-        ORDER BY priority DESC, discountPercent DESC
-        LIMIT 1;
-        
-        IF best_group_id IS NOT NULL THEN
-            UPDATE customer SET groupID = best_group_id WHERE customerID = NEW.customerID;
-        END IF;
+CREATE TRIGGER `before_customer_insert_set_group` BEFORE INSERT ON `customer` FOR EACH ROW BEGIN
+    IF NEW.groupID IS NULL THEN
+        SET NEW.groupID = 8;
     END IF;
 END
 $$
@@ -330,20 +303,35 @@ CREATE TABLE IF NOT EXISTS `customer_group` (
   `color` varchar(7) DEFAULT '#6366f1' COMMENT 'Màu sắc hiển thị (hex color)',
   `status` tinyint(1) DEFAULT '1' COMMENT '1=Hoạt động, 0=Tạm dừng',
   `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `isSystem` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`groupID`),
   KEY `idx_status` (`status`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Nhóm khách hàng theo chi tiêu';
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Nhóm khách hàng theo chi tiêu';
 
 --
 -- Dumping data for table `customer_group`
 --
 
-INSERT INTO `customer_group` (`groupID`, `groupName`, `description`, `minSpent`, `maxSpent`, `color`, `status`, `createdAt`) VALUES
-(1, 'Bronze', 'Tổng chi tiêu từ 0-5 triệu đồng', 0, 4999999, '#8a3e00', 1, '2025-10-29 10:21:19'),
-(2, 'Silver', 'Tổng chi tiêu từ 5-15 triệu đồng', 5000000, 14999999, '#99a6b8', 1, '2025-10-29 10:21:19'),
-(3, 'Gold', 'Tổng chi tiêu từ 20-50 triệu đồng', 15000000, 29999999, '#fbbf24', 1, '2025-10-29 10:21:19'),
-(4, 'Platinum', 'Tổng chi tiêu từ 50-100 triệu đồng', 30000000, 49999999, '#42e9ff', 1, '2025-10-29 10:21:19'),
-(5, 'Diamond', 'Tổng chi tiêu trên 100 triệu đồng', 50000000, NULL, '#2042ee', 1, '2025-10-29 10:21:19');
+INSERT INTO `customer_group` (`groupID`, `groupName`, `description`, `minSpent`, `maxSpent`, `color`, `status`, `createdAt`, `isSystem`) VALUES
+(1, 'Bronze', 'Hạng Đồng', 1, 4999999, '#cd7f32', 1, '2025-10-30 05:13:38', 0),
+(2, 'Silver', 'Hạng Bạc', 5000000, 14999999, '#99a6b8', 1, '2025-10-29 10:21:19', 0),
+(3, 'Gold', 'Hạng Vàng', 15000000, 29999999, '#fbbf24', 1, '2025-10-29 10:21:19', 0),
+(4, 'Platinum', 'Hạng Bạch Kim', 30000000, 49999999, '#42e9ff', 1, '2025-10-29 10:21:19', 0),
+(5, 'Diamond', 'Hạng Kim Cương', 50000000, NULL, '#2042ee', 1, '2025-10-29 10:21:19', 0),
+(8, 'Khách hàng mới', 'New', 0, 0, '#000000', 1, '2025-10-30 05:17:15', 1);
+
+--
+-- Triggers `customer_group`
+--
+DROP TRIGGER IF EXISTS `after_customer_group_update_reassign`;
+DELIMITER $$
+CREATE TRIGGER `after_customer_group_update_reassign` AFTER UPDATE ON `customer_group` FOR EACH ROW BEGIN
+    IF NEW.isSystem = 0 OR NEW.isSystem IS NULL THEN
+        CALL auto_assign_customer_groups_by_spending();
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -366,7 +354,7 @@ CREATE TABLE IF NOT EXISTS `order` (
   PRIMARY KEY (`orderID`),
   KEY `fk_order_user` (`customerID`),
   KEY `fk_order_voucher` (`voucherID`)
-) ENGINE=MyISAM AUTO_INCREMENT=113 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=116 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `order`
@@ -381,37 +369,10 @@ INSERT INTO `order` (`orderID`, `orderDate`, `paymentStatus`, `totalAmount`, `pa
 (6, '2025-10-24 11:48:13', 'Đã hủy', 185000, 'QR', 3, 0, 4, 'Đã hủy', NULL),
 (7, '2025-10-24 11:51:28', 'Đã hủy', 270000, 'QR', 1, 0, 1, 'Đã hủy', 'hết hàng'),
 (8, '2025-10-22 14:28:23', 'Đã hủy', 95000, 'COD', 2, 0, 2, 'Đã hủy', NULL),
-(112, '2025-10-24 14:22:59', 'Đã hủy', 120000000, 'QR', 1, NULL, NULL, 'Đã hủy', 'Nháp');
-
---
--- Triggers `order`
---
-DROP TRIGGER IF EXISTS `after_order_update_assign_group`;
-DELIMITER $$
-CREATE TRIGGER `after_order_update_assign_group` AFTER UPDATE ON `order` FOR EACH ROW BEGIN
-    DECLARE customer_total_spent DECIMAL(15,2);
-    DECLARE best_group_id INT;
-    
-    IF NEW.paymentStatus != OLD.paymentStatus THEN
-        SELECT COALESCE(SUM(totalAmount), 0) INTO customer_total_spent
-        FROM `order`
-        WHERE customerID = NEW.customerID AND paymentStatus != 'Đã hủy';
-        
-        SELECT groupID INTO best_group_id
-        FROM customer_group
-        WHERE status = 1
-          AND customer_total_spent >= minSpent
-          AND (maxSpent IS NULL OR customer_total_spent <= maxSpent)
-        ORDER BY minSpent DESC
-        LIMIT 1;
-        
-        IF best_group_id IS NOT NULL THEN
-            UPDATE customer SET groupID = best_group_id WHERE customerID = NEW.customerID;
-        END IF;
-    END IF;
-END
-$$
-DELIMITER ;
+(112, '2025-10-30 11:10:09', 'Đã thanh toán', 120000000, 'QR', 1, NULL, NULL, 'Hoàn thành', 'Nháp'),
+(113, '2025-10-30 11:51:49', 'Đã thanh toán', 10000000, '', 1225, NULL, NULL, 'Đang xử lý', NULL),
+(114, '2025-10-30 11:53:11', 'Đã thanh toán', 10000000, '', 1226, NULL, NULL, 'Đang xử lý', NULL),
+(115, '2025-10-30 12:04:26', 'Đã thanh toán', 10000000, '', 0, NULL, NULL, 'Chờ xử lý', NULL);
 
 -- --------------------------------------------------------
 
@@ -604,7 +565,7 @@ CREATE TABLE IF NOT EXISTS `voucher` (
   `requirement` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `status` tinyint(1) DEFAULT '1' COMMENT '1=active, 0=locked',
   PRIMARY KEY (`voucherID`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `voucher`
@@ -619,7 +580,8 @@ INSERT INTO `voucher` (`voucherID`, `voucherName`, `value`, `quantity`, `startDa
 (6, 'Test voucher', 12000, 10, '2025-10-06', '2025-11-16', '1223123123123123', 0),
 (7, 'Test voucher 2', 12000, 10, '0001-01-01', '2025-11-16', '1223123123123123', 1),
 (8, 'Test voucher KHTT', 150000, 1, '2025-10-17', '2025-11-28', '', 1),
-(9, 'Test voucher 2', 12000, 1, '2025-10-08', '2025-11-28', '', 1);
+(9, 'Test voucher 2', 12000, 1, '2025-10-08', '2025-11-28', '', 1),
+(10, 'Test voucher KHTT', 120000, 100, '2025-10-30', '2025-11-28', 'hihi', 1);
 
 -- --------------------------------------------------------
 
@@ -635,7 +597,7 @@ CREATE TABLE IF NOT EXISTS `voucher_group` (
   PRIMARY KEY (`voucherGroupID`),
   KEY `idx_voucher` (`voucherID`),
   KEY `idx_group` (`groupID`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ánh xạ voucher - nhóm khách hàng';
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ánh xạ voucher - nhóm khách hàng';
 
 --
 -- Dumping data for table `voucher_group`
@@ -643,7 +605,9 @@ CREATE TABLE IF NOT EXISTS `voucher_group` (
 
 INSERT INTO `voucher_group` (`voucherGroupID`, `voucherID`, `groupID`) VALUES
 (2, 8, 6),
-(4, 9, 3);
+(4, 9, 3),
+(8, 10, 2),
+(7, 10, 1);
 
 -- --------------------------------------------------------
 
@@ -656,12 +620,9 @@ CREATE TABLE IF NOT EXISTS `v_customer_demographics` (
 `groupID` int
 ,`groupName` varchar(100)
 ,`totalCustomers` bigint
-,`maleCount` bigint
-,`femaleCount` bigint
-,`avgAge` decimal(24,4)
-,`minAge` bigint
-,`maxAge` bigint
+,`totalOrders` bigint
 ,`totalRevenue` decimal(32,0)
+,`avgOrderValue` decimal(14,4)
 );
 
 -- --------------------------------------------------------
@@ -691,7 +652,7 @@ CREATE TABLE IF NOT EXISTS `v_customer_group_stats` (
 DROP TABLE IF EXISTS `v_customer_demographics`;
 
 DROP VIEW IF EXISTS `v_customer_demographics`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_customer_demographics`  AS SELECT `cg`.`groupID` AS `groupID`, `cg`.`groupName` AS `groupName`, count(`c`.`customerID`) AS `totalCustomers`, count((case when (`c`.`gender` = 'Nam') then 1 end)) AS `maleCount`, count((case when (`c`.`gender` = 'Nữ') then 1 end)) AS `femaleCount`, avg(timestampdiff(YEAR,`c`.`birthdate`,curdate())) AS `avgAge`, min(timestampdiff(YEAR,`c`.`birthdate`,curdate())) AS `minAge`, max(timestampdiff(YEAR,`c`.`birthdate`,curdate())) AS `maxAge`, coalesce(sum((case when (`o`.`paymentStatus` <> 'Đã hủy') then `o`.`totalAmount` else 0 end)),0) AS `totalRevenue` FROM ((`customer_group` `cg` left join `customer` `c` on((`cg`.`groupID` = `c`.`groupID`))) left join `order` `o` on((`c`.`customerID` = `o`.`customerID`))) WHERE (`cg`.`status` = 1) GROUP BY `cg`.`groupID`, `cg`.`groupName` ORDER BY `cg`.`groupID` ASC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_customer_demographics`  AS SELECT `cg`.`groupID` AS `groupID`, `cg`.`groupName` AS `groupName`, count(distinct `c`.`customerID`) AS `totalCustomers`, count(distinct `o`.`orderID`) AS `totalOrders`, coalesce(sum((case when (`o`.`paymentStatus` <> 'Đã hủy') then `o`.`totalAmount` else 0 end)),0) AS `totalRevenue`, coalesce(avg(`o`.`totalAmount`),0) AS `avgOrderValue` FROM ((`customer_group` `cg` left join `customer` `c` on((`cg`.`groupID` = `c`.`groupID`))) left join `order` `o` on((`c`.`customerID` = `o`.`customerID`))) WHERE (`cg`.`status` = 1) GROUP BY `cg`.`groupID`, `cg`.`groupName` ORDER BY `cg`.`groupID` ASC ;
 
 -- --------------------------------------------------------
 
