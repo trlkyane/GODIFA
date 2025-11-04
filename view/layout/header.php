@@ -119,6 +119,9 @@
           <a href="/GODIFA/view/pages/about.php" class="hover:text-blue-600 transition">
             <i class="fas fa-info-circle mr-1"></i>Về chúng tôi
           </a>
+          <a href="/GODIFA/view/news/news.php" class="hover:text-blue-600 transition">
+            <i class="fas fa-blog mr-1"></i>Tin tức
+          </a>
           <a href="/GODIFA/view/pages/contact.php" class="hover:text-blue-600 transition">
             <i class="fas fa-phone mr-1"></i>Liên hệ
           </a>

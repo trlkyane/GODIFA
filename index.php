@@ -4,6 +4,7 @@ require_once 'middleware/customer_only.php';
 
 require_once 'model/mProduct.php';
 require_once 'model/mCategory.php';
+require_once 'controller/admin/cBlog.php';
 
 $pageTitle = "Trang chủ";
 include 'view/layout/header.php';
@@ -11,10 +12,12 @@ include 'view/layout/header.php';
 // Lấy sản phẩm nổi bật
 $productModel = new Product();
 $featuredProducts = $productModel->getAllProducts(8);
-
 // Lấy danh mục
 $categoryModel = new Category();
 $categories = $categoryModel->getAllCategories();
+// Lấy 3 bài viết mới nhất
+$blogController = new cBlog();
+$recentBlogs = $blogController->getRecentBlogs(3);
 ?>
 
 <!-- Banner chính -->
@@ -112,6 +115,64 @@ $categories = $categoryModel->getAllCategories();
     <div class="text-center mt-10">
       <a href="view/product/list.php" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition">
         <i class="fas fa-arrow-right mr-2"></i>Xem tất cả sản phẩm
+      </a>
+    </div>
+  </div>
+</section>
+<!-- News -->
+<!-- Tin tức & Bài viết (DYNAMIC) -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-newspaper mr-3 text-blue-600"></i>Tin tức & Bài viết
+      </h2>
+      <p class="text-gray-600">Cập nhật những thông tin, mẹo chăm sóc sức khỏe & nuôi dạy bé từ Godifa</p>
+    </div>
+
+    <?php if (!empty($recentBlogs)): ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <?php foreach ($recentBlogs as $blog): ?>
+        <?php 
+          // Kiểm tra ảnh — nếu trống thì dùng ảnh mặc định
+          $imagePath = (!empty($blog['image']) && file_exists(__DIR__ . '/image/' . $blog['image']))
+            ? 'image/' . $blog['image']
+            : 'image/blog.jpg';
+        ?>
+        <article class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden group">
+          <div class="overflow-hidden">
+            <img src="<?php echo $imagePath; ?>" 
+                 alt="<?php echo htmlspecialchars($blog['title']); ?>" 
+                 class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300"
+                 onerror="this.onerror=null; this.src='image/blog.jpg';">
+          </div>
+          <div class="p-5">
+            <div class="text-sm text-gray-500 mb-2 flex items-center gap-2">
+                <i class="far fa-calendar-alt"></i>
+                <span><?php echo date('d/m/Y', strtotime($blog['date'] ?? 'now')); ?></span>
+            </div>
+            <h3 class="font-semibold text-xl text-gray-800 mb-2 group-hover:text-blue-600 transition line-clamp-2 h-[56px]">
+              <?php echo htmlspecialchars($blog['title']); ?>
+            </h3>
+            <p class="text-gray-600 text-sm mb-4 line-clamp-3 h-16">
+              <!-- Hiển thị 150 ký tự đầu tiên của nội dung và loại bỏ tag HTML -->
+              <?php echo htmlspecialchars(strip_tags(substr($blog['content'], 0, 150))); ?>...
+            </p>
+            <a href="view/news/detail.php?id=<?php echo $blog['blogID']; ?>" class="text-blue-600 font-semibold hover:underline">
+              Đọc thêm →
+            </a>
+          </div>
+        </article>
+      <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+        <p class="text-center text-gray-600">Hiện chưa có bài viết nào được đăng.</p>
+    <?php endif; ?>
+
+    <div class="text-center mt-10">
+      <a href="view/news/news.php" 
+         class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition">
+        <i class="fas fa-arrow-right mr-2"></i>Xem tất cả bài viết
       </a>
     </div>
   </div>

@@ -109,5 +109,5 @@ function updateCartCount(count) {
 }
 </script>
 
-<?php include '../layout/chatbox.php'; ?>
+<?php include '../../view/chat/index.php'; ?>
 <?php include '../layout/footer.php'; ?>
