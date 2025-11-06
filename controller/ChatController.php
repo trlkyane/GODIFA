@@ -58,12 +58,23 @@ class ChatController {
 }
 
 // Xử lý request AJAX để tải lịch sử chat
-if (isset($_GET['action']) && $_GET['action'] === 'getChatHistory') {
+// ⬅️ ĐÃ SỬA LỖI: Đổi action từ 'getChatHistory' thành 'getMessages' để khớp với JS
+if (isset($_GET['action']) && $_GET['action'] === 'getMessages') {
     $controller = new ChatController();
-    $convID = $_GET['convID'] ?? 0;
+    
+    // ⬅️ ĐÃ SỬA LỖI: Đổi tham số GET từ 'convID' thành 'conv_id' để khớp với JS
+    $convID = $_GET['conv_id'] ?? 0;
+    
+    $result = $controller->getChatHistory($convID);
+    
+    // ⬅️ ĐÃ SỬA LỖI: Tái cấu trúc output để khớp với JavaScript mong muốn: {success: true, messages: [...]}
+    $output = [
+        'success' => $result['success'],
+        'messages' => $result['data'] // Đổi key 'data' thành 'messages'
+    ];
     
     header('Content-Type: application/json');
-    echo json_encode($controller->getChatHistory($convID));
+    echo json_encode($output);
     exit;
 }
 ?>
