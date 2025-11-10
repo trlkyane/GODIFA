@@ -182,9 +182,9 @@
                   <i class="fas fa-history mr-3 w-5 text-gray-400"></i>
                   <span>Lịch sử đơn hàng</span>
                 </a>
-                <a href="/GODIFA/view/profile.php" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50">
+                <a href="/GODIFA/controller/cCustomerAccount.php?action=view" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50">
                   <i class="fas fa-user mr-3 w-5 text-gray-400"></i>
-                  <span>Thông tin cá nhân</span>
+                  <span>Quản lý tài khoản</span>
                 </a>
                 <div class="border-t border-gray-200 my-1"></div>
                 <a href="/GODIFA/view/auth/logout.php" class="flex items-center px-4 py-2.5 text-red-600 hover:bg-red-50 font-medium">
