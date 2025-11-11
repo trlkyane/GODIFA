@@ -39,7 +39,6 @@ $stmt = $conn->prepare("
         o.paymentMethod,
         o.deliveryStatus,
         o.transactionCode,
-        o.bankTransactionId,
         od.recipientName,
         od.recipientPhone,
         od.recipientEmail,
@@ -141,9 +140,6 @@ $shippingHistory = [];
                     <p class="text-sm text-gray-600">Phương thức: <?= $order['paymentMethod'] ?></p>
                     <?php if ($order['transactionCode']): ?>
                     <p class="text-sm text-gray-600 font-mono mt-1">Mã GD: <?= $order['transactionCode'] ?></p>
-                    <?php endif; ?>
-                    <?php if ($order['bankTransactionId']): ?>
-                    <p class="text-sm text-gray-600 font-mono">Bank ID: <?= $order['bankTransactionId'] ?></p>
                     <?php endif; ?>
                 </div>
 

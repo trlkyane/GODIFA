@@ -26,7 +26,7 @@ try {
     $conn = $db->connect();
     
     // Lấy thông tin đơn hàng
-    $stmt = $conn->prepare("SELECT paymentStatus, qrExpiredAt, bankTransactionId FROM `order` WHERE orderID = ?");
+    $stmt = $conn->prepare("SELECT paymentStatus FROM `order` WHERE orderID = ?");
     $stmt->bind_param("i", $orderID);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -41,15 +41,10 @@ try {
         exit;
     }
     
-    // Kiểm tra QR đã hết hạn chưa
-    $isExpired = $order['qrExpiredAt'] && strtotime($order['qrExpiredAt']) < time();
-    
     http_response_code(200);
     echo json_encode([
         'success' => true,
-        'status' => $order['paymentStatus'],
-        'isExpired' => $isExpired,
-        'bankTransactionId' => $order['bankTransactionId']
+        'status' => $order['paymentStatus']
     ]);
     
 } catch (Exception $e) {

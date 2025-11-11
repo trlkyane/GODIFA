@@ -40,7 +40,6 @@ class CustomerAccountController {
     
     /**
      * Lấy thông tin tài khoản để hiển thị
-     * Đảm bảo Model getCustomerById trả về cột 'birthdate'
      */
     public function getAccountInfo($customerId) {
         $customerInfo = $this->customerModel->getCustomerById($customerId);
@@ -49,47 +48,45 @@ class CustomerAccountController {
             return ['error' => 'Không tìm thấy thông tin tài khoản.'];
         }
         
-        // // 🛑 BƯỚC ĐIỀU CHỈNH QUAN TRỌNG: 
-        // // Đổi tên cột 'birthdate' (tên trong DB) thành 'dateOfBirth' (tên biến mong muốn của View) 
-        // // để View update_info.php có thể sử dụng dễ dàng hơn.
-        // if (isset($customerInfo['birthdate'])) {
-        //     $customerInfo['dateOfBirth'] = $customerInfo['birthdate'];
-        //     unset($customerInfo['birthdate']);
-        // }
+        // Lấy thông tin nhóm khách hàng
+        $groupInfo = null;
+        if (!empty($customerInfo['groupID'])) {
+            require_once __DIR__ . '/../model/mCustomerGroup.php';
+            $groupModel = new CustomerGroup();
+            $groupInfo = $groupModel->getGroupById($customerInfo['groupID']);
+        }
         
-        return ['customer' => $customerInfo];
+        return [
+            'customer' => $customerInfo,
+            'group' => $groupInfo
+        ];
     }
     
     /**
-     * Cập nhật thông tin cá nhân (Bỏ qua Email và Địa chỉ)
+     * Cập nhật thông tin cá nhân (Chỉ cập nhật Họ tên và SĐT)
      */
     public function updateInfo($customerId, $postData) {
         $customerName = trim($postData['customerName'] ?? '');
         $phone = trim($postData['phone'] ?? '');
-        $gender = trim($postData['gender'] ?? null);
-        
-        // Tên biến $dateOfBirth vẫn được sử dụng để lấy dữ liệu từ POST
-        $dateOfBirth = empty($postData['birthdate']) ? NULL : date('Y-m-d', strtotime($postData['birthdate'])); 
     
         if (empty($customerName) || empty($phone)) {
-            return ['success' => false, 'message' => 'Vui lòng điền đầy đủ Tên và Số Điện Thoại.'];
+            return ['success' => false, 'message' => 'Vui lòng điền đầy đủ Họ tên và Số Điện Thoại.'];
+        }
+        
+        // Validate phone number format (10-11 digits)
+        if (!preg_match('/^[0-9]{10,11}$/', $phone)) {
+            return ['success' => false, 'message' => 'Số điện thoại không hợp lệ. Vui lòng nhập 10-11 chữ số.'];
         }
     
-        // GỌI HÀM CẬP NHẬT TRONG MODEL (Model đã được sửa để ánh xạ $dateOfBirth -> birthdate)
-        $result = $this->customerModel->updateCustomerAccount(
-            $customerId, 
-            $customerName, 
-            $phone, 
-            $gender,
-            $dateOfBirth
-        ); 
+        // Cập nhật trong database
+        $result = $this->customerModel->updateCustomerBasicInfo($customerId, $customerName, $phone); 
         
         if ($result) {
             $_SESSION['customer_name'] = $customerName;
             return ['success' => true, 'message' => 'Cập nhật thông tin thành công!'];
         }
         
-        return ['success' => false, 'message' => 'Cập nhật thông tin thất bại hoặc không có gì thay đổi. Vui lòng thử lại.'];
+        return ['success' => false, 'message' => 'Cập nhật thông tin thất bại hoặc không có gì thay đổi.'];
     }
     
     /**
@@ -148,6 +145,7 @@ switch ($action) {
         break;
         
     case 'update_info':
+        // Chỉ xử lý POST request để cập nhật
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $controller->updateInfo($customerID, $_POST);
             
@@ -161,21 +159,9 @@ switch ($action) {
             exit();
         }
         
-        // --- XỬ LÝ GET REQUEST (NẠP FORM) ---
-        // 1. Lấy thông tin khách hàng hiện tại
-        $data = $controller->getAccountInfo($customerID);
-        
-        // 2. Kiểm tra lỗi nếu không lấy được dữ liệu khách hàng
-        if (isset($data['error'])) {
-             $_SESSION['notify_error'] = $data['error'];
-             header('Location: cCustomerAccount.php?action=view'); 
-             exit();
-        }
-
-        // 3. Tạo biến $customer và Nạp View chứa form cập nhật
-        extract($data); // Tạo biến $customer
-        include '../view/customer/update_info.php';
-        break; 
+        // GET request -> chuyển về view page
+        header('Location: cCustomerAccount.php?action=view'); 
+        exit(); 
         
     case 'change_password':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
