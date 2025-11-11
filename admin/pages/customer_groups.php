@@ -2,10 +2,16 @@
 /**
  * Quản lý Nhóm Khách hàng
  * File: admin/pages/customer_groups.php
+ * 
+ * ⚠️ CHỈ CHỦ DOANH NGHIỆP MỚI TRUY CẬP ĐƯỢC
  */
 
+// Load auth middleware TRƯỚC để khởi tạo session và constants
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
+
+// Sau đó check owner permission
+require_once __DIR__ . '/../middleware/owner_only.php';
 
 // Check permission
 if (!hasPermission('manage_customers') && !hasPermission('view_customers')) {
@@ -19,15 +25,14 @@ $groupController = new cCustomerGroup();
 $success = '';
 $error = '';
 
-// Xử lý THÊM nhóm
+// Xử lý THÊM nhóm (DISABLED)
 if (isset($_POST['add_group']) && hasPermission('manage_customers')) {
     $data = [
         'groupName' => trim($_POST['groupName']),
         'description' => trim($_POST['description']),
         'minSpent' => floatval($_POST['minSpent']),
         'maxSpent' => !empty($_POST['maxSpent']) ? floatval($_POST['maxSpent']) : null,
-        'color' => trim($_POST['color']),
-        'status' => intval($_POST['status'])
+        'color' => trim($_POST['color'])
     ];
     
     $result = $groupController->addGroup($data);
@@ -43,65 +48,33 @@ if (isset($_POST['add_group']) && hasPermission('manage_customers')) {
 if (isset($_POST['edit_group']) && hasPermission('manage_customers')) {
     $groupID = intval($_POST['groupID']);
     
-    // Kiểm tra xem có phải nhóm hệ thống không
-    $checkGroup = $groupController->getGroupById($groupID);
-    if ($checkGroup && isset($checkGroup['isSystem']) && $checkGroup['isSystem'] == 1) {
-        $error = 'Không thể chỉnh sửa nhóm hệ thống "Khách hàng mới"!';
-    } else {
-        $data = [
-            'groupName' => trim($_POST['groupName']),
-            'description' => trim($_POST['description']),
-            'minSpent' => floatval($_POST['minSpent']),
-            'maxSpent' => !empty($_POST['maxSpent']) ? floatval($_POST['maxSpent']) : null,
-            'color' => trim($_POST['color']),
-            'status' => intval($_POST['status'])
-        ];
+    $data = [
+        'groupName' => trim($_POST['groupName']),
+        'description' => trim($_POST['description']),
+        'color' => trim($_POST['color'])
+    ];
         
-        $result = $groupController->updateGroup($groupID, $data);
-        
-        if ($result['success']) {
-            $success = $result['message'];
-        } else {
-            $error = implode('<br>', $result['errors']);
-        }
-    }
-}
-
-// Xử lý TOGGLE STATUS
-if (isset($_GET['toggle']) && hasPermission('manage_customers')) {
-    $groupID = intval($_GET['toggle']);
+    $result = $groupController->updateGroup($groupID, $data);
     
-    // Kiểm tra xem có phải nhóm hệ thống không
-    $checkGroup = $groupController->getGroupById($groupID);
-    if ($checkGroup && isset($checkGroup['isSystem']) && $checkGroup['isSystem'] == 1) {
-        $error = 'Không thể thay đổi trạng thái nhóm hệ thống "Khách hàng mới"!';
+    if ($result['success']) {
+        $success = $result['message'];
     } else {
-        $result = $groupController->toggleStatus($groupID);
-        
-        if ($result['success']) {
-            $success = $result['message'];
-        } else {
-            $error = $result['message'];
-        }
+        $error = implode('<br>', $result['errors']);
     }
 }
 
-// Xử lý XÓA nhóm
+// ❌ XÓA TOGGLE STATUS (không cần nữa)
+
+// Xử lý XÓA nhóm (DISABLED - CỐ ĐỊNH 5 HẠNG)
 if (isset($_GET['delete']) && hasPermission('manage_customers')) {
     $groupID = intval($_GET['delete']);
     
-    // Kiểm tra xem có phải nhóm hệ thống không
-    $checkGroup = $groupController->getGroupById($groupID);
-    if ($checkGroup && isset($checkGroup['isSystem']) && $checkGroup['isSystem'] == 1) {
-        $error = 'Không thể xóa nhóm hệ thống "Khách hàng mới"!';
+    $result = $groupController->deleteGroup($groupID);
+    
+    if ($result['success']) {
+        $success = $result['message'];
     } else {
-        $result = $groupController->deleteGroup($groupID);
-        
-        if ($result['success']) {
-            $success = $result['message'];
-        } else {
-            $error = implode('<br>', $result['errors']);
-        }
+        $error = implode('<br>', $result['errors']);
     }
 }
 
@@ -160,7 +133,8 @@ include __DIR__ . '/../includes/header.php';
                         </button>
                     </form>
                     
-                    <?php if (hasPermission('manage_customers')): ?>
+                    <!-- ❌ ẨN NÚT THÊM NHÓM (CỐ ĐỊNH 5 HẠNG) -->
+                    <?php if (false && hasPermission('manage_customers')): ?>
                     <button onclick="openAddModal()" 
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center">
                         <i class="fas fa-plus mr-2"></i>
@@ -206,7 +180,6 @@ include __DIR__ . '/../includes/header.php';
                     $groupName = $group['groupName'];
                     $description = $group['description'] ?? '';
                     $color = $group['color'] ?? '#6366f1';
-                    $status = $group['status'];
                     $stats = $group['stats'];
                     $totalCustomers = $stats['totalCustomers'] ?? 0;
                     $totalRevenue = $stats['totalRevenue'] ?? 0;
@@ -235,15 +208,10 @@ include __DIR__ . '/../includes/header.php';
                                         Chi tiêu: <?php echo $spentRange; ?>
                                     </span>
                                 </div>
-                                <?php if ($status == 1): ?>
+                                <!-- ✅ LUÔN HOẠT ĐỘNG -->
                                 <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     <i class="fas fa-check-circle"></i> Hoạt động
                                 </span>
-                                <?php else: ?>
-                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    <i class="fas fa-pause-circle"></i> Tạm dừng
-                                </span>
-                                <?php endif; ?>
                             </div>
                         </div>
                         
@@ -267,31 +235,14 @@ include __DIR__ . '/../includes/header.php';
                         
                         <!-- Actions -->
                         <?php if (hasPermission('manage_customers')): ?>
-                        <div class="p-4 bg-white border-t border-gray-200 flex justify-center space-x-2">
-                            <?php if (isset($group['isSystem']) && $group['isSystem'] == 1): ?>
-                                <!-- Nhóm hệ thống - không cho chỉnh sửa -->
-                                <div class="flex-1 px-4 py-2 bg-gray-300 text-gray-600 rounded-lg text-sm text-center cursor-not-allowed">
-                                    <i class="fas fa-lock mr-1"></i> Nhóm hệ thống
-                                </div>
-                            <?php else: ?>
-                                <!-- Nhóm thường - cho phép chỉnh sửa -->
-                                <button onclick='openEditModal(<?php echo json_encode($group, JSON_HEX_APOS); ?>)' 
-                                        class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                                    <i class="fas fa-edit mr-1"></i> Sửa
-                                </button>
-                                
-                                <button onclick="toggleStatus(<?php echo $groupID; ?>)" 
-                                        class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm" 
-                                        title="<?php echo $status == 1 ? 'Tạm dừng' : 'Kích hoạt'; ?>">
-                                    <i class="fas fa-<?php echo $status == 1 ? 'pause' : 'play'; ?>"></i>
-                                </button>
-                                
-                                <button onclick="deleteGroup(<?php echo $groupID; ?>, '<?php echo htmlspecialchars($groupName); ?>', <?php echo $totalCustomers; ?>)" 
-                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm" 
-                                        title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            <?php endif; ?>
+                        <div class="p-4 bg-white border-t border-gray-200 flex justify-center">
+                            <button onclick='openEditModal(<?php echo json_encode($group, JSON_HEX_APOS); ?>)' 
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                <i class="fas fa-edit mr-1"></i> Sửa tên & màu
+                            </button>
+                            
+                            <!-- ❌ ẨN NÚT TOGGLE STATUS (LUÔN HOẠT ĐỘNG) -->
+                            <!-- ❌ ẨN NÚT XÓA (CỐ ĐỊNH 5 HẠNG) -->
                         </div>
                         <?php endif; ?>
                     </div>
@@ -345,16 +296,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">
-                    Trạng thái
-                </label>
-                <select name="status" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="1">Hoạt động</option>
-                    <option value="0">Tạm dừng</option>
-                </select>
-            </div>
+            <!-- ❌ XÓA DROPDOWN STATUS (luôn hoạt động) -->
             
             <!-- Điều kiện chi tiêu -->
             <div class="mb-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
@@ -443,22 +385,13 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">
-                    Trạng thái
-                </label>
-                <select name="status" id="edit_status"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="1">Hoạt động</option>
-                    <option value="0">Tạm dừng</option>
-                </select>
-            </div>
+            <!-- ❌ XÓA DROPDOWN STATUS (luôn hoạt động) -->
             
-            <!-- Điều kiện chi tiêu -->
-            <div class="mb-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+            <!-- ✅ HIỂN THỊ NHƯNG KHÔNG CHO SỬA (CỐ ĐỊNH) -->
+            <div class="mb-4 p-4 bg-gray-100 border border-gray-300 rounded-lg">
                 <h4 class="font-bold text-gray-800 mb-3 flex items-center">
-                    <i class="fas fa-wallet text-green-600 mr-2"></i>
-                    Điều kiện chi tiêu
+                    <i class="fas fa-lock text-gray-600 mr-2"></i>
+                    Điều kiện chi tiêu (Cố định - Không thể thay đổi)
                 </h4>
                 
                 <div class="mb-3">
@@ -466,19 +399,21 @@ include __DIR__ . '/../includes/header.php';
                         <i class="fas fa-arrow-up text-green-500 mr-1"></i>
                         Chi tiêu tối thiểu (VNĐ)
                     </label>
-                    <input type="number" name="minSpent" id="edit_minSpent" value="0" min="0" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    <input type="number" name="minSpent" id="edit_minSpent" value="0" min="0" disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-200 cursor-not-allowed"
                            placeholder="VD: 5000000">
+                    <p class="text-xs text-gray-500 mt-1">🔒 Hạn mức cố định, không thể thay đổi</p>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">
                         <i class="fas fa-arrow-down text-blue-500 mr-1"></i>
-                        Chi tiêu tối đa (VNĐ) <span class="text-gray-400 text-xs">(Để trống = không giới hạn)</span>
+                        Chi tiêu tối đa (VNĐ)
                     </label>
-                    <input type="number" name="maxSpent" id="edit_maxSpent" min="0"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="VD: 10000000 (hoặc để trống)">
+                    <input type="number" name="maxSpent" id="edit_maxSpent" min="0" disabled
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-200 cursor-not-allowed"
+                           placeholder="Không giới hạn">
+                    <p class="text-xs text-gray-500 mt-1">🔒 Hạn mức cố định, không thể thay đổi</p>
                 </div>
             </div>
             
@@ -512,7 +447,6 @@ function openEditModal(group) {
     document.getElementById('edit_groupName').value = group.groupName;
     document.getElementById('edit_description').value = group.description || '';
     document.getElementById('edit_color').value = group.color || '#6366f1';
-    document.getElementById('edit_status').value = group.status;
     document.getElementById('edit_minSpent').value = group.minSpent || 0;
     document.getElementById('edit_maxSpent').value = group.maxSpent || '';
     
@@ -523,12 +457,7 @@ function closeEditModal() {
     document.getElementById('editModal').classList.add('hidden');
 }
 
-// Toggle status
-function toggleStatus(groupID) {
-    if (confirm('Bạn có chắc muốn thay đổi trạng thái nhóm này?')) {
-        window.location.href = `?page=customer_groups&toggle=${groupID}`;
-    }
-}
+// ❌ XÓA TOGGLE STATUS (không cần nữa)
 
 // Delete group
 function deleteGroup(groupID, groupName, totalCustomers) {

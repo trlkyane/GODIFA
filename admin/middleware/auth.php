@@ -4,17 +4,13 @@
  * File: admin/middleware/auth.php
  */
 
+// Load constants
+require_once __DIR__ . '/../../config/constants.php';
+
 if (session_status() === PHP_SESSION_NONE) {
-    session_name('GODIFA_ADMIN_SESSION'); // Session riêng cho admin
+    session_name(SESSION_ADMIN); // Session riêng cho admin
     session_start();
 }
-
-// ==================== CONSTANTS ====================
-// Các hằng số vai trò
-define('ROLE_OWNER', 1);           // Chủ Doanh Nghiệp
-define('ROLE_ADMIN', 2);           // Quản Trị Viên
-define('ROLE_SALES', 3);           // Nhân Viên Bán Hàng
-define('ROLE_SUPPORT', 4);         // Nhân Viên CSKH
 
 // ==================== FUNCTIONS ====================
 

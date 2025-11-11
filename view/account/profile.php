@@ -1,0 +1,280 @@
+<?php
+/**
+ * Trang thông tin cá nhân
+ * File: view/profile.php
+ */
+
+// Kiểm tra đăng nhập
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('GODIFA_USER_SESSION');
+    session_start();
+}
+
+if (!isset($_SESSION['customer_id'])) {
+    header('Location: /GODIFA/view/auth/customer-login.php');
+    exit;
+}
+
+require_once __DIR__ . '/../../controller/cProfile.php';
+
+$customerID = $_SESSION['customer_id'];
+$successMessage = '';
+$errorMessage = '';
+
+$profileController = new ProfileController();
+
+// Xử lý cập nhật thông tin
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = [
+        'customerName' => trim($_POST['customerName'] ?? ''),
+        'phone' => trim($_POST['phone'] ?? ''),
+        'email' => trim($_POST['email'] ?? '')
+    ];
+    
+    if (empty($data['customerName']) || empty($data['phone']) || empty($data['email'])) {
+        $errorMessage = 'Vui lòng điền đầy đủ thông tin!';
+    } else {
+        $result = $profileController->updateCustomerInfo($customerID, $data);
+        if ($result) {
+            $successMessage = 'Cập nhật thông tin thành công!';
+            $_SESSION['customer_name'] = $data['customerName'];
+        } else {
+            $errorMessage = 'Có lỗi xảy ra. Vui lòng thử lại!';
+        }
+    }
+}
+
+// Lấy thông tin khách hàng
+$customer = $profileController->getCustomerInfo($customerID);
+
+if (!$customer) {
+    header('Location: /GODIFA/view/auth/logout.php');
+    exit;
+}
+
+// Thống kê đơn hàng
+$stats = $profileController->getOrderStats($customerID);
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Tin Cá Nhân - GODIFA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Header -->
+    <?php include __DIR__ . '/../layout/header.php'; ?>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">👤 Thông Tin Cá Nhân</h1>
+            <p class="text-gray-600 mt-2">Quản lý thông tin tài khoản của bạn</p>
+        </div>
+
+        <!-- Messages -->
+        <?php if ($successMessage): ?>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+            <i class="fas fa-check-circle mr-3 text-xl"></i>
+            <span><?= htmlspecialchars($successMessage) ?></span>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($errorMessage): ?>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+            <i class="fas fa-exclamation-circle mr-3 text-xl"></i>
+            <span><?= htmlspecialchars($errorMessage) ?></span>
+        </div>
+        <?php endif; ?>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Profile Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="text-center">
+                        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                            <?= strtoupper(mb_substr($customer['customerName'], 0, 2)) ?>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-800"><?= htmlspecialchars($customer['customerName']) ?></h2>
+                        <p class="text-gray-600 mt-1"><?= htmlspecialchars($customer['email']) ?></p>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-bar mr-2 text-indigo-600"></i>Thống Kê
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-shopping-bag text-blue-600 text-xl mr-3"></i>
+                                <span class="text-gray-700">Tổng đơn hàng</span>
+                            </div>
+                            <span class="font-bold text-blue-600 text-xl"><?= $stats['totalOrders'] ?></span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-600 text-xl mr-3"></i>
+                                <span class="text-gray-700">Đã thanh toán</span>
+                            </div>
+                            <span class="font-bold text-green-600 text-xl"><?= $stats['paidOrders'] ?></span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-truck text-purple-600 text-xl mr-3"></i>
+                                <span class="text-gray-700">Đã giao</span>
+                            </div>
+                            <span class="font-bold text-purple-600 text-xl"><?= $stats['deliveredOrders'] ?></span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-coins text-yellow-600 text-xl mr-3"></i>
+                                <span class="text-gray-700">Tổng chi tiêu</span>
+                            </div>
+                            <span class="font-bold text-yellow-600"><?= number_format($stats['totalSpent'], 0, ',', '.') ?>₫</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-link mr-2 text-indigo-600"></i>Liên Kết Nhanh
+                    </h3>
+                    <div class="space-y-2">
+                        <a href="/GODIFA/view/account/order_history.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                            <i class="fas fa-history text-indigo-600 mr-3"></i>
+                            <span class="font-semibold text-gray-700">Lịch Sử Đơn Hàng</span>
+                        </a>
+                        <a href="/GODIFA/view/cart/viewcart.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                            <i class="fas fa-shopping-cart text-indigo-600 mr-3"></i>
+                            <span class="font-semibold text-gray-700">Giỏ Hàng</span>
+                        </a>
+                        <a href="/GODIFA/view/product/list.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                            <i class="fas fa-store text-indigo-600 mr-3"></i>
+                            <span class="font-semibold text-gray-700">Mua Sắm</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2">
+                <!-- Account Info Form -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-user-edit mr-2 text-indigo-600"></i>Thông Tin Tài Khoản
+                    </h2>
+                    
+                    <form method="POST" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user mr-2 text-gray-500"></i>Họ và Tên
+                                </label>
+                                <input type="text" name="customerName" value="<?= htmlspecialchars($customer['customerName']) ?>"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                       required>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-phone mr-2 text-gray-500"></i>Số Điện Thoại
+                                </label>
+                                <input type="tel" name="phone" value="<?= htmlspecialchars($customer['phone']) ?>"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2 text-gray-500"></i>Email
+                            </label>
+                            <input type="email" name="email" value="<?= htmlspecialchars($customer['email']) ?>"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   required>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button type="submit" 
+                                    class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold">
+                                <i class="fas fa-save mr-2"></i>Lưu Thay Đổi
+                            </button>
+                            <button type="button" onclick="window.location.reload()" 
+                                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold">
+                                <i class="fas fa-undo mr-2"></i>Hủy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Customer Group Information -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-star mr-2 text-yellow-600"></i>Nhóm Khách Hàng
+                    </h2>
+                    
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-6 border-2 border-yellow-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-2">Cấp độ hiện tại</p>
+                                <p class="text-3xl font-bold text-yellow-700">
+                                    <?php echo htmlspecialchars($customer['groupName'] ?? 'Chưa xác định'); ?>
+                                </p>
+                                <?php if (!empty($customer['groupDescription'])): ?>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    <?php echo htmlspecialchars($customer['groupDescription']); ?>
+                                </p>
+                                <?php endif; ?>
+                            </div>
+                            <div class="text-6xl text-yellow-500">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-red-800 mb-4">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Vùng Nguy Hiểm
+                    </h2>
+                    <p class="text-red-700 mb-4">
+                        Xóa tài khoản sẽ xóa vĩnh viễn tất cả dữ liệu của bạn. Hành động này không thể hoàn tác!
+                    </p>
+                    <button onclick="confirmDeleteAccount()" 
+                            class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition font-semibold">
+                        <i class="fas fa-trash-alt mr-2"></i>Xóa Tài Khoản
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <?php include __DIR__ . '/../layout/footer.php'; ?>
+
+    <script>
+        // Confirm delete account
+        function confirmDeleteAccount() {
+            if (confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
+                if (confirm('Xác nhận lần cuối: Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn!')) {
+                    // TODO: Implement delete account API
+                    alert('Tính năng này đang được phát triển.');
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

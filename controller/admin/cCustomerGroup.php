@@ -28,54 +28,15 @@ class cCustomerGroup {
         return $this->groupModel->getGroupById($id);
     }
     
-    // Thêm nhóm mới
+    // ❌ XÓA CHỨC NĂNG THÊM NHÓM (CỐ ĐỊNH 5 HẠNG)
     public function addGroup($data) {
-        // Validate
-        $errors = [];
-        
-        if (empty($data['groupName'])) {
-            $errors[] = "Vui lòng nhập tên nhóm!";
-        }
-        
-        if (empty($data['color'])) {
-            $data['color'] = '#6366f1'; // Màu mặc định
-        }
-        
-        if (!isset($data['status'])) {
-            $data['status'] = 1;
-        }
-        
-        // Validate minSpent và maxSpent
-        if (!empty($data['maxSpent']) && $data['maxSpent'] <= $data['minSpent']) {
-            $errors[] = "Chi tiêu tối đa phải lớn hơn chi tiêu tối thiểu!";
-        }
-        
-        // ✅ KIỂM TRA KHOẢNG CHI TIÊU KHÔNG ĐƯỢC GIAO NHAU
-        $overlapping = $this->groupModel->checkOverlappingRange(
-            $data['minSpent'], 
-            $data['maxSpent'], 
-            null // null = không loại trừ nhóm nào (đang thêm mới)
-        );
-        
-        if ($overlapping) {
-            $errors[] = "Khoảng chi tiêu ({$data['minSpent']} - " . ($data['maxSpent'] ?: '∞') . ") bị trùng với nhóm '{$overlapping['groupName']}' ({$overlapping['minSpent']} - " . ($overlapping['maxSpent'] ?: '∞') . ")!";
-        }
-        
-        if (!empty($errors)) {
-            return ['success' => false, 'errors' => $errors];
-        }
-        
-        // Thêm nhóm
-        $result = $this->groupModel->addGroup($data);
-        
-        if ($result) {
-            return ['success' => true, 'message' => 'Thêm nhóm khách hàng thành công!'];
-        }
-        
-        return ['success' => false, 'errors' => ['Lỗi khi thêm nhóm khách hàng!']];
+        return [
+            'success' => false, 
+            'errors' => ['❌ Không thể thêm nhóm mới! Hệ thống sử dụng 5 hạng cố định.']
+        ];
     }
     
-    // Cập nhật nhóm
+    // ✅ CHỈ CHO SỬA TÊN, MÔ TẢ, MÀU - KHÔNG CHO SỬA minSpent/maxSpent/status
     public function updateGroup($id, $data) {
         // Validate
         $errors = [];
@@ -88,32 +49,19 @@ class cCustomerGroup {
             $data['color'] = '#6366f1';
         }
         
-        if (!isset($data['status'])) {
-            $data['status'] = 1;
-        }
-        
-        // Validate minSpent và maxSpent
-        if (!empty($data['maxSpent']) && $data['maxSpent'] <= $data['minSpent']) {
-            $errors[] = "Chi tiêu tối đa phải lớn hơn chi tiêu tối thiểu!";
-        }
-        
-        // ✅ KIỂM TRA KHOẢNG CHI TIÊU KHÔNG ĐƯỢC GIAO NHAU (loại trừ nhóm hiện tại)
-        $overlapping = $this->groupModel->checkOverlappingRange(
-            $data['minSpent'], 
-            $data['maxSpent'], 
-            $id // Loại trừ nhóm đang sửa
-        );
-        
-        if ($overlapping) {
-            $errors[] = "Khoảng chi tiêu ({$data['minSpent']} - " . ($data['maxSpent'] ?: '∞') . ") bị trùng với nhóm '{$overlapping['groupName']}' ({$overlapping['minSpent']} - " . ($overlapping['maxSpent'] ?: '∞') . ")!";
-        }
-        
         if (!empty($errors)) {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Cập nhật nhóm
-        $result = $this->groupModel->updateGroup($id, $data);
+        // ✅ CHỈ CẬP NHẬT: groupName, description, color
+        // ❌ KHÔNG CHO SỬA: minSpent, maxSpent, status (luôn = 1)
+        $allowedData = [
+            'groupName' => $data['groupName'],
+            'description' => $data['description'] ?? '',
+            'color' => $data['color']
+        ];
+        
+        $result = $this->groupModel->updateGroup($id, $allowedData);
         
         if ($result) {
             return ['success' => true, 'message' => 'Cập nhật nhóm khách hàng thành công!'];
@@ -122,36 +70,20 @@ class cCustomerGroup {
         return ['success' => false, 'errors' => ['Lỗi khi cập nhật nhóm khách hàng!']];
     }
     
-    // Xóa nhóm
+    // ❌ XÓA CHỨC NĂNG XÓA NHÓM (CỐ ĐỊNH 5 HẠNG)
     public function deleteGroup($id) {
-        // Kiểm tra số lượng khách hàng trong nhóm
-        $count = $this->groupModel->countCustomersInGroup($id);
-        
-        if ($count > 0) {
-            return [
-                'success' => false, 
-                'errors' => ["Không thể xóa nhóm đang có $count khách hàng! Vui lòng chuyển khách hàng sang nhóm khác trước."]
-            ];
-        }
-        
-        $result = $this->groupModel->deleteGroup($id);
-        
-        if ($result) {
-            return ['success' => true, 'message' => 'Xóa nhóm khách hàng thành công!'];
-        }
-        
-        return ['success' => false, 'errors' => ['Lỗi khi xóa nhóm khách hàng!']];
+        return [
+            'success' => false,
+            'errors' => ['❌ Không thể xóa nhóm! Hệ thống sử dụng 5 hạng cố định.']
+        ];
     }
     
-    // Toggle status
+    // ❌ XÓA CHỨC NĂNG TOGGLE STATUS (CỐ ĐỊNH LUÔN HOẠT ĐỘNG)
     public function toggleStatus($id) {
-        $result = $this->groupModel->toggleStatus($id);
-        
-        if ($result) {
-            return ['success' => true, 'message' => 'Đã thay đổi trạng thái nhóm!'];
-        }
-        
-        return ['success' => false, 'message' => 'Lỗi khi thay đổi trạng thái!'];
+        return [
+            'success' => false, 
+            'message' => '❌ Không thể thay đổi trạng thái! Tất cả nhóm luôn hoạt động.'
+        ];
     }
     
     // Lấy thống kê nhóm

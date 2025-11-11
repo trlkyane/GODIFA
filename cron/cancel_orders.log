@@ -1,0 +1,6 @@
+[2025-11-07 17:43:18] === Starting auto-cancel cronjob ===
+[2025-11-07 17:43:18] Found 3 expired orders to cancel
+[2025-11-07 17:43:18] ✅ Cancelled order #113 - GODIFA202511050113
+[2025-11-07 17:43:18] ✅ Cancelled order #115 - GODIFA202511050115
+[2025-11-07 17:43:18] ✅ Cancelled order #125 - GODIFA202511070125
+[2025-11-07 17:43:18] === Cronjob completed: 3 succeeded, 0 failed ===

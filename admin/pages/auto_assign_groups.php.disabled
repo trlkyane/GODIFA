@@ -2,10 +2,16 @@
 /**
  * Tự động phân nhóm khách hàng
  * File: admin/pages/auto_assign_groups.php
+ * 
+ * ⚠️ CHỈ CHỦ DOANH NGHIỆP MỚI TRUY CẬP ĐƯỢC
  */
 
+// Load auth middleware TRƯỚC để khởi tạo session và constants
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
+
+// Sau đó check owner permission
+require_once __DIR__ . '/../middleware/owner_only.php';
 
 // Check permission
 if (!hasPermission('manage_customers')) {

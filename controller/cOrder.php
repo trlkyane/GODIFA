@@ -168,7 +168,7 @@ if (isset($_GET['action'])) {
         case 'history':
             $data = $controller->orderHistory();
             extract($data);
-            include '../view/order_history.php';
+            include '../view/account/order_history.php';
             break;
             
         default:

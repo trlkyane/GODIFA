@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Oct 30, 2025 at 06:27 AM
+-- Generation Time: Nov 08, 2025 at 06:42 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `godifa`
+-- Database: `godifa1`
 --
 
 DELIMITER $$
@@ -206,7 +206,7 @@ INSERT INTO `category` (`categoryID`, `categoryName`, `status`) VALUES
 (3, 'Phụ kiện - Làm đẹp', 1),
 (4, 'Mẹ & Bé', 1),
 (5, 'Gia dụng', 1),
-(8, 'ádasd', 0);
+(8, 'ádasd', 1);
 
 -- --------------------------------------------------------
 
@@ -217,25 +217,86 @@ INSERT INTO `category` (`categoryID`, `categoryName`, `status`) VALUES
 DROP TABLE IF EXISTS `chat`;
 CREATE TABLE IF NOT EXISTS `chat` (
   `chatID` int NOT NULL AUTO_INCREMENT,
+  `conversation_ID` int NOT NULL,
   `chatContent` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `fromCustomerID` int NOT NULL,
-  `toUserID` int NOT NULL,
+  `sender_ID` int NOT NULL,
+  `senderType` enum('customer','user') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
+  `isRead` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chatID`),
-  KEY `fk_chat_fromuser` (`fromCustomerID`),
-  KEY `fk_chat_touser` (`toUserID`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+  KEY `fk_chat_conversation` (`conversation_ID`)
+) ENGINE=MyISAM AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `chat`
 --
 
-INSERT INTO `chat` (`chatID`, `chatContent`, `date`, `fromCustomerID`, `toUserID`) VALUES
-(1, 'Cho em hỏi sản phẩm viên uống bổ gan còn hàng không ạ?', '2025-10-16 09:00:00', 1, 3),
-(2, 'Dạ còn hàng ạ, anh/chị có cần tư vấn thêm gì không?', '2025-10-16 09:05:00', 1, 3),
-(3, 'Shop có freeship không ạ?', '2025-10-16 10:30:00', 2, 4),
-(4, 'Đơn hàng từ 500k trở lên được freeship nội thành ạ!', '2025-10-16 10:35:00', 2, 4),
-(5, 'Sản phẩm này dùng cho trẻ em được không?', '2025-10-16 14:00:00', 3, 3);
+INSERT INTO `chat` (`chatID`, `conversation_ID`, `chatContent`, `date`, `sender_ID`, `senderType`, `isRead`) VALUES
+(6, 1, 'sdas', '2025-11-01 15:58:56', 1, 'customer', 0),
+(7, 1, 'ádas', '2025-11-01 15:58:56', 1, 'customer', 0),
+(8, 1, 'chào bạn', '2025-11-01 15:58:56', 3, 'user', 0),
+(9, 2, 'xin chào', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(10, 2, 'chào', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(11, 2, 'chào khải', '2025-11-01 15:58:56', 3, 'user', 0),
+(12, 2, 'tôi cần giúp đỡ', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(13, 2, 'bạn cần gì', '2025-11-01 15:58:56', 3, 'user', 0),
+(14, 2, 'sdas', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(15, 2, 'ádas', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(16, 2, 'ádasdsa', '2025-11-01 15:58:56', 3, 'user', 0),
+(17, 2, 'hở', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(18, 2, 'hở', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(19, 2, 'sao', '2025-11-01 15:58:56', 3, 'user', 0),
+(20, 2, 'ádas', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(21, 2, 'ádas', '2025-11-01 15:58:56', 3, 'user', 0),
+(22, 2, 'sadsa', '2025-11-01 15:58:56', 3, 'user', 0),
+(23, 2, '2', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(24, 2, '3', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(25, 2, '4', '2025-11-01 15:58:56', 3, 'user', 0),
+(26, 2, 'xin chào', '2025-11-01 15:58:56', 1223, 'customer', 0),
+(27, 2, 'chào Khải', '2025-11-01 15:58:56', 3, 'user', 0),
+(28, 3, 'hello ạ', '2025-11-02 01:19:38', 2, 'customer', 0),
+(29, 3, 'hello ạ', '2025-11-02 01:19:45', 2, 'customer', 0),
+(30, 3, 'Chào bạn nha', '2025-11-02 01:20:36', 3, 'user', 0),
+(31, 3, 'Sao tôi không thấy được tin nhắn cũ nhỉ', '2025-11-02 01:21:04', 2, 'customer', 0),
+(32, 3, 'À thấy rồi nè', '2025-11-02 01:21:08', 2, 'customer', 0),
+(33, 3, 'Hahaa', '2025-11-02 01:21:12', 3, 'user', 0),
+(34, 3, 'Chào lại nhé', '2025-11-02 01:21:32', 2, 'customer', 0),
+(35, 3, 'aaaa', '2025-11-02 01:21:43', 2, 'customer', 0),
+(36, 3, 'aaaa', '2025-11-02 01:21:45', 2, 'customer', 0),
+(37, 3, 'aaaa', '2025-11-02 01:21:49', 2, 'customer', 0),
+(38, 3, 'Hello', '2025-11-02 01:21:56', 2, 'customer', 0),
+(39, 3, 'Hello bạn', '2025-11-02 01:22:11', 2, 'customer', 0),
+(40, 3, 'Alo', '2025-11-02 01:22:19', 2, 'customer', 0),
+(41, 3, 'Chào bạn nha', '2025-11-03 00:08:03', 1, 'user', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `conversation`
+--
+
+DROP TABLE IF EXISTS `conversation`;
+CREATE TABLE IF NOT EXISTS `conversation` (
+  `conversationID` int NOT NULL AUTO_INCREMENT,
+  `customerID` int NOT NULL,
+  `userID` int NOT NULL,
+  `last_message_at` datetime NOT NULL,
+  `customer_unread_count` int NOT NULL DEFAULT '0',
+  `user_unread_count` int NOT NULL DEFAULT '0',
+  `status` enum('open','closed','pending') NOT NULL,
+  PRIMARY KEY (`conversationID`),
+  KEY `fk_conversation_customer` (`customerID`),
+  KEY `fk_conversation_user` (`userID`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `conversation`
+--
+
+INSERT INTO `conversation` (`conversationID`, `customerID`, `userID`, `last_message_at`, `customer_unread_count`, `user_unread_count`, `status`) VALUES
+(1, 1, 0, '2025-11-01 14:34:23', 0, 2, 'open'),
+(2, 1223, 0, '2025-11-01 15:00:18', 0, 11, 'open'),
+(3, 2, 0, '2025-11-03 00:08:03', 0, 11, 'open');
 
 -- --------------------------------------------------------
 
@@ -249,39 +310,67 @@ CREATE TABLE IF NOT EXISTS `customer` (
   `customerName` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `phone` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `email` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
+  `birthdate` date DEFAULT NULL COMMENT 'Ngày sinh',
+  `gender` enum('Nam','Nữ','Khác') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Giới tính',
   `password` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1=Hoạt động, 0=Đã khóa',
   `groupID` int DEFAULT NULL COMMENT 'ID nhóm khách hàng',
   PRIMARY KEY (`customerID`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_status` (`status`),
+  KEY `idx_gender` (`gender`),
+  KEY `idx_birthdate` (`birthdate`),
   KEY `idx_groupID` (`groupID`)
-) ENGINE=MyISAM AUTO_INCREMENT=1228 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1224 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `customer`
 --
 
-INSERT INTO `customer` (`customerID`, `customerName`, `phone`, `email`, `password`, `status`, `groupID`) VALUES
-(1, 'Ngô Hoàng Khải', '0817574722', 'ngok1708@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 5),
-(2, 'Lê Trung Hiếu', '0123222531', 'trunghieu@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
-(3, 'Nguyễn Trung Trực', '0812412573', 'trungtruc@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
-(4, 'nguyễn  thanh tùng', '0313212356', 'tungnguyen@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
-(5, 'lê hồng minh', '0123111444', 'hongminh@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
-(1223, 'hhh', '0999666', 'hhh@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 8),
-(1224, 'Test Customer 1761798391', '0474708621', 'test_1761798391@godifa.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 8),
-(1225, 'Test 1761799909', '0306592138', 'test1761799909@godifa.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 2),
-(1226, 'Test 1761799991', '0339655073', 'test1761799991@godifa.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 2),
-(1227, 'ttt', '01111111', 'ttt@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 8);
+INSERT INTO `customer` (`customerID`, `customerName`, `phone`, `email`, `birthdate`, `gender`, `password`, `status`, `groupID`) VALUES
+(1, 'Ngô Hoàng Khải', '0817574722', 'ngok1708@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
+(2, 'Lê Trung Hiếu', '0123222531', 'trunghieu@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
+(3, 'Nguyễn Trung Trực', '0812412573', 'trungtruc@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
+(4, 'nguyễn  thanh tùng', '0313212356', 'tungnguyen@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
+(5, 'lê hồng minh', '0123111444', 'hongminh@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8),
+(1223, 'quốc khải', '0949123123', 'quockhai@gmail.com', NULL, NULL, '7c6a180b36896a0a8c02787eeafb0e4c', 1, 8);
 
 --
 -- Triggers `customer`
 --
-DROP TRIGGER IF EXISTS `before_customer_insert_set_group`;
+DROP TRIGGER IF EXISTS `after_customer_update`;
 DELIMITER $$
-CREATE TRIGGER `before_customer_insert_set_group` BEFORE INSERT ON `customer` FOR EACH ROW BEGIN
-    IF NEW.groupID IS NULL THEN
-        SET NEW.groupID = 8;
+CREATE TRIGGER `after_customer_update` AFTER UPDATE ON `customer` FOR EACH ROW BEGIN
+    DECLARE cust_age INT;
+    DECLARE cust_orders INT;
+    DECLARE cust_spent DECIMAL(15,2);
+    DECLARE best_group_id INT;
+    
+    IF NEW.birthdate IS NOT NULL AND NEW.gender IS NOT NULL THEN
+        SET cust_age = TIMESTAMPDIFF(YEAR, NEW.birthdate, CURDATE());
+        
+        SELECT 
+            COUNT(o.orderID),
+            COALESCE(SUM(o.totalAmount), 0)
+        INTO cust_orders, cust_spent
+        FROM `order` o
+        WHERE o.customerID = NEW.customerID AND o.paymentStatus != 'Đã hủy';
+        
+        SELECT groupID INTO best_group_id
+        FROM customer_group
+        WHERE status = 1 
+          AND autoAssign = 1
+          AND (gender = 'Tất cả' OR gender = NEW.gender)
+          AND (minAge IS NULL OR cust_age >= minAge)
+          AND (maxAge IS NULL OR cust_age <= maxAge)
+          AND (minOrders <= cust_orders)
+          AND (minSpent <= cust_spent)
+        ORDER BY priority DESC, discountPercent DESC
+        LIMIT 1;
+        
+        IF best_group_id IS NOT NULL THEN
+            UPDATE customer SET groupID = best_group_id WHERE customerID = NEW.customerID;
+        END IF;
     END IF;
 END
 $$
@@ -318,7 +407,7 @@ INSERT INTO `customer_group` (`groupID`, `groupName`, `description`, `minSpent`,
 (3, 'Gold', 'Hạng Vàng', 15000000, 29999999, '#fbbf24', 1, '2025-10-29 10:21:19', 0),
 (4, 'Platinum', 'Hạng Bạch Kim', 30000000, 49999999, '#42e9ff', 1, '2025-10-29 10:21:19', 0),
 (5, 'Diamond', 'Hạng Kim Cương', 50000000, NULL, '#2042ee', 1, '2025-10-29 10:21:19', 0),
-(8, 'Khách hàng mới', 'New', 0, 0, '#000000', 1, '2025-10-30 05:17:15', 1);
+(6, 'Khách hàng mới', '', 0, 0, '#000000', 1, '2025-10-30 05:17:15', 1);
 
 --
 -- Triggers `customer_group`
@@ -347,32 +436,207 @@ CREATE TABLE IF NOT EXISTS `order` (
   `totalAmount` decimal(10,0) NOT NULL,
   `paymentMethod` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
   `customerID` int NOT NULL,
+  `note` text COLLATE utf8mb3_unicode_520_ci COMMENT 'Ghi chú đơn hàng',
   `voucherID` int DEFAULT NULL,
   `userID` int DEFAULT NULL,
-  `deliveryStatus` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT 'Chờ xử lý' COMMENT 'Chờ xử lý, Đang giao, Hoàn thành, Đã hủy',
-  `cancelReason` text COLLATE utf8mb3_unicode_520_ci COMMENT 'Lý do hủy đơn hàng',
+  `deliveryStatus` enum('Chờ xác nhận','Đang xử lý','Chờ lấy hàng','Đang lấy hàng','Đã lấy hàng','Đang vận chuyển','Đang giao','Đã giao','Giao thất bại','Đang hoàn','Đã hoàn','Đã hủy') COLLATE utf8mb3_unicode_520_ci DEFAULT 'Chờ xác nhận',
+  `shippingCode` varchar(50) COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Mã vận đơn GHN',
+  `shippingProvider` varchar(50) COLLATE utf8mb3_unicode_520_ci DEFAULT 'GHN' COMMENT 'Đơn vị vận chuyển',
+  `shippingFee` decimal(10,2) DEFAULT '0.00' COMMENT 'Phí vận chuyển',
+  `actualDeliveryTime` datetime DEFAULT NULL COMMENT 'Thời gian giao thực tế',
+  `cancelReason` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci COMMENT 'Lý do hủy đơn hàng',
+  `shippingMetadata` json DEFAULT NULL COMMENT 'Dữ liệu từ GHN webhook',
+  `qrExpiredAt` datetime DEFAULT NULL COMMENT 'Thời gian hết hạn QR code (15 phút sau khi tạo)',
+  `transactionCode` varchar(50) COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Mã giao dịch duy nhất (GODIFA202511040001)',
+  `qrUrl` text COLLATE utf8mb3_unicode_520_ci COMMENT 'Link QR Code để khách có thể quét lại',
   PRIMARY KEY (`orderID`),
   KEY `fk_order_user` (`customerID`),
-  KEY `fk_order_voucher` (`voucherID`)
-) ENGINE=MyISAM AUTO_INCREMENT=116 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+  KEY `fk_order_voucher` (`voucherID`),
+  KEY `idx_shipping_code` (`shippingCode`),
+  KEY `idx_transaction_code` (`transactionCode`),
+  KEY `idx_qr_expired` (`qrExpiredAt`)
+) ENGINE=MyISAM AUTO_INCREMENT=129 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `order`
 --
 
-INSERT INTO `order` (`orderID`, `orderDate`, `paymentStatus`, `totalAmount`, `paymentMethod`, `customerID`, `voucherID`, `userID`, `deliveryStatus`, `cancelReason`) VALUES
-(1, '2025-10-22 14:28:23', 'Đã thanh toán', 700000, 'QR', 1, 0, 1, 'Hoàn thành', NULL),
-(2, '2025-10-22 14:28:23', 'Đã thanh toán', 440000, 'QR', 2, 0, 2, 'Hoàn thành', NULL),
-(3, '2025-10-25 23:58:16', 'Đã hủy', 570000, 'QR', 3, 0, 1, 'Đã hủy', 'll'),
-(4, '2025-10-24 20:44:21', 'Đã thanh toán', 750000, 'COD', 1, 0, 3, 'Đang xử lý', NULL),
-(5, '2025-10-22 14:28:23', 'Đã hủy', 650000, 'QR', 2, 0, 2, 'Đã hủy', NULL),
-(6, '2025-10-24 11:48:13', 'Đã hủy', 185000, 'QR', 3, 0, 4, 'Đã hủy', NULL),
-(7, '2025-10-24 11:51:28', 'Đã hủy', 270000, 'QR', 1, 0, 1, 'Đã hủy', 'hết hàng'),
-(8, '2025-10-22 14:28:23', 'Đã hủy', 95000, 'COD', 2, 0, 2, 'Đã hủy', NULL),
-(112, '2025-10-30 11:10:09', 'Đã thanh toán', 120000000, 'QR', 1, NULL, NULL, 'Hoàn thành', 'Nháp'),
-(113, '2025-10-30 11:51:49', 'Đã thanh toán', 10000000, '', 1225, NULL, NULL, 'Đang xử lý', NULL),
-(114, '2025-10-30 11:53:11', 'Đã thanh toán', 10000000, '', 1226, NULL, NULL, 'Đang xử lý', NULL),
-(115, '2025-10-30 12:04:26', 'Đã thanh toán', 10000000, '', 0, NULL, NULL, 'Chờ xử lý', NULL);
+INSERT INTO `order` (`orderID`, `orderDate`, `paymentStatus`, `totalAmount`, `paymentMethod`, `customerID`, `note`, `voucherID`, `userID`, `deliveryStatus`, `shippingCode`, `shippingProvider`, `shippingFee`, `actualDeliveryTime`, `cancelReason`, `shippingMetadata`, `qrExpiredAt`, `transactionCode`, `qrUrl`) VALUES
+(1, '2025-11-01 15:58:56', 'Đã thanh toán', 700000, 'QR', 1, NULL, 0, 1, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, '2025-11-01 15:58:56', 'Đã thanh toán', 440000, 'QR', 2, NULL, 0, 2, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL),
+(3, '2025-11-01 15:58:56', 'Đã hủy', 570000, 'QR', 3, NULL, 0, 1, 'Đã hủy', NULL, 'GHN', 0.00, NULL, 'll', NULL, NULL, NULL, NULL),
+(4, '2025-11-09 01:10:53', 'Đã thanh toán', 750000, 'COD', 1, NULL, 0, 3, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, '2025-11-01 15:58:56', 'Đã hủy', 650000, 'QR', 2, NULL, 0, 2, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL),
+(6, '2025-11-01 15:58:56', 'Đã hủy', 185000, 'QR', 3, NULL, 0, 4, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL),
+(7, '2025-11-01 15:58:56', 'Đã hủy', 270000, 'QR', 1, NULL, 0, 1, 'Đã hủy', NULL, 'GHN', 0.00, NULL, 'hết hàng', NULL, NULL, NULL, NULL),
+(8, '2025-11-01 15:58:56', 'Đã hủy', 95000, 'COD', 2, NULL, 0, 2, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL),
+(112, '2025-11-01 15:58:56', 'Đã hủy', 120000000, 'QR', 1, NULL, NULL, NULL, 'Đã hủy', NULL, 'GHN', 0.00, NULL, 'Nháp', NULL, NULL, NULL, NULL),
+(113, '2025-11-08 00:43:18', 'Đã hủy', 90000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, 'QR code hết hạn - Tự động hủy', NULL, '2025-11-05 18:47:19', 'GODIFA202511050113', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=90000&des=SEVQR+TKP155+GODIFA202511050113'),
+(114, '2025-11-09 01:09:36', 'Đã thanh toán', 90000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, '2025-11-05 18:47:42', 'GODIFA202511050114', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=90000&des=SEVQR+TKP155+GODIFA202511050114'),
+(115, '2025-11-08 00:43:18', 'Đã hủy', 90000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, 'QR code hết hạn - Tự động hủy', NULL, '2025-11-05 20:22:27', 'GODIFA202511050115', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=90000&des=SEVQR+TKP155+GODIFA202511050115'),
+(116, '2025-11-08 01:50:07', 'Đã hủy', 500000, 'QR', 1, NULL, NULL, NULL, 'Đã hủy', 'GHN20251105201754', 'GHN', 22000.00, NULL, 'Nhap', '{\"time\": \"2025-11-05T20:18:25.178Z\", \"status\": \"picking\", \"location\": \"Bưu cục test\", \"raw_data\": {\"Time\": \"2025-11-05T20:18:25.178Z\", \"Status\": \"picking\", \"OrderCode\": \"GHN20251105201754\", \"Description\": \"Test webhook from simulator\", \"CurrentLocation\": \"Bưu cục test\"}, \"description\": \"Test webhook from simulator\"}', NULL, NULL, NULL),
+(117, '2025-11-09 01:09:36', 'Đã thanh toán', 500000, 'QR', 1, NULL, NULL, NULL, '', 'GHN20251105201926', 'GHN', 22000.00, '2025-11-05 20:35:21', NULL, '{\"time\": \"2025-11-05T20:35:20.736Z\", \"status\": \"delivered\", \"location\": \"Bưu cục test\", \"raw_data\": {\"Time\": \"2025-11-05T20:35:20.736Z\", \"Status\": \"delivered\", \"OrderCode\": \"GHN20251105201926\", \"Description\": \"Test webhook from simulator\", \"CurrentLocation\": \"Bưu cục test\"}, \"description\": \"Test webhook from simulator\"}', NULL, NULL, NULL),
+(118, '2025-11-08 01:50:12', 'Đã hủy', 500000, 'QR', 1, NULL, NULL, NULL, 'Đã hủy', 'GHN20251105201934', 'GHN', 22000.00, NULL, 'Nhap', NULL, NULL, NULL, NULL),
+(120, '2025-11-09 01:09:36', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, '2025-11-07 16:38:02', 'GODIFA202511070120', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070120'),
+(121, '2025-11-09 01:09:36', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, '2025-11-07 16:46:08', 'GODIFA202511070121', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070121'),
+(122, '2025-11-09 01:09:36', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, '2025-11-07 16:49:25', 'GODIFA202511070122', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070122'),
+(123, '2025-11-09 01:09:36', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, '2025-11-07 16:58:11', 'GODIFA202511070123', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070123'),
+(124, '2025-11-09 01:09:36', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, '2025-11-07 17:14:48', 'GODIFA202511070124', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070124'),
+(125, '2025-11-08 00:43:18', 'Đã hủy', 10000, 'QR', 2, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, 'QR code hết hạn - Tự động hủy', NULL, '2025-11-07 17:21:11', 'GODIFA202511070125', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070125'),
+(126, '2025-11-09 01:05:09', 'Chờ thanh toán (COD)', 90000, 'COD', 2, '', NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, 'GODIFA202511070126', NULL),
+(127, '2025-11-09 01:04:56', 'Chờ thanh toán (COD)', 10000, 'COD', 3, '', NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, 'GODIFA202511080127', NULL),
+(128, '2025-11-09 01:11:45', 'Chờ thanh toán (COD)', 10000, 'COD', 3, '', NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, 'GODIFA202511080128', NULL);
+
+--
+-- Triggers `order`
+--
+DROP TRIGGER IF EXISTS `after_order_update_assign_group`;
+DELIMITER $$
+CREATE TRIGGER `after_order_update_assign_group` AFTER UPDATE ON `order` FOR EACH ROW BEGIN
+    DECLARE customer_total_spent DECIMAL(15,2);
+    DECLARE best_group_id INT;
+    
+    IF NEW.paymentStatus != OLD.paymentStatus THEN
+        SELECT COALESCE(SUM(totalAmount), 0) INTO customer_total_spent
+        FROM `order`
+        WHERE customerID = NEW.customerID AND paymentStatus != 'Đã hủy';
+        
+        SELECT groupID INTO best_group_id
+        FROM customer_group
+        WHERE status = 1
+          AND customer_total_spent >= minSpent
+          AND (maxSpent IS NULL OR customer_total_spent <= maxSpent)
+        ORDER BY minSpent DESC
+        LIMIT 1;
+        
+        IF best_group_id IS NOT NULL THEN
+            UPDATE customer SET groupID = best_group_id WHERE customerID = NEW.customerID;
+        END IF;
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_backup_20251108`
+--
+
+DROP TABLE IF EXISTS `order_backup_20251108`;
+CREATE TABLE IF NOT EXISTS `order_backup_20251108` (
+  `orderID` int NOT NULL DEFAULT '0',
+  `orderDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `paymentStatus` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL COMMENT 'Chờ thanh toán, Đã thanh toán, Đã hủy',
+  `totalAmount` decimal(10,0) NOT NULL,
+  `paymentMethod` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
+  `customerID` int NOT NULL,
+  `customerName` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Tên người nhận',
+  `phone` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'SĐT người nhận',
+  `email` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Email người nhận',
+  `address` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci COMMENT 'Địa chỉ giao hàng',
+  `provinceId` int DEFAULT NULL COMMENT 'Mã tỉnh/thành GHN',
+  `districtId` int DEFAULT NULL COMMENT 'Mã quận/huyện GHN',
+  `wardCode` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Mã phường/xã GHN',
+  `note` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci COMMENT 'Ghi chú đơn hàng',
+  `voucherID` int DEFAULT NULL,
+  `userID` int DEFAULT NULL,
+  `deliveryStatus` enum('Chờ xác nhận','Đang xử lý','Chờ lấy hàng','Đang lấy hàng','Đã lấy hàng','Đang vận chuyển','Đang giao','Đã giao','Giao thất bại','Đang hoàn','Đã hoàn','Đã hủy') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT 'Chờ xác nhận',
+  `shippingCode` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Mã vận đơn GHN',
+  `shippingProvider` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT 'GHN' COMMENT 'Đơn vị vận chuyển',
+  `shippingFee` decimal(10,2) DEFAULT '0.00' COMMENT 'Phí vận chuyển',
+  `expectedDeliveryTime` datetime DEFAULT NULL COMMENT 'Thời gian giao dự kiến',
+  `actualDeliveryTime` datetime DEFAULT NULL COMMENT 'Thời gian giao thực tế',
+  `cancelReason` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci COMMENT 'Lý do hủy đơn hàng',
+  `shippingMetadata` json DEFAULT NULL COMMENT 'Dữ liệu từ GHN webhook',
+  `qrExpiredAt` datetime DEFAULT NULL COMMENT 'Thời gian hết hạn QR code (15 phút sau khi tạo)',
+  `transactionCode` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Mã giao dịch duy nhất (GODIFA202511040001)',
+  `qrUrl` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci COMMENT 'Link QR Code để khách có thể quét lại',
+  `bankTransactionId` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL COMMENT 'Mã giao dịch từ ngân hàng (webhook trả về)',
+  `recipientName` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL,
+  `recipientEmail` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL,
+  `recipientPhone` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci DEFAULT NULL,
+  `deliveryAddress` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci,
+  `deliveryNotes` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `order_backup_20251108`
+--
+
+INSERT INTO `order_backup_20251108` (`orderID`, `orderDate`, `paymentStatus`, `totalAmount`, `paymentMethod`, `customerID`, `customerName`, `phone`, `email`, `address`, `provinceId`, `districtId`, `wardCode`, `note`, `voucherID`, `userID`, `deliveryStatus`, `shippingCode`, `shippingProvider`, `shippingFee`, `expectedDeliveryTime`, `actualDeliveryTime`, `cancelReason`, `shippingMetadata`, `qrExpiredAt`, `transactionCode`, `qrUrl`, `bankTransactionId`, `recipientName`, `recipientEmail`, `recipientPhone`, `deliveryAddress`, `deliveryNotes`) VALUES
+(1, '2025-11-01 15:58:56', 'Đã thanh toán', 700000, 'QR', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, '2025-11-01 15:58:56', 'Đã thanh toán', 440000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(3, '2025-11-01 15:58:56', 'Đã hủy', 570000, 'QR', 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, 'll', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(4, '2025-11-01 15:58:56', 'Đã thanh toán', 750000, 'COD', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 3, 'Đang xử lý', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, '2025-11-01 15:58:56', 'Đã hủy', 650000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6, '2025-11-01 15:58:56', 'Đã hủy', 185000, 'QR', 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 4, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(7, '2025-11-01 15:58:56', 'Đã hủy', 270000, 'QR', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, 'hết hàng', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(8, '2025-11-01 15:58:56', 'Đã hủy', 95000, 'COD', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(112, '2025-11-01 15:58:56', 'Đã hủy', 120000000, 'QR', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đã hủy', NULL, 'GHN', 0.00, NULL, NULL, 'Nháp', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(113, '2025-11-08 00:43:18', 'Đã hủy', 90000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, 'QR code hết hạn - Tự động hủy', NULL, '2025-11-05 18:47:19', 'GODIFA202511050113', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=90000&des=SEVQR+TKP155+GODIFA202511050113', NULL, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', NULL, ''),
+(114, '2025-11-06 03:08:35', 'Đã thanh toán', 90000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang xử lý', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, '2025-11-05 18:47:42', 'GODIFA202511050114', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=90000&des=SEVQR+TKP155+GODIFA202511050114', NULL, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', NULL, ''),
+(115, '2025-11-08 00:43:18', 'Đã hủy', 90000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, 'QR code hết hạn - Tự động hủy', NULL, '2025-11-05 20:22:27', 'GODIFA202511050115', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=90000&des=SEVQR+TKP155+GODIFA202511050115', NULL, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'asdas, 46034, 1863, 240', 'aaa'),
+(116, '2025-11-06 03:18:25', 'Đã thanh toán', 500000, 'QR', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang lấy hàng', 'GHN20251105201754', 'GHN', 22000.00, NULL, NULL, NULL, '{\"time\": \"2025-11-05T20:18:25.178Z\", \"status\": \"picking\", \"location\": \"Bưu cục test\", \"raw_data\": {\"Time\": \"2025-11-05T20:18:25.178Z\", \"Status\": \"picking\", \"OrderCode\": \"GHN20251105201754\", \"Description\": \"Test webhook from simulator\", \"CurrentLocation\": \"Bưu cục test\"}, \"description\": \"Test webhook from simulator\"}', NULL, NULL, NULL, NULL, 'Nguyễn Văn Test', 'test@gmail.com', '0987654321', '42/5-7 Hồ Đắc Di, Tây Thạnh, Tân Phú, TP.HCM', NULL),
+(117, '2025-11-06 03:35:20', 'Đã thanh toán', 500000, 'QR', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đã giao', 'GHN20251105201926', 'GHN', 22000.00, NULL, '2025-11-05 20:35:21', NULL, '{\"time\": \"2025-11-05T20:35:20.736Z\", \"status\": \"delivered\", \"location\": \"Bưu cục test\", \"raw_data\": {\"Time\": \"2025-11-05T20:35:20.736Z\", \"Status\": \"delivered\", \"OrderCode\": \"GHN20251105201926\", \"Description\": \"Test webhook from simulator\", \"CurrentLocation\": \"Bưu cục test\"}, \"description\": \"Test webhook from simulator\"}', NULL, NULL, NULL, NULL, 'Nguyễn Văn Test', 'test@gmail.com', '0987654321', '42/5-7 Hồ Đắc Di, Tây Thạnh, Tân Phú, TP.HCM', NULL),
+(118, '2025-11-06 03:19:34', 'Đã thanh toán', 500000, 'QR', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang xử lý', 'GHN20251105201934', 'GHN', 22000.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Nguyễn Văn Test', 'test@gmail.com', '0987654321', '42/5-7 Hồ Đắc Di, Tây Thạnh, Tân Phú, TP.HCM', NULL),
+(119, '2025-11-07 23:15:09', '�� thanh to�n', 59000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, '2025-11-07 16:29:16', 'GODIFA202511070119', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=59000&des=SEVQR+TKP155+GODIFA202511070119', '29499469', 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', '!@#, 46034, 1863, 240', '111'),
+(120, '2025-11-07 23:43:39', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang xử lý', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, '2025-11-07 16:38:02', 'GODIFA202511070120', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070120', '29500892', 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'qqq, 80213, 2264, 269', '11'),
+(121, '2025-11-07 23:41:55', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang xử lý', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, '2025-11-07 16:46:08', 'GODIFA202511070121', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070121', '29501824', 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'asdas, 450706, 3302, 261', ''),
+(122, '2025-11-07 23:41:11', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang xử lý', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, '2025-11-07 16:49:25', 'GODIFA202511070122', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070122', '29502017', 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', '11, 470503, 1776, 258', ''),
+(123, '2025-11-07 23:43:51', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang xử lý', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, '2025-11-07 16:58:11', 'GODIFA202511070123', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070123', '29502480', 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'aaa, 80212, 2264, 269', ''),
+(124, '2025-11-08 00:00:27', 'Đã thanh toán', 10000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Đang xử lý', NULL, 'GHN', 0.00, NULL, NULL, NULL, NULL, '2025-11-07 17:14:48', 'GODIFA202511070124', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070124', '29503571', 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'aa, 600507, 1998, 253', ''),
+(125, '2025-11-08 00:43:18', 'Đã hủy', 10000, 'QR', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'GHN', 0.00, NULL, NULL, 'QR code hết hạn - Tự động hủy', NULL, '2025-11-07 17:21:11', 'GODIFA202511070125', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=10000&des=SEVQR+TKP155+GODIFA202511070125', NULL, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', '12, 600507, 1998, 253', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_delivery`
+--
+
+DROP TABLE IF EXISTS `order_delivery`;
+CREATE TABLE IF NOT EXISTS `order_delivery` (
+  `deliveryID` int NOT NULL AUTO_INCREMENT,
+  `orderID` int NOT NULL,
+  `recipientName` varchar(100) NOT NULL,
+  `recipientEmail` varchar(100) DEFAULT NULL,
+  `recipientPhone` varchar(20) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `ward` varchar(100) DEFAULT NULL,
+  `district` varchar(100) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `provinceId` int DEFAULT NULL,
+  `districtId` int DEFAULT NULL,
+  `wardCode` varchar(20) DEFAULT NULL,
+  `fullAddress` varchar(500) GENERATED ALWAYS AS (concat_ws(_utf8mb4', ',`address`,`ward`,`district`,`city`)) STORED,
+  `deliveryNotes` text,
+  `createdAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`deliveryID`),
+  UNIQUE KEY `orderID` (`orderID`),
+  KEY `idx_orderID` (`orderID`),
+  KEY `idx_province_district` (`provinceId`,`districtId`),
+  KEY `idx_ward` (`wardCode`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `order_delivery`
+--
+
+INSERT INTO `order_delivery` (`deliveryID`, `orderID`, `recipientName`, `recipientEmail`, `recipientPhone`, `address`, `ward`, `district`, `city`, `provinceId`, `districtId`, `wardCode`, `deliveryNotes`, `createdAt`) VALUES
+(1, 115, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'asdas', '46034', '1863', '240', 0, 0, '0', 'aaa', '2025-11-05 20:07:27'),
+(2, 116, 'Nguyễn Văn Test', 'test@gmail.com', '0987654321', '42/5-7 Hồ Đắc Di', 'Phường Tây Thạnh', 'Quận Tân Phú', 'Hồ Chí Minh', 202, 1456, '21511', NULL, '2025-11-05 20:17:54'),
+(3, 117, 'Nguyễn Văn Test', 'test@gmail.com', '0987654321', '42/5-7 Hồ Đắc Di', 'Phường Tây Thạnh', 'Quận Tân Phú', 'Hồ Chí Minh', 202, 1456, '21511', NULL, '2025-11-05 20:19:26'),
+(4, 118, 'Nguyễn Văn Test', 'test@gmail.com', '0987654321', '42/5-7 Hồ Đắc Di', 'Phường Tây Thạnh', 'Quận Tân Phú', 'Hồ Chí Minh', 202, 1456, '21511', NULL, '2025-11-05 20:19:34'),
+(5, 119, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', '!@#', '46034', '1863', '240', 0, 0, '0', '111', '2025-11-07 16:14:16'),
+(6, 120, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'qqq', '80213', '2264', '269', 0, 0, '0', '11', '2025-11-07 16:23:02'),
+(7, 121, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'asdas', '450706', '3302', '261', 0, 0, '0', '', '2025-11-07 16:31:08'),
+(8, 122, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', '11', '470503', '1776', '258', 0, 0, '0', '', '2025-11-07 16:34:25'),
+(9, 123, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'aaa', '80212', '2264', '269', 0, 0, '0', '', '2025-11-07 16:43:11'),
+(10, 124, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', 'aa', '600507', '1998', '253', 0, 0, '0', '', '2025-11-07 16:59:48'),
+(11, 125, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', '12', '600507', '1998', '253', 0, 0, '0', '', '2025-11-07 17:06:11'),
+(12, 126, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0123222531', '!@#', '140813', '2267', '266', 266, 2267, '140813', '', '2025-11-07 18:42:21'),
+(13, 127, 'Nguyễn Trung Trực', 'trungtruc@gmail.com', '0812412573', 'asdas', '360703', '1835', '259', 259, 1835, '360703', '', '2025-11-08 17:50:14'),
+(14, 128, 'Nguyễn Trung Trực', 'trungtruc@gmail.com', '0812412573', '!@#', '390302', '1856', '260', 260, 1856, '390302', '', '2025-11-08 18:11:27');
 
 -- --------------------------------------------------------
 
@@ -402,7 +666,20 @@ INSERT INTO `order_details` (`orderID`, `productID`, `quantity`, `price`) VALUES
 (5, 5, 1, 650000),
 (6, 13, 1, 185000),
 (7, 18, 1, 270000),
-(8, 14, 1, 95000);
+(8, 14, 1, 95000),
+(113, 30, 1, 90000),
+(114, 30, 1, 90000),
+(115, 30, 1, 90000),
+(119, 16, 1, 59000),
+(120, 36, 1, 10000),
+(121, 36, 1, 10000),
+(122, 36, 1, 10000),
+(123, 36, 1, 10000),
+(124, 36, 1, 10000),
+(125, 36, 1, 10000),
+(126, 30, 1, 90000),
+(127, 36, 1, 10000),
+(128, 36, 1, 10000);
 
 -- --------------------------------------------------------
 
@@ -423,7 +700,7 @@ CREATE TABLE IF NOT EXISTS `product` (
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1=Hoạt động, 0=Đã khóa',
   PRIMARY KEY (`productID`),
   KEY `fk_product_category` (`categoryID`)
-) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `product`
@@ -460,7 +737,8 @@ INSERT INTO `product` (`productID`, `productName`, `SKU_MRK`, `stockQuantity`, `
 (28, 'Hộp Đựng Thuốc 2 Ngăn Cao Cấp Inomata Nhật Bản\r\n', '4973228171516', 16, 95000, 'Mô tả sản phẩm Hộp đựng thuốc Inomata chia 2 ngăn Nhật Bản\r\n- Chất liệu: nhựa PP cao cấp\r\n- Kích thước: đường kính 7cm * độ dày 2cm\r\n- Công dụng: Chia 2 ngăn, dùng để đựng th. Thiết kế nhỏ gọn dễ dàng mang theo người. Kiểu dáng đẹp, sang trọng. \r\n- Hàng nhập khẩu từ Nhật, sản xuất tại Nhật Bản ', '4973228171516.jpg', 5, 1),
 (29, 'Kem Đánh Răng Muối SunStar tuýp 170g Hàng Nội Địa Nhật Bản\r\n', '4901616005266', 19, 70000, 'Kem Đánh Răng Muối SunStar là sản phẩm đến từ Nhật Bản, với khả năng chăm sóc răng miệng 1 cách toàn diện. Kem có chứa thành phần chính là muối kết hợp với canxi carbonate, vitamin E, tinh thể muối, sorbitol giúp đánh bật các mảng bám ố vàng trên răng và trong từng kẽ răng, đồng thời còn giúp ngăn chặn các bệnh về nha chu, sâu răng, chảy máu chân răng hiệu quả.', '4901616005266.jpg', 5, 1),
 (30, 'Hộp 180 bông ngoáy tai cao cấp cho người lớn\r\n', '4936613072331', 20, 90000, 'Xuất xứ: Hàng nội địa Nhật Bản, sản xuất tại Nhật Bản.\r\n- Chất liệu: tay cầm bằng nhựa, 2 đầu bằng bông.\r\n- Công dụng: vệ sinh, làm sạch tai. Đầu bông chất liệu cotton cao cấp, không gây đau rát, an toàn khi ngoáy tai.', '4936613072331.jpg', 5, 1),
-(31, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)', '4973430023672', 10, 60000, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)\r\n\r\nBàn chải chà gót chân bằng đá san hô dùng cọ gót chân giúp làm mềm, mịn gót chân, loại bỏ các vết chai sần, xơ cứng phần gót chân bạn.\r\nĐặc điểm\r\nChất liệu an toàn\r\nVới thành phần từ đá thiên nhiên nên bạn sẽ hoàn toàn yên tâm khi sử dụng để chăm sóc cho đôi chân của mình và gia đình\r\nSản phẩm với kích thước vừa tay cầm, dễ dàng cất gọn, giúp tiết kiệm không gian nhà tắm', '4973430023672.jpg', 5, 1);
+(31, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)', '4973430023672', 10, 60000, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)\r\n\r\nBàn chải chà gót chân bằng đá san hô dùng cọ gót chân giúp làm mềm, mịn gót chân, loại bỏ các vết chai sần, xơ cứng phần gót chân bạn.\r\nĐặc điểm\r\nChất liệu an toàn\r\nVới thành phần từ đá thiên nhiên nên bạn sẽ hoàn toàn yên tâm khi sử dụng để chăm sóc cho đôi chân của mình và gia đình\r\nSản phẩm với kích thước vừa tay cầm, dễ dàng cất gọn, giúp tiết kiệm không gian nhà tắm', '4973430023672.jpg', 5, 1),
+(36, 'aaa', '12', 15, 10000, '', '690e1ccdd4ff9.jpg', 8, 1);
 
 -- --------------------------------------------------------
 
@@ -514,6 +792,40 @@ INSERT INTO `role` (`roleID`, `roleName`) VALUES
 (2, 'Nhân Viên Quản Trị'),
 (3, 'Nhân Viên Bán Hàng'),
 (4, 'Nhân Viên CSKH');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_history`
+--
+
+DROP TABLE IF EXISTS `shipping_history`;
+CREATE TABLE IF NOT EXISTS `shipping_history` (
+  `historyID` int NOT NULL AUTO_INCREMENT,
+  `orderID` int NOT NULL,
+  `shippingCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `updatedBy` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'GHN Webhook',
+  `createdAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`historyID`),
+  KEY `idx_order_id` (`orderID`),
+  KEY `idx_shipping_code` (`shippingCode`)
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Lịch sử vận chuyển - Không dùng FK vì order table dùng MyISAM';
+
+--
+-- Dumping data for table `shipping_history`
+--
+
+INSERT INTO `shipping_history` (`historyID`, `orderID`, `shippingCode`, `status`, `location`, `description`, `updatedBy`, `createdAt`) VALUES
+(1, 116, 'GHN20251105201754', 'Đang xử lý', 'Kho Tân Phú', 'Đơn hàng đã được tạo', 'System', '2025-11-05 20:17:54'),
+(2, 116, 'GHN20251105201754', 'Đang lấy hàng', 'Bưu cục test', 'Test webhook from simulator', 'GHN Webhook', '2025-11-05 20:18:25'),
+(3, 117, 'GHN20251105201926', 'Đang xử lý', 'Kho Tân Phú', 'Đơn hàng đã được tạo', 'System', '2025-11-05 20:19:26'),
+(4, 118, 'GHN20251105201934', 'Đang xử lý', 'Kho Tân Phú', 'Đơn hàng đã được tạo', 'System', '2025-11-05 20:19:34'),
+(5, 117, 'GHN20251105201926', 'Đã lấy hàng', 'Bưu cục test', 'Test webhook from simulator', 'GHN Webhook', '2025-11-05 20:20:07'),
+(6, 117, 'GHN20251105201926', 'Đang vận chuyển', 'Bưu cục test', 'Test webhook from simulator', 'GHN Webhook', '2025-11-05 20:34:42'),
+(7, 117, 'GHN20251105201926', 'Đã giao', 'Bưu cục test', 'Test webhook from simulator', 'GHN Webhook', '2025-11-05 20:35:20');
 
 -- --------------------------------------------------------
 
@@ -581,7 +893,7 @@ INSERT INTO `voucher` (`voucherID`, `voucherName`, `value`, `quantity`, `startDa
 (7, 'Test voucher 2', 12000, 10, '0001-01-01', '2025-11-16', '1223123123123123', 1),
 (8, 'Test voucher KHTT', 150000, 1, '2025-10-17', '2025-11-28', '', 1),
 (9, 'Test voucher 2', 12000, 1, '2025-10-08', '2025-11-28', '', 1),
-(10, 'Test voucher KHTT', 120000, 100, '2025-10-30', '2025-11-28', 'hihi', 1);
+(10, 'Bronze', 10000, 1, '0000-00-00', '2025-12-07', '', 1);
 
 -- --------------------------------------------------------
 
@@ -597,7 +909,7 @@ CREATE TABLE IF NOT EXISTS `voucher_group` (
   PRIMARY KEY (`voucherGroupID`),
   KEY `idx_voucher` (`voucherID`),
   KEY `idx_group` (`groupID`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ánh xạ voucher - nhóm khách hàng';
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ánh xạ voucher - nhóm khách hàng';
 
 --
 -- Dumping data for table `voucher_group`
@@ -606,8 +918,7 @@ CREATE TABLE IF NOT EXISTS `voucher_group` (
 INSERT INTO `voucher_group` (`voucherGroupID`, `voucherID`, `groupID`) VALUES
 (2, 8, 6),
 (4, 9, 3),
-(8, 10, 2),
-(7, 10, 1);
+(5, 10, 1);
 
 -- --------------------------------------------------------
 
@@ -617,12 +928,15 @@ INSERT INTO `voucher_group` (`voucherGroupID`, `voucherID`, `groupID`) VALUES
 --
 DROP VIEW IF EXISTS `v_customer_demographics`;
 CREATE TABLE IF NOT EXISTS `v_customer_demographics` (
-`groupID` int
+`avgAge` decimal(24,4)
+,`femaleCount` bigint
+,`groupID` int
 ,`groupName` varchar(100)
+,`maleCount` bigint
+,`maxAge` bigint
+,`minAge` bigint
 ,`totalCustomers` bigint
-,`totalOrders` bigint
 ,`totalRevenue` decimal(32,0)
-,`avgOrderValue` decimal(14,4)
 );
 
 -- --------------------------------------------------------
@@ -633,11 +947,11 @@ CREATE TABLE IF NOT EXISTS `v_customer_demographics` (
 --
 DROP VIEW IF EXISTS `v_customer_group_stats`;
 CREATE TABLE IF NOT EXISTS `v_customer_group_stats` (
-`groupID` int
+`description` text
+,`groupID` int
 ,`groupName` varchar(100)
-,`description` text
-,`minSpent` decimal(10,0)
 ,`maxSpent` decimal(10,0)
+,`minSpent` decimal(10,0)
 ,`status` tinyint(1)
 ,`totalCustomers` bigint
 ,`totalOrders` bigint
@@ -652,7 +966,7 @@ CREATE TABLE IF NOT EXISTS `v_customer_group_stats` (
 DROP TABLE IF EXISTS `v_customer_demographics`;
 
 DROP VIEW IF EXISTS `v_customer_demographics`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_customer_demographics`  AS SELECT `cg`.`groupID` AS `groupID`, `cg`.`groupName` AS `groupName`, count(distinct `c`.`customerID`) AS `totalCustomers`, count(distinct `o`.`orderID`) AS `totalOrders`, coalesce(sum((case when (`o`.`paymentStatus` <> 'Đã hủy') then `o`.`totalAmount` else 0 end)),0) AS `totalRevenue`, coalesce(avg(`o`.`totalAmount`),0) AS `avgOrderValue` FROM ((`customer_group` `cg` left join `customer` `c` on((`cg`.`groupID` = `c`.`groupID`))) left join `order` `o` on((`c`.`customerID` = `o`.`customerID`))) WHERE (`cg`.`status` = 1) GROUP BY `cg`.`groupID`, `cg`.`groupName` ORDER BY `cg`.`groupID` ASC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_customer_demographics`  AS SELECT `cg`.`groupID` AS `groupID`, `cg`.`groupName` AS `groupName`, count(`c`.`customerID`) AS `totalCustomers`, count((case when (`c`.`gender` = 'Nam') then 1 end)) AS `maleCount`, count((case when (`c`.`gender` = 'Nữ') then 1 end)) AS `femaleCount`, avg(timestampdiff(YEAR,`c`.`birthdate`,curdate())) AS `avgAge`, min(timestampdiff(YEAR,`c`.`birthdate`,curdate())) AS `minAge`, max(timestampdiff(YEAR,`c`.`birthdate`,curdate())) AS `maxAge`, coalesce(sum((case when (`o`.`paymentStatus` <> 'Đã hủy') then `o`.`totalAmount` else 0 end)),0) AS `totalRevenue` FROM ((`customer_group` `cg` left join `customer` `c` on((`cg`.`groupID` = `c`.`groupID`))) left join `order` `o` on((`c`.`customerID` = `o`.`customerID`))) WHERE (`cg`.`status` = 1) GROUP BY `cg`.`groupID`, `cg`.`groupName` ORDER BY `cg`.`groupID` ASC ;
 
 -- --------------------------------------------------------
 
