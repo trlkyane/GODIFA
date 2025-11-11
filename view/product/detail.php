@@ -28,8 +28,8 @@ include __DIR__ . '/../layout/header.php';
             <div class="space-y-4">
                 <div class="relative overflow-hidden rounded-xl bg-gray-100">
                     <img src="/GODIFA/image/<?php echo $product['image']; ?>" 
-                         alt="<?php echo htmlspecialchars($product['productName']); ?>" 
-                         class="w-full h-[500px] object-contain">
+                            alt="<?php echo htmlspecialchars($product['productName']); ?>" 
+                            class="w-full h-[500px] object-contain">
                     <?php if ($product['stockQuantity'] < 10 && $product['stockQuantity'] > 0): ?>
                         <span class="absolute top-4 left-4 bg-red-500 text-white text-sm px-3 py-1 rounded-full font-semibold">
                             <i class="fas fa-exclamation-circle mr-1"></i>Sắp hết hàng
@@ -48,17 +48,19 @@ include __DIR__ . '/../layout/header.php';
                         <?php echo htmlspecialchars($product['productName']); ?>
                     </h1>
                     <div class="flex items-center gap-4 mb-4">
+                        <?php 
+                        $ratingValue = round($avgRating['avgRating'] ?? 0);
+                        $totalReviews = $avgRating['totalReviews'] ?? 0;
+                        ?>
                         <div class="flex items-center text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span class="text-gray-600 ml-2 text-sm">(4.5/5)</span>
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="fas fa-star <?php echo $i > $ratingValue ? 'text-gray-300' : ''; ?>"></i>
+                            <?php endfor; ?>
+                            <span class="text-gray-600 ml-2 text-sm">(<?php echo number_format($avgRating['avgRating'] ?? 0, 1); ?>/5)</span>
                         </div>
                         <span class="text-gray-400">|</span>
                         <span class="text-gray-600 text-sm">
-                            <i class="fas fa-box mr-1"></i>Kho: <strong class="text-gray-900"><?php echo $product['stockQuantity']; ?></strong>
+                            <i class="fas fa-comment-alt mr-1"></i>Đã bán: <strong class="text-gray-900"><?php echo $totalReviews; ?></strong>
                         </span>
                     </div>
                 </div>
@@ -90,7 +92,7 @@ include __DIR__ . '/../layout/header.php';
                                 <i class="fas fa-minus text-gray-600"></i>
                             </button>
                             <input type="number" id="qty" value="1" min="1" max="<?php echo $product['stockQuantity']; ?>" 
-                                   class="w-20 text-center border-x py-2 focus:outline-none">
+                                    class="w-20 text-center border-x py-2 focus:outline-none">
                             <button onclick="increaseQty()" class="px-4 py-2 hover:bg-gray-100">
                                 <i class="fas fa-plus text-gray-600"></i>
                             </button>
@@ -148,14 +150,64 @@ include __DIR__ . '/../layout/header.php';
                 <?php echo nl2br(htmlspecialchars($product['description'])); ?>
             </div>
         </div>
+        
+        <div class="border-t p-8 bg-white">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>Đánh giá sản phẩm (<?php echo $totalReviews; ?>)
+            </h2>
 
+            <?php if ($totalReviews > 0): ?>
+                <div class="flex items-center mb-6 p-4 border rounded-xl bg-yellow-50">
+                    <div class="flex-shrink-0 text-center mr-6">
+                        <p class="text-5xl font-bold text-yellow-600">
+                            <?php echo number_format($avgRating['avgRating'] ?? 0, 1); ?>
+                        </p>
+                        <div class="flex justify-center text-yellow-400 mt-1">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="fas fa-star <?php echo $i > $ratingValue ? 'text-gray-300' : ''; ?>"></i>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-lg"><?php echo $totalReviews; ?> lượt đánh giá</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <?php foreach ($reviews as $review): ?>
+                        <div class="border-b pb-4">
+                            <div class="flex items-center mb-2">
+                                <span class="font-semibold text-gray-700 mr-3">
+                                    <?php echo htmlspecialchars($review['customerName']); ?>
+                                </span>
+                                
+                                <div class="flex text-sm text-yellow-400">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <i class="fas fa-star <?php echo $i > $review['rating'] ? 'text-gray-300' : ''; ?>"></i>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+                            <p class="text-gray-800 mb-2">
+                                <?php echo nl2br(htmlspecialchars($review['comment'])); ?>
+                            </p>
+                            <span class="text-xs text-gray-500">
+                                Ngày đánh giá: <?php echo date('d/m/Y', strtotime($review['dateReview'])); ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-8 border rounded-xl bg-gray-50">
+                    <p class="text-gray-600 font-medium">Chưa có đánh giá nào cho sản phẩm này.</p>
+                    <p class="text-sm text-gray-500 mt-1">Hãy là người đầu tiên đánh giá!</p>
+                </div>
+            <?php endif; ?>
+        </div>
+        
         <div class="border-t p-8 bg-gray-50">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">
                 <i class="fas fa-boxes text-blue-600 mr-2"></i>Sản phẩm liên quan
             </h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <?php
-                // Sử dụng dữ liệu đã được truyền từ controller
                 if (isset($relatedProducts) && count($relatedProducts) > 0):
                     foreach ($relatedProducts as $r):
                         if ($r['productID'] == $product['productID']) continue;
@@ -219,5 +271,3 @@ function buyNow(id) {
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
-
-

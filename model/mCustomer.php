@@ -96,16 +96,22 @@ class Customer {
     }
     
     // Cập nhật thông tin khách hàng
-    public function updateCustomer($id, $customerName, $phone, $email, $status = null) {
-        if ($status !== null) {
-            $sql = "UPDATE customer SET customerName = ?, phone = ?, email = ?, status = ? WHERE customerID = ?";
-            $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "sssii", $customerName, $phone, $email, $status, $id);
-        } else {
-            $sql = "UPDATE customer SET customerName = ?, phone = ?, email = ? WHERE customerID = ?";
-            $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "sssi", $customerName, $phone, $email, $id);
-        }
+    public function updateCustomerAccount($id, $customerName, $phone, $gender, $dateOfBirth) {
+        $sql = "UPDATE customer 
+                SET customerName = ?, phone = ?, gender = ?, birthdate = ?  
+                WHERE customerID = ?"; // <-- ĐÃ SỬA: dateOfBirth thành birthdate
+        
+        $stmt = mysqli_prepare($this->conn, $sql);
+        
+        // Tham số: 4 strings (s) và 1 integer (i)
+        mysqli_stmt_bind_param($stmt, "ssssi", 
+            $customerName, 
+            $phone, 
+            $gender,
+            $dateOfBirth, // Giá trị của biến $dateOfBirth sẽ được bind vào cột birthdate
+            $id
+        );
+        
         return mysqli_stmt_execute($stmt);
     }
     
