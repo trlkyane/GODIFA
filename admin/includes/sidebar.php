@@ -127,17 +127,12 @@ $pendingOrdersCount = $orderModel->countByStatus('Chờ thanh toán');
         </a>
         <?php endif; ?>
 
-        <?php if (hasPermission('view_customers') || hasPermission('manage_customers')): ?>
-        <!-- Nhóm Khách hàng -->
-        <a href="?page=customer_groups" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
-            <i class="fas fa-users-cog w-5"></i>
+        <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1): ?>
+        <!-- Nhóm Khách hàng - CHỈ CHỦ DOANH NGHIỆP -->
+        <a href="?page=customer_groups" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 border-l-4 border-transparent hover:border-amber-500">
+            <i class="fas fa-users-cog w-5 text-amber-600"></i>
             <span>Nhóm KH</span>
-        </a>
-        
-        <!-- Tự động phân nhóm -->
-        <a href="?page=auto_assign_groups" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
-            <i class="fas fa-magic w-5"></i>
-            <span>Phân nhóm tự động</span>
+            <i class="fas fa-crown text-amber-500 text-xs ml-auto" title="Chỉ Chủ DN"></i>
         </a>
         <?php endif; ?>
 

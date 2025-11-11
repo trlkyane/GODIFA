@@ -60,7 +60,7 @@ include __DIR__ . '/../layout/header.php';
           <button onclick="clearAllCart()" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition">
             <i class="fas fa-trash mr-2"></i>Xóa tất cả
           </button>
-          <a href="/GODIFA/controller/cOrder.php?action=checkout" class="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+          <a href="/GODIFA/view/cart/checkout.php" class="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
             <i class="fas fa-credit-card mr-2"></i>Thanh toán
           </a>
         </div>
@@ -124,19 +124,13 @@ function updateQuantity(productId, quantity) {
         return;
     }
     
-    console.log('Updating quantity:', productId, quantity);
-    
     fetch('/GODIFA/controller/cCart.php?action=update', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${productId}&quantity=${quantity}`
     })
-    .then(r => {
-        console.log('Response status:', r.status);
-        return r.json();
-    })
+    .then(r => r.json())
     .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
             // Cập nhật giao diện không cần reload
             if (data.cart) {
@@ -160,19 +154,13 @@ function updateQuantity(productId, quantity) {
 function removeItem(productId) {
     if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
     
-    console.log('Removing item:', productId);
-    
     fetch('/GODIFA/controller/cCart.php?action=remove', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${productId}`
     })
-    .then(r => {
-        console.log('Response status:', r.status);
-        return r.json();
-    })
+    .then(r => r.json())
     .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
             // Cập nhật giao diện không cần reload
             if (data.cart && Object.keys(data.cart).length > 0) {

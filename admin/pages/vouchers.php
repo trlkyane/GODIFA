@@ -25,18 +25,25 @@ $error = '';
 
 // Xử lý THÊM voucher
 if (isset($_POST['add_voucher']) && (hasPermission('create_voucher') || hasPermission('manage_vouchers'))) {
-    // Validate dates trước
-    $startDate = $_POST['startDate'] ?? '';
-    $endDate = $_POST['endDate'] ?? '';
-    $validationErrors = [];
+    // DEBUG: Log giá trị POST
+    error_log("POST startDate: '" . ($_POST['startDate'] ?? 'NOT SET') . "'");
+    error_log("POST endDate: '" . ($_POST['endDate'] ?? 'NOT SET') . "'");
     
-    // Kiểm tra ngày không được rỗng
-    if (empty($startDate)) {
-        $validationErrors[] = "Ngày bắt đầu không được để trống!";
+    // Validate dates trước - tự động set default nếu rỗng
+    $startDate = trim($_POST['startDate'] ?? '');
+    $endDate = trim($_POST['endDate'] ?? '');
+    
+    // Auto-fill nếu rỗng (bao gồm cả whitespace)
+    if (empty($startDate) || $startDate === '') {
+        $startDate = date('Y-m-d');
+        error_log("Auto-filled startDate: $startDate");
     }
-    if (empty($endDate)) {
-        $validationErrors[] = "Ngày kết thúc không được để trống!";
+    if (empty($endDate) || $endDate === '') {
+        $endDate = date('Y-m-d', strtotime('+30 days'));
+        error_log("Auto-filled endDate: $endDate");
     }
+    
+    $validationErrors = [];
     
     // Kiểm tra ngày hợp lệ
     if (!empty($startDate) && strtotime($startDate) === false) {
@@ -91,18 +98,19 @@ if (isset($_POST['add_voucher']) && (hasPermission('create_voucher') || hasPermi
 if (isset($_POST['edit_voucher']) && hasPermission('manage_vouchers')) {
     $voucherID = intval($_POST['voucherID']);
     
-    // Validate dates trước
+    // Validate dates trước - tự động set default nếu rỗng
     $startDate = $_POST['startDate'] ?? '';
     $endDate = $_POST['endDate'] ?? '';
-    $validationErrors = [];
     
-    // Kiểm tra ngày không được rỗng
+    // Auto-fill nếu rỗng
     if (empty($startDate)) {
-        $validationErrors[] = "Ngày bắt đầu không được để trống!";
+        $startDate = date('Y-m-d');
     }
     if (empty($endDate)) {
-        $validationErrors[] = "Ngày kết thúc không được để trống!";
+        $endDate = date('Y-m-d', strtotime('+30 days'));
     }
+    
+    $validationErrors = [];
     
     // Kiểm tra ngày hợp lệ
     if (!empty($startDate) && strtotime($startDate) === false) {
@@ -688,37 +696,44 @@ include __DIR__ . '/../includes/header.php';
 <script>
 // Date validation functions
 function validateAddDates() {
-    const startDate = document.getElementById('add_startDate').value;
-    const endDate = document.getElementById('add_endDate').value;
+    const startDateInput = document.getElementById('add_startDate');
+    const endDateInput = document.getElementById('add_endDate');
     const today = new Date().toISOString().split('T')[0];
+    const next30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
     const startError = document.getElementById('add_startDate_error');
     const endError = document.getElementById('add_endDate_error');
     
-    let isValid = true;
-    
     // Reset errors
-    startError.classList.add('hidden');
-    endError.classList.add('hidden');
+    if (startError) startError.classList.add('hidden');
+    if (endError) endError.classList.add('hidden');
     
-    // Check if dates are filled
-    if (!startDate) {
-        startError.textContent = 'Vui lòng chọn ngày bắt đầu';
-        startError.classList.remove('hidden');
-        isValid = false;
+    // Auto-fill nếu rỗng
+    if (!startDateInput.value || startDateInput.value.trim() === '') {
+        startDateInput.value = today;
+        console.log('Auto-filled startDate:', today);
     }
     
-    if (!endDate) {
-        endError.textContent = 'Vui lòng chọn ngày kết thúc';
-        endError.classList.remove('hidden');
-        isValid = false;
+    if (!endDateInput.value || endDateInput.value.trim() === '') {
+        endDateInput.value = next30Days;
+        console.log('Auto-filled endDate:', next30Days);
     }
+    
+    // LẤY LẠI giá trị SAU KHI SET
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    
+    console.log('Final startDate:', startDate);
+    console.log('Final endDate:', endDate);
     
     // Check if start date is before end date
     if (startDate && endDate && startDate > endDate) {
-        endError.textContent = 'Ngày kết thúc phải sau ngày bắt đầu';
-        endError.classList.remove('hidden');
-        isValid = false;
+        if (endError) {
+            endError.textContent = 'Ngày kết thúc phải sau ngày bắt đầu';
+            endError.classList.remove('hidden');
+        }
+        alert('Lỗi: Ngày kết thúc phải sau ngày bắt đầu!');
+        return false;
     }
     
     // Update min date for end date
@@ -726,7 +741,8 @@ function validateAddDates() {
         document.getElementById('add_endDate').setAttribute('min', startDate);
     }
     
-    return isValid;
+    // ALWAYS return true để cho form submit (PHP sẽ validate lại)
+    return true;
 }
 
 function validateEditDates() {
@@ -772,6 +788,21 @@ function validateEditDates() {
 
 // Modal functions
 function openAddModal() {
+    // Set default dates nếu chưa có
+    const today = new Date().toISOString().split('T')[0];
+    const next30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    const startDateInput = document.getElementById('add_startDate');
+    const endDateInput = document.getElementById('add_endDate');
+    
+    // Đảm bảo luôn có giá trị
+    if (!startDateInput.value || startDateInput.value.trim() === '') {
+        startDateInput.value = today;
+    }
+    if (!endDateInput.value || endDateInput.value.trim() === '') {
+        endDateInput.value = next30Days;
+    }
+    
     document.getElementById('addModal').classList.remove('hidden');
     // Validate on open
     validateAddDates();
@@ -843,6 +874,22 @@ window.onclick = function(event) {
     if (event.target == addModal) closeAddModal();
     if (event.target == editModal) closeEditModal();
 }
+
+// Force set default dates on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const next30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    const startInput = document.getElementById('add_startDate');
+    const endInput = document.getElementById('add_endDate');
+    
+    if (startInput && (!startInput.value || startInput.value === '')) {
+        startInput.value = today;
+    }
+    if (endInput && (!endInput.value || endInput.value === '')) {
+        endInput.value = next30Days;
+    }
+});
 </script>
 
 <style>

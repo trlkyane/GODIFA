@@ -58,6 +58,13 @@ class Database {
     }
     
     /**
+     * Alias for getConnection() - for backward compatibility
+     */
+    public function connect() {
+        return $this->connection;
+    }
+    
+    /**
      * Close connection
      */
     public function closeConnection() {
@@ -109,10 +116,11 @@ define('UPLOAD_DIR', __DIR__ . '/../images/');
 define('UPLOAD_URL', BASE_URL . 'images/');
 
 // Session Configuration
-if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.cookie_lifetime', 86400); // 24 hours
-    session_start();
-}
+// MOVED: Session start should be handled by individual pages before any output
+// if (session_status() === PHP_SESSION_NONE) {
+//     ini_set('session.cookie_lifetime', 86400); // 24 hours
+//     session_start();
+// }
 
 // ============================================
 // HELPER FUNCTIONS

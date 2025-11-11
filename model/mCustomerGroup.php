@@ -26,9 +26,9 @@ class CustomerGroup {
         return $groups;
     }
     
-    // Lấy chỉ nhóm đang hoạt động
+    // Lấy tất cả nhóm
     public function getActiveGroups() {
-        $sql = "SELECT * FROM customer_group WHERE status = 1 ORDER BY minSpent ASC, groupID ASC";
+        $sql = "SELECT * FROM customer_group ORDER BY minSpent ASC, groupID ASC";
         $result = mysqli_query($this->conn, $sql);
         $groups = [];
         while ($row = mysqli_fetch_assoc($result)) {
@@ -49,16 +49,15 @@ class CustomerGroup {
     
     // Thêm nhóm mới
     public function addGroup($data) {
-        $sql = "INSERT INTO customer_group (groupName, description, minSpent, maxSpent, color, status) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO customer_group (groupName, description, minSpent, maxSpent, color) 
+                VALUES (?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssddsi", 
+        mysqli_stmt_bind_param($stmt, "ssdds", 
             $data['groupName'],
             $data['description'],
             $data['minSpent'],
             $data['maxSpent'],
-            $data['color'],
-            $data['status']
+            $data['color']
         );
         return mysqli_stmt_execute($stmt);
     }
@@ -66,16 +65,15 @@ class CustomerGroup {
     // Cập nhật nhóm
     public function updateGroup($id, $data) {
         $sql = "UPDATE customer_group 
-                SET groupName = ?, description = ?, minSpent = ?, maxSpent = ?, color = ?, status = ?
+                SET groupName = ?, description = ?, minSpent = ?, maxSpent = ?, color = ?
                 WHERE groupID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssddsii", 
+        mysqli_stmt_bind_param($stmt, "ssddsi", 
             $data['groupName'],
             $data['description'],
             $data['minSpent'],
             $data['maxSpent'],
             $data['color'],
-            $data['status'],
             $id
         );
         return mysqli_stmt_execute($stmt);
@@ -96,14 +94,6 @@ class CustomerGroup {
         }
         
         $sql = "DELETE FROM customer_group WHERE groupID = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        return mysqli_stmt_execute($stmt);
-    }
-    
-    // Toggle status
-    public function toggleStatus($id) {
-        $sql = "UPDATE customer_group SET status = 1 - status WHERE groupID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
         return mysqli_stmt_execute($stmt);
@@ -153,7 +143,6 @@ class CustomerGroup {
                 FROM customer_group cg
                 LEFT JOIN customer c ON cg.groupID = c.groupID
                 LEFT JOIN `order` o ON c.customerID = o.customerID AND o.paymentStatus != 'Đã hủy'
-                WHERE cg.status = 1
                 GROUP BY cg.groupID, cg.groupName, cg.description, cg.minSpent, cg.maxSpent, cg.color
                 ORDER BY cg.minSpent ASC, cg.groupID ASC";
         $result = mysqli_query($this->conn, $sql);
@@ -203,54 +192,9 @@ class CustomerGroup {
         return $row['count'];
     }
     
-    /**
-     * Kiểm tra khoảng chi tiêu có bị giao nhau với nhóm khác không
-     * @param float $minSpent - Chi tiêu tối thiểu
-     * @param float|null $maxSpent - Chi tiêu tối đa (null = không giới hạn)
-     * @param int|null $excludeGroupID - ID nhóm cần loại trừ khi kiểm tra (dùng khi update)
-     * @return array|false - Trả về nhóm bị trùng hoặc false nếu không trùng
-     */
-    public function checkOverlappingRange($minSpent, $maxSpent, $excludeGroupID = null) {
-        // Build query
-        $sql = "SELECT groupID, groupName, minSpent, maxSpent 
-                FROM customer_group 
-                WHERE 1=1";
-        
-        // Loại trừ nhóm hiện tại nếu đang update
-        if ($excludeGroupID !== null) {
-            $sql .= " AND groupID != " . intval($excludeGroupID);
-        }
-        
-        // Kiểm tra giao nhau
-        // Case 1: Nhóm mới có maxSpent = NULL (không giới hạn)
-        if ($maxSpent === null) {
-            // Trùng nếu có nhóm nào có minSpent >= minSpent của nhóm mới
-            $sql .= " AND minSpent >= " . floatval($minSpent);
-        } else {
-            // Case 2: Nhóm mới có maxSpent xác định
-            // Trùng nếu:
-            // - Nhóm khác có maxSpent = NULL và minSpent < maxSpent của nhóm mới
-            // - Hoặc khoảng [minSpent, maxSpent] giao nhau
-            $sql .= " AND (
-                (maxSpent IS NULL AND minSpent < " . floatval($maxSpent) . ")
-                OR (
-                    maxSpent IS NOT NULL 
-                    AND NOT (
-                        maxSpent < " . floatval($minSpent) . " 
-                        OR minSpent > " . floatval($maxSpent) . "
-                    )
-                )
-            )";
-        }
-        
-        $result = mysqli_query($this->conn, $sql);
-        
-        if ($result && mysqli_num_rows($result) > 0) {
-            return mysqli_fetch_assoc($result); // Trả về nhóm bị trùng
-        }
-        
-        return false; // Không trùng
-    }
+    // ============================================
+    // XÓA HẾT VALIDATION GAP (KHÔNG CẦN NỮA - DÙNG FIXED TIERS)
+    // ============================================
     
     public function __destruct() {
         if ($this->conn) {

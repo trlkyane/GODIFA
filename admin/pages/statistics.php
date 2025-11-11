@@ -18,6 +18,21 @@ $controller = new cStatistics();
 // Get all statistics data
 $data = $controller->getAllStatistics();
 
+// Hiển thị thông báo lỗi nếu có
+$errorMessage = '';
+if (isset($_GET['error'])) {
+    switch ($_GET['error']) {
+        case 'permission_denied':
+            $errorMessage = '⚠️ Bạn không có quyền truy cập trang đó! Chỉ Chủ Doanh Nghiệp mới có thể truy cập.';
+            break;
+        case 'unauthorized':
+            $errorMessage = '🔒 Vui lòng đăng nhập để tiếp tục.';
+            break;
+        default:
+            $errorMessage = 'Có lỗi xảy ra: ' . htmlspecialchars($_GET['error']);
+    }
+}
+
 // Extract data
 $revenueStats = $data['revenue'];
 $orderStats = $data['orders'];
@@ -48,6 +63,16 @@ include __DIR__ . '/../includes/sidebar.php';
     <!-- Top bar -->
     <header class="bg-white shadow-sm">
         <div class="px-4 py-4">
+            <?php if ($errorMessage): ?>
+            <!-- Error Alert -->
+            <div class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-3 text-xl"></i>
+                    <p class="font-medium"><?= $errorMessage ?></p>
+                </div>
+            </div>
+            <?php endif; ?>
+            
             <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">

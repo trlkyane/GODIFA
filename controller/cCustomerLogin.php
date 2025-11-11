@@ -27,8 +27,15 @@ class cCustomerLogin {
             $_SESSION["customer_phone"] = $customer["phone"];
             $_SESSION["is_customer_logged_in"] = true;
             
+            // Kiểm tra có redirect sau login không (ví dụ từ checkout)
+            $redirectUrl = '/GODIFA/index.php';
+            if (isset($_SESSION['redirect_after_login'])) {
+                $redirectUrl = $_SESSION['redirect_after_login'];
+                unset($_SESSION['redirect_after_login']); // Xóa sau khi dùng
+            }
+            
             echo "<script>alert('Đăng nhập thành công! Chào mừng " . htmlspecialchars($customer["customerName"]) . "');</script>";
-            header("refresh:0;url=/GODIFA/index.php");
+            header("refresh:0;url=$redirectUrl");
             exit();
         } else {
             echo "<script>alert('Email hoặc mật khẩu không đúng!');</script>";

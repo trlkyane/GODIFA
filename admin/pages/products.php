@@ -549,12 +549,8 @@ function closeEditModal() {
 
 // Toggle status
 function toggleStatus(id) {
-    console.log('Toggle status clicked for product ID:', id);
     if (confirm('Bạn có chắc muốn thay đổi trạng thái sản phẩm này?\n\n• Hoạt động → Đã khóa\n• Đã khóa → Hoạt động')) {
-        console.log('Confirmed! Redirecting...');
         window.location.href = `?page=products&toggle=${id}`;
-    } else {
-        console.log('Cancelled');
     }
 }
 

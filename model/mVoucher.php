@@ -69,7 +69,8 @@ class Voucher {
         $sql = "INSERT INTO voucher (voucherName, value, quantity, startDate, endDate, requirement) 
                 VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sdiiss", $voucherName, $value, $quantity, $startDate, $endDate, $requirement);
+        // Fix: startDate và endDate phải là 's' (string) không phải 'i' (integer)
+        mysqli_stmt_bind_param($stmt, "sdisss", $voucherName, $value, $quantity, $startDate, $endDate, $requirement);
         return mysqli_stmt_execute($stmt);
     }
     

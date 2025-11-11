@@ -79,11 +79,9 @@ class Blog {
     // Tìm kiếm bài viết
     public function searchBlogs($keyword) {
         $searchTerm = "%$keyword%";
-        $sql = "SELECT b.*, u.userName as authorName 
-                FROM blog b 
-                LEFT JOIN user u ON b.userID = u.userID 
-                WHERE b.title LIKE ? OR b.content LIKE ?
-                ORDER BY b.date DESC";
+        $sql = "SELECT * FROM blog 
+                WHERE title LIKE ? OR content LIKE ?
+                ORDER BY date DESC";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "ss", $searchTerm, $searchTerm);
         mysqli_stmt_execute($stmt);
@@ -97,10 +95,9 @@ class Blog {
     
     // Lấy bài viết mới nhất
     public function getRecentBlogs($limit = 5) {
-        $sql = "SELECT b.*, u.userName as authorName 
-                FROM blog b 
-                LEFT JOIN user u ON b.userID = u.userID 
-                ORDER BY b.date DESC 
+        $sql = "SELECT * FROM blog 
+                WHERE status = 1
+                ORDER BY date DESC 
                 LIMIT ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $limit);
