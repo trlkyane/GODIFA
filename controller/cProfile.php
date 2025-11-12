@@ -28,7 +28,10 @@ class ProfileController {
                 c.status,
                 c.groupID,
                 cg.groupName,
-                cg.description as groupDescription
+                cg.description as groupDescription,
+                cg.color as groupColor,
+                cg.minSpent as groupMinSpent,
+                cg.maxSpent as groupMaxSpent
             FROM customer c
             LEFT JOIN customer_group cg ON c.groupID = cg.groupID
             WHERE c.customerID = ?
@@ -63,7 +66,35 @@ class ProfileController {
     }
     
     /**
-     * Cập nhật thông tin khách hàng
+     * Cập nhật thông tin cơ bản (CHỈ TÊN VÀ SỐ ĐIỆN THOẠI)
+     */
+    public function updateCustomerBasicInfo($customerID, $data) {
+        $conn = $this->db->connect();
+        
+        $stmt = $conn->prepare("
+            UPDATE customer 
+            SET customerName = ?, phone = ?
+            WHERE customerID = ?
+        ");
+        $stmt->bind_param(
+            "ssi",
+            $data['customerName'],
+            $data['phone'],
+            $customerID
+        );
+        
+        $success = $stmt->execute();
+        
+        if ($success) {
+            // Cập nhật session
+            $_SESSION['customer_name'] = $data['customerName'];
+        }
+        
+        return $success;
+    }
+    
+    /**
+     * Cập nhật thông tin khách hàng (DEPRECATED - giữ để tương thích)
      */
     public function updateCustomerInfo($customerID, $data) {
         $conn = $this->db->connect();

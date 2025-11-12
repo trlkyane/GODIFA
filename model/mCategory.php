@@ -77,13 +77,7 @@ class Category {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa danh mục
-    public function deleteCategory($id) {
-        $sql = "DELETE FROM category WHERE categoryID = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        return mysqli_stmt_execute($stmt);
-    }
+    // REMOVED: deleteCategory() - Chỉ dùng khóa (toggleStatus), không xóa
     
     // Chuyển đổi trạng thái (Khóa/Mở khóa)
     public function toggleStatus($id) {
@@ -102,6 +96,11 @@ class Category {
         $result = mysqli_stmt_get_result($stmt);
         $row = mysqli_fetch_assoc($result);
         return $row['total'];
+    }
+    
+    // Kiểm tra danh mục có sản phẩm không
+    public function hasProducts($id) {
+        return $this->countProductsInCategory($id) > 0;
     }
     
     public function __destruct() {
