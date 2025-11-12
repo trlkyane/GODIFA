@@ -63,7 +63,7 @@ if ($order['paymentStatus'] === 'Đã thanh toán' && isset($_SESSION['cart'])) 
     <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/GODIFA" class="text-2xl font-bold text-indigo-600">🇯🇵 GODIFA</a>
+            <a href="/GODIFA" class="text-2xl font-bold text-indigo-600">GODIFA</a>
             <nav class="space-x-4 text-sm">
                 <a href="/GODIFA" class="hover:text-indigo-600">Trang chủ</a>
                 <a href="/GODIFA/view/cart/viewcart.php" class="hover:text-indigo-600">Giỏ hàng</a>
