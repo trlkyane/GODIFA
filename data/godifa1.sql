@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 11, 2025 at 06:01 PM
+-- Generation Time: Nov 12, 2025 at 06:32 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -351,52 +351,11 @@ CREATE TABLE IF NOT EXISTS `customer` (
 
 INSERT INTO `customer` (`customerID`, `customerName`, `phone`, `email`, `password`, `status`, `groupID`) VALUES
 (1, 'Ngô Hoàng Khải', '0817574722', 'ngok1708@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
-(2, 'Lê Trung Hiếu', '0123222531', 'trunghieu@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
+(2, 'Lê Trung Hiếu', '0978848500', 'trunghieu@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
 (3, 'Nguyễn Trung Trực', '0812412573', 'trungtruc@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
 (4, 'nguyễn  thanh tùng', '0313212356', 'tungnguyen@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
 (5, 'lê hồng minh', '0123111444', 'hongminh@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1),
 (1223, 'quốc khải', '0949123123', 'quockhai@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1);
-
---
--- Triggers `customer`
---
-DROP TRIGGER IF EXISTS `after_customer_update`;
-DELIMITER $$
-CREATE TRIGGER `after_customer_update` AFTER UPDATE ON `customer` FOR EACH ROW BEGIN
-    DECLARE cust_age INT;
-    DECLARE cust_orders INT;
-    DECLARE cust_spent DECIMAL(15,2);
-    DECLARE best_group_id INT;
-    
-    IF NEW.birthdate IS NOT NULL AND NEW.gender IS NOT NULL THEN
-        SET cust_age = TIMESTAMPDIFF(YEAR, NEW.birthdate, CURDATE());
-        
-        SELECT 
-            COUNT(o.orderID),
-            COALESCE(SUM(o.totalAmount), 0)
-        INTO cust_orders, cust_spent
-        FROM `order` o
-        WHERE o.customerID = NEW.customerID AND o.paymentStatus != 'Đã hủy';
-        
-        SELECT groupID INTO best_group_id
-        FROM customer_group
-        WHERE status = 1 
-          AND autoAssign = 1
-          AND (gender = 'Tất cả' OR gender = NEW.gender)
-          AND (minAge IS NULL OR cust_age >= minAge)
-          AND (maxAge IS NULL OR cust_age <= maxAge)
-          AND (minOrders <= cust_orders)
-          AND (minSpent <= cust_spent)
-        ORDER BY priority DESC, discountPercent DESC
-        LIMIT 1;
-        
-        IF best_group_id IS NOT NULL THEN
-            UPDATE customer SET groupID = best_group_id WHERE customerID = NEW.customerID;
-        END IF;
-    END IF;
-END
-$$
-DELIMITER ;
 
 -- --------------------------------------------------------
 
