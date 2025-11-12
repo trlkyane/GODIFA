@@ -265,7 +265,7 @@ function buyNow(id) {
         body: `productId=${id}&quantity=${qty}`
     })
     .then(r => r.json())
-    .then(d => { if(d.success) window.location.href = '../cart/view.php'; else alert('❌ Lỗi!'); })
+    .then(d => { if(d.success) window.location.href = '../view/cart/checkout.php'; else alert('❌ Lỗi!'); })
     .catch(() => alert('❌ Lỗi kết nối!'));
 }
 </script>
