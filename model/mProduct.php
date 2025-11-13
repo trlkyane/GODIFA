@@ -38,7 +38,7 @@ class Product {
         $sql = "SELECT p.*, c.categoryName 
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
-                WHERE p.status = 1 
+                WHERE p.status = 1 AND (c.status = 1 OR c.status IS NULL)
                 ORDER BY p.productID DESC";
         
         if ($limit !== null) {
@@ -71,7 +71,7 @@ class Product {
         $sql = "SELECT p.*, c.categoryName 
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
-                WHERE p.categoryID = ? AND p.status = 1
+                WHERE p.categoryID = ? AND p.status = 1 AND c.status = 1
                 ORDER BY p.productID DESC";
         
         if ($limit) {
@@ -95,7 +95,7 @@ class Product {
         $sql = "SELECT p.*, c.categoryName 
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
-                WHERE (p.productName LIKE ? OR p.description LIKE ?) AND p.status = 1
+                WHERE (p.productName LIKE ? OR p.description LIKE ?) AND p.status = 1 AND (c.status = 1 OR c.status IS NULL)
                 ORDER BY p.productID DESC";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "ss", $keyword, $keyword);

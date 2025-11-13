@@ -104,28 +104,7 @@ class cCategory {
         }
     }
     
-    /**
-     * Xóa danh mục
-     * @param int $id - ID danh mục
-     * @return array ['success' => bool, 'message' => string]
-     */
-    public function deleteCategory($id) {
-        // Kiểm tra danh mục có sản phẩm không
-        if ($this->categoryModel->hasProducts($id)) {
-            return [
-                'success' => false,
-                'message' => 'Không thể xóa danh mục đang chứa sản phẩm!'
-            ];
-        }
-        
-        $result = $this->categoryModel->deleteCategory($id);
-        
-        if ($result) {
-            return ['success' => true, 'message' => 'Xóa danh mục thành công!'];
-        } else {
-            return ['success' => false, 'message' => 'Lỗi khi xóa danh mục!'];
-        }
-    }
+    // REMOVED: deleteCategory() - Chỉ dùng khóa/mở (toggleStatus), không xóa
     
     /**
      * Bật/tắt trạng thái danh mục
@@ -144,9 +123,17 @@ class cCategory {
         
         if ($result) {
             $statusText = $newStatus == 1 ? 'Hiển thị' : 'Ẩn';
+            $message = "Đã chuyển danh mục sang trạng thái: {$statusText}";
+            
+            // Cảnh báo khi ẩn danh mục có sản phẩm
+            if ($newStatus == 0 && $this->categoryModel->hasProducts($id)) {
+                $productCount = $this->categoryModel->countProductsInCategory($id);
+                $message .= " (Lưu ý: {$productCount} sản phẩm trong danh mục này sẽ bị ẩn trên website)";
+            }
+            
             return [
                 'success' => true,
-                'message' => "Đã chuyển danh mục sang trạng thái: {$statusText}"
+                'message' => $message
             ];
         } else {
             return ['success' => false, 'message' => 'Lỗi khi thay đổi trạng thái!'];

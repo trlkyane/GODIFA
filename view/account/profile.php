@@ -23,18 +23,19 @@ $errorMessage = '';
 
 $profileController = new ProfileController();
 
-// Xử lý cập nhật thông tin
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Xử lý cập nhật thông tin (CHỈ TÊN VÀ SỐ ĐIỆN THOẠI)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $data = [
         'customerName' => trim($_POST['customerName'] ?? ''),
-        'phone' => trim($_POST['phone'] ?? ''),
-        'email' => trim($_POST['email'] ?? '')
+        'phone' => trim($_POST['phone'] ?? '')
     ];
     
-    if (empty($data['customerName']) || empty($data['phone']) || empty($data['email'])) {
-        $errorMessage = 'Vui lòng điền đầy đủ thông tin!';
+    if (empty($data['customerName']) || empty($data['phone'])) {
+        $errorMessage = 'Vui lòng điền đầy đủ họ tên và số điện thoại!';
+    } elseif (!preg_match('/^[0-9]{10,11}$/', $data['phone'])) {
+        $errorMessage = 'Số điện thoại không hợp lệ (10-11 chữ số)!';
     } else {
-        $result = $profileController->updateCustomerInfo($customerID, $data);
+        $result = $profileController->updateCustomerBasicInfo($customerID, $data);
         if ($result) {
             $successMessage = 'Cập nhật thông tin thành công!';
             $_SESSION['customer_name'] = $data['customerName'];
@@ -179,7 +180,7 @@ $stats = $profileController->getOrderStats($customerID);
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-user mr-2 text-gray-500"></i>Họ và Tên
+                                    <i class="fas fa-user mr-2 text-gray-500"></i>Họ và Tên <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="customerName" value="<?= htmlspecialchars($customer['customerName']) ?>"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -188,26 +189,32 @@ $stats = $profileController->getOrderStats($customerID);
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                    <i class="fas fa-phone mr-2 text-gray-500"></i>Số Điện Thoại
+                                    <i class="fas fa-phone mr-2 text-gray-500"></i>Số Điện Thoại <span class="text-red-500">*</span>
                                 </label>
                                 <input type="tel" name="phone" value="<?= htmlspecialchars($customer['phone']) ?>"
+                                       pattern="[0-9]{10,11}"
+                                       placeholder="10-11 chữ số"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                        required>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-info-circle"></i> Nhập 10-11 chữ số
+                                </p>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                <i class="fas fa-envelope mr-2 text-gray-500"></i>Email
+                                <i class="fas fa-envelope mr-2 text-gray-500"></i>Email 
+                                <span class="text-gray-500 text-xs">(Không thể thay đổi)</span>
                             </label>
-                            <input type="email" name="email" value="<?= htmlspecialchars($customer['email']) ?>"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                   required>
+                            <input type="email" value="<?= htmlspecialchars($customer['email']) ?>"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600"
+                                   readonly>
                         </div>
 
                         <div class="flex gap-4">
-                            <button type="submit" 
-                                    class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold">
+                            <button type="submit" name="update_profile"
+                                    class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold shadow-md">
                                 <i class="fas fa-save mr-2"></i>Lưu Thay Đổi
                             </button>
                             <button type="button" onclick="window.location.reload()" 
@@ -224,38 +231,52 @@ $stats = $profileController->getOrderStats($customerID);
                         <i class="fas fa-star mr-2 text-yellow-600"></i>Nhóm Khách Hàng
                     </h2>
                     
-                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-6 border-2 border-yellow-200">
+                    <?php if (!empty($customer['groupName'])): ?>
+                    <div class="rounded-lg p-6 border-2" style="background: linear-gradient(135deg, <?= htmlspecialchars($customer['groupColor'] ?? '#f59e0b') ?>15, <?= htmlspecialchars($customer['groupColor'] ?? '#f59e0b') ?>05); border-color: <?= htmlspecialchars($customer['groupColor'] ?? '#f59e0b') ?>;">
                         <div class="flex items-center justify-between">
-                            <div>
+                            <div class="flex-1">
                                 <p class="text-sm text-gray-600 mb-2">Cấp độ hiện tại</p>
-                                <p class="text-3xl font-bold text-yellow-700">
-                                    <?php echo htmlspecialchars($customer['groupName'] ?? 'Chưa xác định'); ?>
+                                <p class="text-3xl font-bold" style="color: <?= htmlspecialchars($customer['groupColor'] ?? '#ca8a04') ?>;">
+                                    <i class="fas fa-crown mr-2"></i><?= htmlspecialchars($customer['groupName']) ?>
                                 </p>
                                 <?php if (!empty($customer['groupDescription'])): ?>
                                 <p class="text-sm text-gray-600 mt-2">
-                                    <?php echo htmlspecialchars($customer['groupDescription']); ?>
+                                    <?= htmlspecialchars($customer['groupDescription']) ?>
                                 </p>
                                 <?php endif; ?>
+                                
+                                <?php if ($customer['groupMaxSpent'] > 0): ?>
+                                <div class="mt-4 p-3 bg-white rounded-lg shadow-sm">
+                                    <p class="text-xs text-gray-500 mb-1">Ngưỡng chi tiêu của nhóm</p>
+                                    <p class="text-lg font-bold" style="color: <?= htmlspecialchars($customer['groupColor'] ?? '#ca8a04') ?>;">
+                                        <?= number_format($customer['groupMinSpent']) ?>₫ - <?= number_format($customer['groupMaxSpent']) ?>₫
+                                    </p>
+                                </div>
+                                <?php endif; ?>
                             </div>
-                            <div class="text-6xl text-yellow-500">
+                            <div class="text-6xl ml-6" style="color: <?= htmlspecialchars($customer['groupColor'] ?? '#f59e0b') ?>;">
                                 <i class="fas fa-crown"></i>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Danger Zone -->
-                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-                    <h2 class="text-xl font-bold text-red-800 mb-4">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>Vùng Nguy Hiểm
-                    </h2>
-                    <p class="text-red-700 mb-4">
-                        Xóa tài khoản sẽ xóa vĩnh viễn tất cả dữ liệu của bạn. Hành động này không thể hoàn tác!
-                    </p>
-                    <button onclick="confirmDeleteAccount()" 
-                            class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition font-semibold">
-                        <i class="fas fa-trash-alt mr-2"></i>Xóa Tài Khoản
-                    </button>
+                    <?php else: ?>
+                    <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-2">Cấp độ hiện tại</p>
+                                <p class="text-2xl font-bold text-gray-500">
+                                    <i class="fas fa-user mr-2"></i>Chưa xếp hạng
+                                </p>
+                                <p class="text-sm text-gray-500 mt-2">
+                                    Bạn chưa được xếp vào nhóm khách hàng nào. Hãy mua sắm để nhận ưu đãi!
+                                </p>
+                            </div>
+                            <div class="text-6xl text-gray-300">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

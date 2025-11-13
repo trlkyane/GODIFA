@@ -81,6 +81,11 @@ $discountAmount = !empty($_POST['discountAmount']) ? (int)$_POST['discountAmount
 $subtotal = $totalAmount;
 $finalAmount = $subtotal + $shippingFee - $discountAmount;
 
+// ✅ CRITICAL FIX: Không cho phép số âm - set minimum = 0
+if ($finalAmount < 0) {
+    $finalAmount = 0;
+}
+
 // Debug log (optional - comment out in production)
 $debugLog = __DIR__ . '/../logs/checkout.log';
 if (is_dir(dirname($debugLog))) {
