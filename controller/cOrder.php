@@ -244,7 +244,7 @@ if (isset($_GET['action'])) {
                 $data = $controller->orderDetail((int)$_GET['id']);
                 if ($data) {
                     extract($data);
-                    include '../view/customer/order_detail.php';
+                    include '../view/order/detail.php';
                 } else {
                     header('Location: index.php?action=history'); 
                 }
@@ -285,7 +285,7 @@ if (isset($_GET['action'])) {
             case 'reviews': 
                 $data = $controller->reviewHistory();
                 extract($data);
-                include '../view/customer/order_detail.php'; 
+                include '../view/order/detail.php'; 
                 break;
                 
             default:
