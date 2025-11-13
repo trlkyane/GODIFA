@@ -1,4 +1,3 @@
-
 const http = require('http');
 const express = require('express');
 const { Server } = require('socket.io');
@@ -32,10 +31,11 @@ chatModel.loadFAQs().then(loadedFaqs => {
 
 // ==========================================================
 // HÀM XỬ LÝ PHẢN HỒI BOT (CHỈ DÙNG FAQ)
+// ĐÃ CHỈNH SỬA: KHÔNG TRẢ LỜI MẶC ĐỊNH
 // ==========================================================
 /**
  * Xử lý phản hồi của Bot bằng cách kiểm tra các từ khóa trong bảng chatbot.
- * Sử dụng tìm kiếm ưu tiên từ khóa dài nhất.
+ * Nếu không tìm thấy keyword, Bot sẽ im lặng.
  */
 async function handleBotResponse(io, conversationID, message) {
     let botResponse = null;
@@ -48,19 +48,20 @@ async function handleBotResponse(io, conversationID, message) {
         if (normalizedMessage.includes(keyword)) {
             botResponse = faqs[keyword];
             console.log(`[BOT] Phản hồi FAQ cố định (Keyword: ${keyword}) cho ConvID: ${conversationID}`);
-            // Đã tìm thấy từ khóa khớp dài nhất (nhờ sắp xếp), thoát vòng lặp
+            // Đã tìm thấy từ khóa khớp dài nhất, thoát vòng lặp
             break; 
         }
     }
 
     // 2. Phản hồi mặc định nếu không tìm thấy FAQ
     if (!botResponse) {
-        botResponse = "Xin lỗi vì sự bất tiện nhưng tôi không hiểu câu hỏi hoặc câu nói của bạn. Vui lòng cung cấp thêm thông tin hoặc chờ nhân viên hỗ trợ.";
-        console.log(`[BOT] Phản hồi mặc định cho ConvID: ${conversationID}`);
+        // 🚨 CHỈ GHI LOG, KHÔNG GÁN PHẢN HỒI MẶC ĐỊNH CHO botResponse
+        console.log(`[BOT] KHÔNG tìm thấy keyword. Bot sẽ im lặng.`);
     }
 
     // 3. Lưu và gửi phản hồi của Bot
-    if (botResponse) {
+    // Chỉ chạy nếu botResponse có giá trị (tức là đã tìm thấy keyword khớp)
+    if (botResponse) { 
         // [ĐÃ KHẮC PHỤC LỖI] Gửi senderType: 'bot' (vì CSDL đã được cập nhật)
         const chatID = await chatModel.saveMessage({
             conversation_ID: conversationID, 

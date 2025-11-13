@@ -1,4 +1,4 @@
-// FILE: GODIFA/public/js/chat_client.js - ĐÃ SỬA ĐỔI
+// FILE: GODIFA/public/js/chat_client.js - ĐÃ HOÀN CHỈNH VỚI CHỨC NĂNG TẢI LỊCH SỬ & FIX VỊ TRÍ TIN NHẮN
 
 const SOCKET_SERVER_PORT = 3000;
 const SOCKET_SERVER_URL = `http://localhost:${SOCKET_SERVER_PORT}`; 
@@ -31,14 +31,17 @@ function displayMessage(data, isSentByCurrentUser) {
 
     const content = data.chatContent || data.content;
     const senderType = data.senderType;
+    const senderID = data.senderID;
+    
+    const isReceivedMessage = !isSentByCurrentUser; 
     
     let bubbleClass;
     let iconHtml = ''; 
     let bubbleStyle = '';
     
     if (isSentByCurrentUser) {
-        bubbleClass = 'sent'; 
-    } else if (String(senderType) === 'bot') {
+        bubbleClass = 'sent'; // Tin nhắn của người xem hiện tại (Khách hàng) -> Bên phải
+    } else if (isReceivedMessage && (String(senderType) === 'bot' || String(senderID) === '0')) {
         // Tin nhắn Bot: Thêm icon robot và style trực tiếp
         bubbleClass = 'received'; 
         iconHtml = '<i class="fas fa-robot mr-2" style="color: #4CAF50;"></i>';
@@ -47,7 +50,7 @@ function displayMessage(data, isSentByCurrentUser) {
         bubbleStyle = 'background-color: #fffde7; border: 1px solid #ffecb3;'; 
 
     } else {
-        // Tin nhắn Admin/User
+        // Tin nhắn Admin/User hoặc tin nhắn khác của người khác -> Bên trái
         bubbleClass = 'received';
     }
     
@@ -55,7 +58,6 @@ function displayMessage(data, isSentByCurrentUser) {
     const timeString = formatTime(rawDate.toISOString());
 
     const bubble = document.createElement('div');
-    // ÁP DỤNG STYLE TRỰC TIẾP VÀO THUỘC TÍNH style
     bubble.className = `message-bubble ${bubbleClass}`; 
     bubble.style.cssText = bubbleStyle;
 
@@ -66,7 +68,54 @@ function displayMessage(data, isSentByCurrentUser) {
     `;
     
     messagesDisplay.appendChild(bubble);
-    scrollToBottom();
+}
+
+/**
+ * Tải lịch sử tin nhắn từ PHP API và hiển thị
+ */
+function loadChatHistory(convID, currentUserID) {
+    if (convID === 'null' || !convID) return; 
+
+    const messagesDisplay = document.getElementById('messages-display');
+    if (messagesDisplay) {
+        messagesDisplay.innerHTML = '<div class="text-center text-gray-500 py-4">Đang tải lịch sử chat...</div>';
+    }
+
+    // Vui lòng kiểm tra lại đường dẫn API này nếu vẫn gặp lỗi 404
+    // Thử dùng: const apiUrl = `/controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
+    const apiUrl = `/GODIFA/controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
+    
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                // Thử đọc response text để debug nếu lỗi 404/500
+                return response.text().then(text => { throw new Error(`HTTP error! status: ${response.status}. Response: ${text.substring(0, 100)}`); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (messagesDisplay) {
+                messagesDisplay.innerHTML = ''; // Xóa thông báo đang tải
+            }
+            if (data.success && data.messages) {
+                data.messages.forEach(msg => {
+                    // 🚀 FIX LỖI VỊ TRÍ: CHỈ CẦN KIỂM TRA SENDER ID TRÙNG VỚI NGƯỜI DÙNG HIỆN TẠI
+                    // Bỏ qua việc kiểm tra senderType để khắc phục lỗi từ Backend
+                    const isSentByCurrentUser = (String(msg.senderID) === String(currentUserID));
+                    
+                    displayMessage(msg, isSentByCurrentUser); 
+                });
+                scrollToBottom(); // Cuộn xuống dưới cùng sau khi tải xong tất cả
+            } else {
+                messagesDisplay.innerHTML = '<div class="text-center text-gray-500 py-4">Chưa có tin nhắn nào.</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi khi tải lịch sử chat:', error);
+            if (messagesDisplay) {
+                messagesDisplay.innerHTML = `<div class="text-center text-red-500 py-4">Lỗi tải lịch sử: ${error.message}</div>`;
+            }
+        });
 }
 
 
@@ -82,6 +131,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const messageForm = document.getElementById('message-form'); 
     const messageInput = document.getElementById('message-input'); 
+    
+    // 🚀 BẮT ĐẦU TẢI LỊCH SỬ CHAT KHI DOM LOAD XONG
+    // Chỉ tải nếu đã có Conversation ID
+    if (currentConvID !== 'null') {
+        loadChatHistory(currentConvID, currentUserID);
+    }
     
     // --- SOCKET LISTENERS & ROOM JOIN ---
 
@@ -127,12 +182,9 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Conversation created! New ID: ${currentConvID}`);
 
         // 💥 QUAN TRỌNG: Gửi join_room NGAY LẬP TỨC 
-        // Điều này đảm bảo Client nhận được tin nhắn Bot sắp gửi từ Server.
         socket.emit('join_room', { conversationID: currentConvID });
         
-        // Server Node.js của bạn đã được tối ưu để gửi tin nhắn Bot SAU khi 
-        // gửi sự kiện 'conversation_created', đảm bảo tin nhắn Bot sẽ được nhận
-        // qua 'receive_message' sau khi join_room này hoàn tất.
+        // Tin nhắn Bot sẽ được Server broadcast sau.
     });
 
 
@@ -158,25 +210,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     // YÊU CẦU TẠO CONVERSATION MỚI VÀ GỬI TIN NHẮN ĐẦU TIÊN
                     socket.emit('create_new_conversation', messageData);
                     
-                    // 💥 CHỈ TỰ HIỂN THỊ TIN NHẮN ĐẦU TIÊN (Khách hàng)
-                    // Tin nhắn này không bị Server broadcast lại, nên KHÔNG cần chống lặp.
-                    // Tin nhắn Bot sẽ được Server broadcast sau.
+                    // Tự hiển thị tin nhắn đầu tiên (Khách hàng)
+                    displayMessage(messageData, true); 
                     
                 } else {
                     // GỬI TIN NHẮN BÌNH THƯỜNG
                     socket.emit('send_message', messageData); 
                     
                     // 💥 TỰ HIỂN THỊ (Client-side render)
-                    // Tin nhắn này bị Server broadcast lại, nhưng được chặn bởi logic isSelfSent.
-                    displayMessage(messageData, true); 
-                }
-                
-                // 💥 LƯU Ý: Vì server Node.js của bạn đã được sửa để gọi Bot 
-                // sau khi gửi 'conversation_created', ta cần TỰ HIỂN THỊ tin nhắn 
-                // đầu tiên ngay cả khi nó đi qua 'create_new_conversation'.
-                
-                // QUYẾT ĐỊNH: Tự hiển thị tin nhắn ngay lập tức (Áp dụng cho cả 2 trường hợp gửi)
-                if (currentConvID === 'null') {
                     displayMessage(messageData, true); 
                 }
                 

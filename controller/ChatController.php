@@ -26,7 +26,23 @@ class ChatController {
     }
     
     /**
+     * 🚀 HÀM MỚI: Tìm ID Conversation gần nhất của Khách hàng
+     * Cần thiết cho GODIFA/view/chat/index.php để load lịch sử
+     */
+    public function getLatestConversationIDByCustomerID($customerID) {
+        // Giả định ChatModel có hàm findLatestConversationIDByCustomerID($customerID)
+        // để truy vấn database và tìm Conversation ID gần nhất
+        $convID = $this->model->findLatestConversationIDByCustomerID($customerID); 
+        
+        // Trả về kết quả, đảm bảo convID là một số hoặc 0
+        return [
+            'conversationID' => (int)$convID 
+        ];
+    }
+    
+    /**
      * Lấy lịch sử chat và đánh dấu đã đọc (Sử dụng AJAX)
+     * ĐÃ FIX LỖI: Đảm bảo senderType cho tin nhắn bot
      */
     public function getChatHistory($convID) {
         if (!is_numeric($convID) || $convID <= 0) {
@@ -35,6 +51,35 @@ class ChatController {
         
         // 1. Lấy lịch sử tin nhắn
         $messages = $this->model->getMessagesByConversationID($convID);
+        
+        // 🚀 BẮT ĐẦU FIX LỖI: Đảm bảo tin nhắn bot có senderType = 'bot'
+        if (!empty($messages)) {
+            $BOT_SENDER_ID = 0; // ID bot đã xác nhận là 0
+            
+            // Dùng tham chiếu (&) để sửa đổi trực tiếp mảng $messages
+            foreach ($messages as &$msg) {
+                // Kiểm tra nếu senderType bị thiếu hoặc không đúng
+                if (!isset($msg['senderType']) || $msg['senderType'] !== 'bot') {
+                    
+                    // So sánh senderID là 0 (hoặc '0')
+                    if (isset($msg['senderID']) && $msg['senderID'] == $BOT_SENDER_ID) { 
+                        $msg['senderType'] = 'bot';
+                    }
+                    
+                    // Logic dự phòng để gán các senderType khác (nếu cần thiết)
+                    else if (isset($msg['senderID']) && $msg['senderID'] > 0) {
+                         // Giả định các ID khác 0 là Staff/User (trừ khi có ID Khách hàng riêng)
+                         $msg['senderType'] = 'user';
+                    }
+                    else {
+                        // Nếu senderID = NULL hoặc không xác định và không phải bot, giả định là customer
+                        $msg['senderType'] = 'customer';
+                    }
+                }
+            }
+            unset($msg); // Bỏ tham chiếu để tránh lỗi
+        }
+        // 🛑 KẾT THÚC FIX LỖI
         
         // 2. Đánh dấu tất cả tin nhắn khách hàng gửi đã đọc (cho Staff/Admin)
         $this->model->markAsReadForUser($convID);

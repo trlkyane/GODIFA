@@ -194,7 +194,7 @@ class OrderController {
         $result = $this->reviewModel->addReview($productId, $customerId, $orderId, $rating, $comment);
         
         if ($result) {
-            return ['success' => true, 'message' => 'Đánh giá của bạn đã được gửi thành công và đang chờ duyệt.'];
+            return ['success' => true, 'message' => 'Đánh giá của bạn đã được gửi thành công.'];
         } else {
             return ['success' => false, 'message' => 'Lỗi hệ thống khi lưu đánh giá.'];
         }

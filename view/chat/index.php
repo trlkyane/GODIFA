@@ -24,7 +24,7 @@ $conversations = [];
 if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     // Đã đăng nhập là User/Staff (từ bảng user)
     $user_id = $_SESSION['user_id'];
-    $user_type = 'user'; // <--- QUAN TRỌNG: Gán SENDERTYPE LÀ 'user'
+    $user_type = 'user'; // SENDERTYPE LÀ 'user'
 } 
 // Sau đó kiểm tra Customer
 else if (isset($_SESSION['customer_id']) && !empty($_SESSION['customer_id'])) {
@@ -34,9 +34,42 @@ else if (isset($_SESSION['customer_id']) && !empty($_SESSION['customer_id'])) {
 }
 
 
-// LƯU Ý: Nếu $currentConversationID và $unread_count_total được gán 
-// từ Controller/Model PHP, bạn cần giữ nguyên logic đó ở đây.
-// Nếu không, chúng sẽ giữ nguyên giá trị mặc định là 'null' và 0.
+// ------------------------------------------------------------------
+// BỔ SUNG LOGIC: TÌM CONVERSATION ID CUỐI CÙNG CỦA KHÁCH HÀNG
+// ------------------------------------------------------------------
+
+// Chỉ tìm Conversation ID nếu là Khách hàng đã đăng nhập
+if ($user_type === 'customer' && $user_id !== 'guest') {
+    
+    // Yêu cầu file Controller để sử dụng logic tìm kiếm
+    // Đảm bảo đường dẫn này đúng với vị trí hiện tại của file ChatController.php
+    // Giả định ChatController nằm ở thư mục cha của view, sau đó là controller.
+    $controllerPath = __DIR__ . "/../../controller/ChatController.php"; 
+    
+    if (file_exists($controllerPath)) {
+        require_once($controllerPath);
+        
+        $chatController = new ChatController();
+        
+        // 🚨 QUAN TRỌNG: Hàm này PHẢI TỒN TẠI trong ChatController.php
+        if (method_exists($chatController, 'getLatestConversationIDByCustomerID')) {
+            $latestConv = $chatController->getLatestConversationIDByCustomerID($user_id); 
+            
+            if (isset($latestConv['conversationID']) && $latestConv['conversationID'] > 0) {
+                // Gán Conversation ID tìm được
+                $currentConversationID = $latestConv['conversationID'];
+                
+                // Tùy chọn: Bạn có thể thêm logic lấy tên Staff cuối cùng hoặc số tin nhắn chưa đọc ở đây
+            }
+        } else {
+            // Lỗi Debug: Xóa hoặc comment dòng này khi triển khai
+            // echo "";
+        }
+    } else {
+        // Lỗi Debug: Xóa hoặc comment dòng này khi triển khai
+        // echo "";
+    }
+}
 
 // ------------------------------------------------------------------
 // BẮT ĐẦU CẤU TRÚC HTML
@@ -226,7 +259,7 @@ else if (isset($_SESSION['customer_id']) && !empty($_SESSION['customer_id'])) {
             background-color: #ff6633;
         }
     </style>
-    </head>
+</head>
 <body>
     
     <button id="chat-toggle-btn" class="chat-toggle-btn">
@@ -280,16 +313,16 @@ else if (isset($_SESSION['customer_id']) && !empty($_SESSION['customer_id'])) {
             const popupContainer = document.getElementById('chat-popup-container');
             
             if (toggleBtn && popupContainer) {
-                 // Mở/Đóng Popup
-                 toggleBtn.addEventListener('click', function() {
-                     popupContainer.classList.toggle('hidden');
-                 });
+                // Mở/Đóng Popup
+                toggleBtn.addEventListener('click', function() {
+                    popupContainer.classList.toggle('hidden');
+                });
             }
 
             if (closeBtn && popupContainer) {
                 closeBtn.addEventListener('click', function() {
-                     popupContainer.classList.add('hidden');
-                 });
+                    popupContainer.classList.add('hidden');
+                });
             }
             
             // Hiển thị popup ngay khi tải nếu có tin nhắn chưa đọc
@@ -297,8 +330,8 @@ else if (isset($_SESSION['customer_id']) && !empty($_SESSION['customer_id'])) {
             if (badgeElement && popupContainer) {
                 const initialCount = parseInt(badgeElement.dataset.initialCount);
                 if (initialCount > 0) {
-                     // Nếu có tin nhắn chưa đọc, mở popup
-                     popupContainer.classList.remove('hidden');
+                    // Nếu có tin nhắn chưa đọc, mở popup
+                    popupContainer.classList.remove('hidden');
                 }
             }
         });

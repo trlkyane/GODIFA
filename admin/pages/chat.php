@@ -225,8 +225,7 @@ include __DIR__ . '/../includes/header.php';
                             <?php endif; ?>
                         </div>
 
-                        <!-- Đã thay đổi căn chỉnh mặc định của messagesList thành flex-start -->
-                        <div id="messagesList" class="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col items-start">
+                        <div id="messagesList" class="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col">
                             <?php if ($currentConversationID == 'null'): ?>
                                 <div class="w-full text-center py-10 text-gray-400">
                                     <i class="fas fa-comments text-6xl mb-4"></i>
@@ -267,6 +266,19 @@ include __DIR__ . '/../includes/header.php';
     const CURRENT_USER_ID = '<?php echo $currentUserID; ?>';
     const CURRENT_ROLE_ID = '<?php echo $currentRoleID; ?>';
     
+    /**
+     * Tự động cuộn xuống dưới cùng của danh sách tin nhắn
+     */
+    function scrollToBottom(elementId = 'messagesList') {
+        const messagesList = document.getElementById(elementId);
+        if (messagesList) {
+            // Sử dụng setTimeout để đảm bảo cuộn sau khi DOM đã render tin nhắn mới
+            setTimeout(() => {
+                 messagesList.scrollTop = messagesList.scrollHeight;
+            }, 100);
+        }
+    }
+
     // Hàm deleteConversation cần được định nghĩa trong admin_chat_client.js
     function deleteConversation(customerID) {
         // Thay window.confirm bằng một modal hoặc pop-up tùy chỉnh theo yêu cầu của dự án.
@@ -279,42 +291,41 @@ include __DIR__ . '/../includes/header.php';
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 
-<!-- KHỐI CSS MỚI ĐỂ CĂN CHỈNH VÀ GHI ĐÈ TAILWIND -->
 <style>
 /* 1. KHUNG CHỨA TIN NHẮN (MESSAGES LIST) */
 #messagesList { 
     display: flex;
-    flex-direction: column; /* Quan trọng: Xếp tin nhắn theo chiều dọc */
+    flex-direction: column; 
     padding: 1rem;
-    height: 100%;
-    overflow-y: auto; 
-    align-items: stretch; /* Cho phép các hàng tin nhắn chiếm toàn bộ chiều rộng (để align-self hoạt động) */
+    
+    /* FIX QUAN TRỌNG: Đảm bảo khả năng cuộn */
+    flex-grow: 1; /* Đã có từ class flex-1 */
+    min-height: 0; /* Ngăn nó giãn nở vô hạn, cho phép cuộn */
+    
+    overflow-y: auto; /* Kích hoạt thanh cuộn (Đã có) */ 
+    
+    align-items: stretch; 
 }
 
 /* 2. ĐỊNH DẠNG CHUNG CHO MỖI TIN NHẮN (ROW) */
 .message-row {
     display: flex; 
-    max-width: 100%; /* Chiếm toàn bộ chiều rộng của #messagesList */
+    max-width: 100%; 
     margin-bottom: 0.5rem;
-    
-    /* Thiết lập Flex container cho nội dung bên trong row (bubble + timestamp) */
-    /* Quan trọng: Dùng flex-end để căn chỉnh nội dung bubble và timestamp theo cùng một hướng */
     align-items: flex-end; 
 }
 
 /* 3. CĂN CHỈNH TIN NHẮN GỬI ĐI (BÊN PHẢI) - staff/admin */
 .message-row.sent {
-    /* Quan trọng nhất: Đẩy toàn bộ hàng tin nhắn sang phải */
+    /* Quan trọng: Đẩy toàn bộ hàng tin nhắn sang phải */
     align-self: flex-end; 
-    /* Đảm bảo nội dung (bubble) cũng căn sang phải */
     justify-content: flex-end;
 }
 
 /* 4. CĂN CHỈNH TIN NHẮN NHẬN ĐƯỢC (BÊN TRÁI) - customer */
 .message-row.received {
-    /* Quan trọng nhất: Đảm bảo toàn bộ hàng tin nhắn nằm bên trái */
+    /* Quan trọng: Đảm bảo toàn bộ hàng tin nhắn nằm bên trái */
     align-self: flex-start; 
-    /* Đảm bảo nội dung (bubble) cũng căn sang trái */
     justify-content: flex-start;
 }
 
@@ -323,10 +334,8 @@ include __DIR__ . '/../includes/header.php';
     padding: 10px 14px;
     border-radius: 18px;
     word-wrap: break-word;
-    /* Giới hạn chiều rộng thực của bubble để nó không chiếm quá nhiều */
     max-width: 85%; 
     box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-    /* Căn chỉnh nội dung văn bản bên trong bubble */
     text-align: left;
 }
 
@@ -366,10 +375,10 @@ include __DIR__ . '/../includes/header.php';
     color: #6b7280; /* Gray-500 trên nền trắng */
 }
 
-/* Cuộn xuống dưới cùng */
+/* 🚀 FIX LỖI CUỘN: Xóa thuộc tính justify-content: flex-end; */
 #messagesList:not(:empty) {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Quan trọng: Đẩy nội dung xuống dưới */
+    /* justify-content: flex-end; <--- Đã loại bỏ */
 }
 </style>

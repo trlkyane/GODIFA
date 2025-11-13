@@ -60,16 +60,6 @@ if ($order['paymentStatus'] === 'Đã thanh toán' && isset($_SESSION['cart'])) 
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     
-    <!-- Header -->
-    <header class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/GODIFA" class="text-2xl font-bold text-indigo-600">GODIFA</a>
-            <nav class="space-x-4 text-sm">
-                <a href="/GODIFA" class="hover:text-indigo-600">Trang chủ</a>
-                <a href="/GODIFA/view/cart/viewcart.php" class="hover:text-indigo-600">Giỏ hàng</a>
-            </nav>
-        </div>
-    </header>
 
     <!-- Main Content -->
     <div class="max-w-4xl mx-auto mt-10 mb-10 px-4">
@@ -209,13 +199,6 @@ if ($order['paymentStatus'] === 'Đã thanh toán' && isset($_SESSION['cart'])) 
         </div>
 
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-10">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-sm text-gray-400">© <?= date('Y') ?> GODIFA. Mọi quyền được bảo lưu.</p>
-        </div>
-    </footer>
-
+<?php include '../layout/footer.php'; ?>
 </body>
 </html>

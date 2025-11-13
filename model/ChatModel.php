@@ -56,12 +56,41 @@ class ChatModel {
     }
 
     /**
+     * 🚀 HÀM MỚI BỔ SUNG: Tìm Conversation ID gần nhất của Khách hàng
+     * Dùng cho việc load lịch sử chat của Khách hàng khi truy cập
+     */
+    public function findLatestConversationIDByCustomerID($customerID) {
+        // Truy vấn tìm Conversation ID (ID hội thoại) có 'last_message_at' mới nhất
+        $sql = "
+            SELECT 
+                conversationID 
+            FROM conversation 
+            WHERE customerID = ? 
+            ORDER BY last_message_at DESC 
+            LIMIT 1
+        ";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$customerID]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Trả về Conversation ID hoặc 0 nếu không tìm thấy
+            return $result ? (int)$result['conversationID'] : 0;
+        } catch (\Exception $e) {
+            error_log("Lỗi tìm Conversation ID gần nhất: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+
+    /**
      * Lấy lịch sử chat dựa trên Conversation ID
      */
     public function getMessagesByConversationID($convID) {
         $sql = "
             SELECT 
-                chatID, chatContent, sender_ID, senderType, date
+                chatID, chatContent, sender_ID AS senderID, senderType, date
             FROM chat 
             WHERE conversation_ID = ? 
             ORDER BY date ASC

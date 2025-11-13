@@ -8,36 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800"> 
-  <!-- Header -->
-  <header class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-blue-600"><a href="../../index.php">GODIFA </a></h1>
-      <nav class="space-x-6 text-sm font-semibold">
-        <a href="../../index.php" class="hover:text-blue-600">Trang chủ</a>
-        <a href="../product/list.php" class="hover:text-blue-600">Sản phẩm</a>
-        <a href="../news/news.php" class="hover:text-blue-600">Tin tức</a>
-        <a href="contact.php" class="hover:text-blue-600">Liên hệ</a>
-        <a href="/GODIFA/view/cart/viewcart.php" class="hover:text-blue-600">Giỏ hàng</a>
-        <?php
-            if(!isset($_SESSION["dn"])){
-              echo '<a href="vLogin.php" class="hover:text-blue-600">Đăng nhập</a>';
-            }else{
-              if($_SESSION["dn"]==1){
-                echo '<a href="admin.php" class="hover:text-blue-600">Admin </a>';
-                echo '<a href="product.php?dangxuat" class="hover:text-blue-600">Đăng xuất</a>';
-              }else{
-                echo '<a href="product.php?dangxuat" class="hover:text-blue-600">Đăng xuất</a>';
-              }
-            }
-
-            if(isset($_REQUEST["dangxuat"])){
-              include_once("logout.php");
-            }
-        ?>
-      </nav>
-    </div>
-  </header>
-
+  
+  <?php include '../layout/header.php'; ?>
 <section class="bg-white py-16">
   <div class="max-w-5xl mx-auto px-4">
     <h1 class="text-4xl font-bold text-center text-blue-700 mb-10"> 🌸 Giới thiệu về Godifa</h1>
@@ -76,6 +48,6 @@
     <p class="text-lg">Chất lượng – Giá tốt – Hỗ trợ tận tâm – Giao hàng toàn quốc</p>
   </div>
 </section>
-
+<?php include '../chat/index.php'; ?>
 <?php include '../layout/footer.php'; ?>
 
