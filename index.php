@@ -12,9 +12,9 @@ include 'view/layout/header.php';
 // Lấy sản phẩm nổi bật
 $productModel = new Product();
 $featuredProducts = $productModel->getAllProducts(8);
-// Lấy danh mục
+// Lấy danh mục (chỉ hiển thị danh mục đang hoạt động)
 $categoryModel = new Category();
-$categories = $categoryModel->getAllCategories();
+$categories = $categoryModel->getActiveCategories();
 // Lấy 3 bài viết mới nhất
 $blogController = new cBlog();
 $recentBlogs = $blogController->getRecentBlogs(3);
