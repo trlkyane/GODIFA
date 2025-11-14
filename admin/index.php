@@ -20,6 +20,7 @@ $validPages = [
     'vouchers' => 'pages/vouchers.php',
     'chat' => 'pages/chat.php',
     'blog' => 'pages/blog.php',
+    'reviews' => 'pages/reviews.php',
 ];
 
 // Nếu request page hợp lệ và file tồn tại
