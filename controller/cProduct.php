@@ -38,6 +38,14 @@ class ProductController {
             $products = $this->productModel->getActiveProducts($limit, $offset);
         }
         
+        // Lấy rating và review count cho từng sản phẩm
+        foreach ($products as &$product) {
+            $ratingData = $this->reviewModel->getAverageRating($product['productID']);
+            $product['avgRating'] = $ratingData['avgRating'] ?? 0;
+            $product['reviewCount'] = $ratingData['totalReviews'] ?? 0;
+        }
+        unset($product);
+        
         $categories = $this->categoryModel->getActiveCategories();
         $totalProducts = $this->productModel->countProducts();
         $totalPages = ceil($totalProducts / $limit);

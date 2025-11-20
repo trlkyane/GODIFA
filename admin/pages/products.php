@@ -39,6 +39,7 @@ if (isset($_POST['add_product']) && hasPermission('manage_products')) {
         'SKU' => trim($_POST['SKU_MRK']),
         'stockQuantity' => intval($_POST['stockQuantity']),
         'price' => floatval($_POST['price']),
+        'promotional_price' => !empty($_POST['promotional_price']) ? floatval($_POST['promotional_price']) : null,
         'description' => trim($_POST['description']),
         'categoryID' => intval($_POST['categoryID']),
         'image' => $image,
@@ -83,6 +84,7 @@ if (isset($_POST['edit_product']) && hasPermission('manage_products')) {
         'SKU' => trim($_POST['SKU_MRK']),
         'stockQuantity' => intval($_POST['stockQuantity']),
         'price' => floatval($_POST['price']),
+        'promotional_price' => !empty($_POST['promotional_price']) ? floatval($_POST['promotional_price']) : null,
         'description' => trim($_POST['description']),
         'categoryID' => intval($_POST['categoryID']),
         'image' => $image
@@ -256,7 +258,7 @@ include __DIR__ . '/../includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-4 py-3 text-sm">
-                                        <div class="font-medium text-gray-900 truncate" style="max-width: 250px;" title="<?php echo htmlspecialchars($product['productName']); ?>">
+                                        <div onclick='openViewModal(<?php echo json_encode($product, JSON_HEX_APOS); ?>)' class="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600" style="max-width: 250px;" title="Xem chi tiết: <?php echo htmlspecialchars($product['productName']); ?>">
                                             <?php echo htmlspecialchars($product['productName']); ?>
                                         </div>
                                         <div class="text-xs text-gray-500 truncate" style="max-width: 250px;">
@@ -268,8 +270,15 @@ include __DIR__ . '/../includes/header.php';
                                             <?php echo htmlspecialchars($product['categoryName'] ?? 'N/A'); ?>
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-sm font-semibold text-green-600">
-                                        <?php echo number_format($product['price'], 0, ',', '.'); ?>₫
+                                    <td class="px-4 py-3 text-sm">
+                                        <?php if (!empty($product['promotional_price']) && $product['promotional_price'] > 0): ?>
+                                            <div class="flex flex-col">
+                                                <span class="text-gray-400 line-through text-xs"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</span>
+                                                <span class="font-semibold text-red-600"><?php echo number_format($product['promotional_price'], 0, ',', '.'); ?>₫</span>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="font-semibold text-green-600"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-2 py-3 text-center text-sm">
                                         <span class="px-2 py-0.5 <?php echo $product['stockQuantity'] > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?> rounded text-xs font-medium">
@@ -284,6 +293,11 @@ include __DIR__ . '/../includes/header.php';
                                     </td>
                                     <td class="px-2 py-3 text-center">
                                         <div class="flex justify-center items-center space-x-2">
+                                            <!-- Xem nhanh -->
+                                            <button onclick='openViewModal(<?php echo json_encode($product, JSON_HEX_APOS); ?>)'
+                                                    class="text-gray-600 hover:text-blue-600" title="Xem chi tiết">
+                                                <i class="fas fa-eye text-lg"></i>
+                                            </button>
                                             <?php if (hasPermission('manage_products')): ?>
                                             <!-- Sửa -->
                                             <button onclick='openEditModal(<?php echo json_encode($product, JSON_HEX_APOS); ?>)' 
@@ -396,9 +410,17 @@ include __DIR__ . '/../includes/header.php';
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá (VNĐ) <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá gốc (VNĐ) <span class="text-red-500">*</span></label>
                     <input type="number" name="price" required min="0" step="1000"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá khuyến mãi (VNĐ)</label>
+                    <input type="number" name="promotional_price" min="0" step="1000"
+                           placeholder="Để trống nếu không có KM"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Giá khuyến mãi phải nhỏ hơn giá gốc</p>
                 </div>
                 
                 <div>
@@ -473,9 +495,17 @@ include __DIR__ . '/../includes/header.php';
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá (VNĐ) <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá gốc (VNĐ) <span class="text-red-500">*</span></label>
                     <input type="number" name="price" id="edit_price" required min="0" step="1000"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá khuyến mãi (VNĐ)</label>
+                    <input type="number" name="promotional_price" id="edit_promotional_price" min="0" step="1000"
+                           placeholder="Để trống nếu không có KM"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Giá khuyến mãi phải nhỏ hơn giá gốc</p>
                 </div>
                 
                 <div>
@@ -513,7 +543,105 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
+<!-- Modal XEM NHANH sản phẩm -->
+<div id="viewModal" class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
+        <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <i class="fas fa-eye text-blue-500 mr-2"></i>Chi tiết sản phẩm
+            </h3>
+            <button onclick="closeViewModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-6" id="viewContent">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <div id="viewImage" class="aspect-[4/5] w-full bg-gray-100 rounded flex items-center justify-center overflow-hidden mb-4"></div>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">Trạng thái</p>
+                            <p id="viewStatus" class="mt-1 font-medium"></p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">Tồn kho</p>
+                            <p id="viewStock" class="mt-1 font-medium"></p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">SKU</p>
+                            <p id="viewSKU" class="mt-1 font-medium"></p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">Danh mục</p>
+                            <p id="viewCategory" class="mt-1 font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h2 id="viewName" class="text-xl font-bold text-gray-900 mb-3 leading-tight"></h2>
+                    <div id="viewPricing" class="mb-4"></div>
+                    <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line max-h-56 overflow-auto" id="viewDescription"></div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button onclick="closeViewModal()" class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm">Đóng</button>
+                <?php /* Optional quick edit */ ?>
+                <?php if (hasPermission('manage_products')): ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// View modal state
+let currentViewedProduct = null;
+
+function openViewModal(product) {
+    currentViewedProduct = product;
+    // Name
+    document.getElementById('viewName').textContent = product.productName || 'N/A';
+    // Image
+    const imgBox = document.getElementById('viewImage');
+    if (product.image) {
+        imgBox.innerHTML = `<img src="/GODIFA/image/${product.image}" alt="${product.productName}" class="w-full h-full object-cover"/>`;
+    } else {
+        imgBox.innerHTML = '<div class="text-gray-400 text-sm"><i class="fas fa-image text-3xl mb-2"></i><p>Không có hình</p></div>';
+    }
+    // Status
+    const statusHtml = `<span class='px-2 py-1 rounded text-xs ${product.status==1?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}'>${product.status==1?'Hoạt động':'Đã khóa'}</span>`;
+    document.getElementById('viewStatus').innerHTML = statusHtml;
+    // Stock
+    document.getElementById('viewStock').textContent = (product.stockQuantity || 0) + ' sản phẩm';
+    // SKU
+    document.getElementById('viewSKU').textContent = product.SKU_MRK || '—';
+    // Category
+    document.getElementById('viewCategory').textContent = product.categoryName || '—';
+    // Pricing
+    const pricingDiv = document.getElementById('viewPricing');
+    if (product.promotional_price && product.promotional_price > 0) {
+        const discount = Math.round(((product.price - product.promotional_price)/product.price)*100);
+        pricingDiv.innerHTML = `
+            <div class='flex items-center gap-3'>
+                <span class='text-2xl font-bold text-red-600'>${Number(product.promotional_price).toLocaleString('vi-VN')}₫</span>
+                <span class='text-base line-through text-gray-400'>${Number(product.price).toLocaleString('vi-VN')}₫</span>
+                <span class='px-2 py-0.5 bg-red-100 text-red-600 text-xs font-semibold rounded'>-${discount}%</span>
+            </div>`;
+    } else {
+        pricingDiv.innerHTML = `<span class='text-2xl font-bold text-gray-800'>${Number(product.price).toLocaleString('vi-VN')}₫</span>`;
+    }
+    // Description
+    document.getElementById('viewDescription').textContent = product.description || 'Chưa có mô tả.';
+    // Edit button visibility
+    const editBtn = document.getElementById('viewEditBtn');
+    if (editBtn) editBtn.classList.remove('hidden');
+    document.getElementById('viewModal').classList.remove('hidden');
+}
+
+function closeViewModal() {
+    document.getElementById('viewModal').classList.add('hidden');
+    currentViewedProduct = null;
+}
 // Modal functions
 function openAddModal() {
     document.getElementById('addModal').classList.remove('hidden');
@@ -529,6 +657,7 @@ function openEditModal(product) {
     document.getElementById('edit_SKU_MRK').value = product.SKU_MRK || '';
     document.getElementById('edit_categoryID').value = product.categoryID;
     document.getElementById('edit_price').value = product.price;
+    document.getElementById('edit_promotional_price').value = product.promotional_price || '';
     document.getElementById('edit_stockQuantity').value = product.stockQuantity;
     document.getElementById('edit_description').value = product.description || '';
     

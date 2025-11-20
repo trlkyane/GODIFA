@@ -108,14 +108,8 @@ class cCustomer {
             $status = intval($data['status']);
         }
         
-        // Cập nhật khách hàng
-        $result = $this->customerModel->updateCustomer(
-            $id,
-            $data['customerName'],
-            $data['phone'],
-            $data['email'],
-            $status
-        );
+            // Cập nhật khách hàng
+            $result = $this->customerModel->updateCustomer($id, $data);
         
         if ($result) {
             return ['success' => true, 'message' => 'Cập nhật thông tin thành công!'];

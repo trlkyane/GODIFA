@@ -36,19 +36,27 @@ class Blog {
     }
     
     // Thêm bài viết mới
-    public function addBlog($title, $content) {
-        $sql = "INSERT INTO blog (title, content, date) 
-                VALUES (?, ?, NOW())";
+    public function addBlog($title, $content, $image = '') {
+        $sql = "INSERT INTO blog (title, content, image, date) 
+                VALUES (?, ?, ?, NOW())";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ss", $title, $content);
+        mysqli_stmt_bind_param($stmt, "sss", $title, $content, $image);
         return mysqli_stmt_execute($stmt);
     }
     
     // Cập nhật bài viết
-    public function updateBlog($id, $title, $content) {
-        $sql = "UPDATE blog SET title = ?, content = ? WHERE blogID = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssi", $title, $content, $id);
+    public function updateBlog($id, $title, $content, $image = null) {
+        if ($image !== null) {
+            // Cập nhật cả hình ảnh
+            $sql = "UPDATE blog SET title = ?, content = ?, image = ? WHERE blogID = ?";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "sssi", $title, $content, $image, $id);
+        } else {
+            // Không cập nhật hình ảnh
+            $sql = "UPDATE blog SET title = ?, content = ? WHERE blogID = ?";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "ssi", $title, $content, $id);
+        }
         return mysqli_stmt_execute($stmt);
     }
     

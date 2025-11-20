@@ -43,7 +43,8 @@ class cBlog {
         // Thêm bài viết
         $result = $this->blogModel->addBlog(
             $data['title'],
-            $data['content']
+            $data['content'],
+            $data['image'] ?? ''
         );
         
         if ($result) {
@@ -71,10 +72,12 @@ class cBlog {
         }
         
         // Cập nhật bài viết
+        $image = isset($data['image']) ? $data['image'] : null;
         $result = $this->blogModel->updateBlog(
             $id,
             $data['title'],
-            $data['content']
+            $data['content'],
+            $image
         );
         
         if ($result) {

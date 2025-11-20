@@ -40,15 +40,22 @@ class CartController {
                 return ['success' => false, 'message' => 'Số lượng sản phẩm không đủ'];
             }
             
+            // Xác định giá cuối cùng (ưu tiên giá khuyến mãi nếu có)
+            $finalPrice = (!empty($product['promotional_price']) && $product['promotional_price'] > 0) 
+                ? $product['promotional_price'] 
+                : $product['price'];
+            
             // Nếu sản phẩm đã có trong giỏ, tăng số lượng
             if (isset($_SESSION['cart'][$productId])) {
                 $_SESSION['cart'][$productId]['quantity'] += $quantity;
+                // Cập nhật giá nếu có thay đổi
+                $_SESSION['cart'][$productId]['price'] = $finalPrice;
             } else {
                 // Thêm sản phẩm mới vào giỏ
                 $_SESSION['cart'][$productId] = [
                     'productID' => $productId,
                     'productName' => $product['productName'],
-                    'price' => $product['price'],
+                    'price' => $finalPrice,
                     'quantity' => $quantity,
                     'image' => $product['image']
                 ];

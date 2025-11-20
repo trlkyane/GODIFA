@@ -15,7 +15,7 @@ $db = Database::getInstance();
 $conn = $db->connect();
 
 $stmt = $conn->prepare("
-    SELECT o.orderID, o.orderDate, o.totalAmount, o.paymentStatus, o.qrExpiredAt, o.transactionCode, o.qrUrl,
+    SELECT o.orderID, o.orderDate, o.totalAmount, o.paymentStatus, o.transactionCode,
            d.recipientName, d.recipientPhone, d.fullAddress
     FROM `order` o
     LEFT JOIN order_delivery d ON o.orderID = d.orderID
@@ -25,6 +25,26 @@ $stmt->bind_param("i", $orderID);
 $stmt->execute();
 $result = $stmt->get_result();
 $order = $result->fetch_assoc();
+
+// Lấy QR info từ session (được tạo từ cCheckout.php)
+$qrUrl = $_SESSION['qr_url'] ?? null;
+$qrExpiredAt = $_SESSION['qr_expired_at'] ?? null;
+
+// Nếu không có trong session, tạo mới
+if (!$qrUrl || !$qrExpiredAt) {
+    $account = '105875539922';
+    $bank = 'VietinBank';
+    $description = 'SEVQR TKP155 ' . $order['transactionCode'];
+    $qrUrl = "https://qr.sepay.vn/img?acc=$account&bank=$bank&amount={$order['totalAmount']}&des=" . urlencode($description);
+    $qrExpiredAt = date('Y-m-d H:i:s', time() + 15 * 60); // 15 phút
+    
+    // Lưu vào session
+    $_SESSION['qr_url'] = $qrUrl;
+    $_SESSION['qr_expired_at'] = $qrExpiredAt;
+}
+
+$order['qrUrl'] = $qrUrl;
+$order['qrExpiredAt'] = $qrExpiredAt;
 
 if (!$order) {
     die("Không tìm thấy đơn hàng!");
@@ -65,7 +85,7 @@ $isExpired = $remainingSeconds <= 0;
     <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/GODIFA" class="text-2xl font-bold text-indigo-600">🇯🇵 GODIFA</a>
+            <a href="/GODIFA" class="text-2xl font-bold text-indigo-600">GODIFA</a>
             <nav class="space-x-4 text-sm">
                 <a href="/GODIFA" class="hover:text-indigo-600">Trang chủ</a>
                 <a href="/GODIFA/view/cart/viewcart.php" class="hover:text-indigo-600">Giỏ hàng</a>

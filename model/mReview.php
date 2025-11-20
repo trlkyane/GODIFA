@@ -12,7 +12,8 @@ class Review {
     
     // Thêm đánh giá mới
     public function addReview($productId, $customerId, $orderId, $rating, $comment) {
-        $status = 0; // 🌟 THAY ĐỔI: 0 = Chờ duyệt 🌟
+        // Mặc định: hiển thị ngay (1 = Hiển thị)
+        $status = 1;
         
         $sql = "INSERT INTO review (rating, comment, productID, customerID, orderID, status) 
                 VALUES (?, ?, ?, ?, ?, ?)";
@@ -22,6 +23,14 @@ class Review {
         // Chuỗi tham số: i (rating), s (comment), i (productID), i (customerID), i (orderID), i (status)
         mysqli_stmt_bind_param($stmt, "isiiii", $rating, $comment, $productId, $customerId, $orderId, $status); 
         
+        return mysqli_stmt_execute($stmt);
+    }
+
+    // Toggle ẩn/hiện đánh giá (1 => 0, khác 1 => 1)
+    public function toggleVisibility($reviewId) {
+        $sql = "UPDATE review SET status = CASE WHEN status = 1 THEN 0 ELSE 1 END WHERE reviewID = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $reviewId);
         return mysqli_stmt_execute($stmt);
     }
     

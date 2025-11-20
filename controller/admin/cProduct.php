@@ -69,6 +69,15 @@ class cProduct {
             $errors[] = "Giá sản phẩm phải lớn hơn hoặc bằng 0!";
         }
         
+        // Validate: Giá khuyến mãi (nếu có)
+        if (isset($data['promotional_price']) && !empty($data['promotional_price'])) {
+            if ($data['promotional_price'] < 0) {
+                $errors[] = "Giá khuyến mãi phải lớn hơn hoặc bằng 0!";
+            } elseif ($data['promotional_price'] >= $data['price']) {
+                $errors[] = "Giá khuyến mãi phải nhỏ hơn giá gốc!";
+            }
+        }
+        
         // Validate: Số lượng
         if (!isset($data['stockQuantity']) || $data['stockQuantity'] < 0) {
             $errors[] = "Số lượng tồn kho phải lớn hơn hoặc bằng 0!";
@@ -101,6 +110,7 @@ class cProduct {
         }
         
         // Thêm sản phẩm
+        $promotional_price = (!empty($data['promotional_price']) && $data['promotional_price'] > 0) ? $data['promotional_price'] : null;
         $result = $this->productModel->addProduct(
             $data['productName'],
             $data['SKU'] ?? '',
@@ -108,7 +118,8 @@ class cProduct {
             $data['price'],
             $data['description'] ?? '',
             $data['image'] ?? '',
-            $data['categoryID']
+            $data['categoryID'],
+            $promotional_price
         );
         
         if ($result) {
@@ -141,6 +152,15 @@ class cProduct {
         // Validate: Giá
         if (!isset($data['price']) || $data['price'] < 0) {
             $errors[] = "Giá sản phẩm phải lớn hơn hoặc bằng 0!";
+        }
+        
+        // Validate: Giá khuyến mãi (nếu có)
+        if (isset($data['promotional_price']) && !empty($data['promotional_price'])) {
+            if ($data['promotional_price'] < 0) {
+                $errors[] = "Giá khuyến mãi phải lớn hơn hoặc bằng 0!";
+            } elseif ($data['promotional_price'] >= $data['price']) {
+                $errors[] = "Giá khuyến mãi phải nhỏ hơn giá gốc!";
+            }
         }
         
         // Validate: Số lượng
@@ -177,6 +197,7 @@ class cProduct {
         }
         
         // Cập nhật sản phẩm
+        $promotional_price = (!empty($data['promotional_price']) && $data['promotional_price'] > 0) ? $data['promotional_price'] : null;
         $result = $this->productModel->updateProduct(
             $id,
             $data['productName'],
@@ -185,7 +206,8 @@ class cProduct {
             $data['price'],
             $data['description'] ?? '',
             $data['image'] ?? '',
-            $data['categoryID']
+            $data['categoryID'],
+            $promotional_price
         );
         
         if ($result) {

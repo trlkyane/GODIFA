@@ -2,6 +2,34 @@
 require_once __DIR__ . '/database.php';
 
 class Customer {
+    // Cập nhật thông tin khách hàng (bao gồm ghi chú)
+public function updateCustomer($id, $data) {
+    
+    // 1. Gán các giá trị cần ràng buộc vào các biến độc lập
+    $customerName = $data['customerName'];
+    $phone = $data['phone'];
+    $email = $data['email'];
+    
+    // Xử lý biến 'note' để đảm bảo nó là một biến và có giá trị mặc định
+    // Dù isset() kiểm tra có tồn tại hay không, giá trị gán cuối cùng phải là một biến độc lập
+    $note = isset($data['note']) ? $data['note'] : '';
+
+    $sql = "UPDATE customer SET customerName = ?, phone = ?, email = ?, note = ? WHERE customerID = ?";
+    $stmt = mysqli_prepare($this->conn, $sql);
+    
+    // 2. Sử dụng các biến độc lập trong mysqli_stmt_bind_param()
+    mysqli_stmt_bind_param(
+        $stmt,
+        "ssssi",
+        $customerName, // Biến độc lập (Argument 3)
+        $phone,        // Biến độc lập (Argument 4)
+        $email,        // Biến độc lập (Argument 5)
+        $note,         // Biến độc lập (Argument 6 - Đã gây ra lỗi trước đó)
+        $id            // Biến độc lập (Argument 7)
+    );
+    
+    return mysqli_stmt_execute($stmt);
+}
     private $conn;
     
     public function __construct() {
@@ -55,14 +83,15 @@ class Customer {
     // Tạo khách hàng mới (cho admin tạo đơn)
     public function createCustomer($data) {
         $hashedPassword = md5($data['password']);
-        $sql = "INSERT INTO customer (customerName, phone, email, address, password) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO customer (customerName, phone, email, address, password, note) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sssss", 
+        mysqli_stmt_bind_param($stmt, "ssssss", 
             $data['customerName'], 
             $data['phone'], 
             $data['email'], 
             $data['address'], 
-            $hashedPassword
+            $hashedPassword,
+            isset($data['note']) ? $data['note'] : ''
         );
         
         if (mysqli_stmt_execute($stmt)) {
@@ -73,7 +102,7 @@ class Customer {
     
     // Lấy thông tin khách hàng theo ID
     public function getCustomerById($id) {
-        $sql = "SELECT * FROM customer WHERE customerID = ?";
+    $sql = "SELECT * FROM customer WHERE customerID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
         mysqli_stmt_execute($stmt);

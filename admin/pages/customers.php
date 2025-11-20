@@ -24,12 +24,13 @@ $success = '';
 $error = '';
 
 // Xử lý THÊM khách hàng
-if (isset($_POST['add_customer']) && hasPermission('manage_users')) {
+if (isset($_POST['add_customer']) && hasPermission('manage_customers')) {
     $data = [
         'customerName' => trim($_POST['customerName']),
         'phone' => trim($_POST['phone']),
         'email' => trim($_POST['email']),
-        'password' => $_POST['password']
+        'password' => $_POST['password'],
+        'note' => isset($_POST['note']) ? trim($_POST['note']) : ''
     ];
     
     $result = $customerController->addCustomer($data);
@@ -42,12 +43,13 @@ if (isset($_POST['add_customer']) && hasPermission('manage_users')) {
 }
 
 // Xử lý SỬA khách hàng
-if (isset($_POST['edit_customer']) && hasPermission('manage_users')) {
+if (isset($_POST['edit_customer']) && hasPermission('manage_customers')) {
     $customerID = intval($_POST['customerID']);
     $data = [
         'customerName' => trim($_POST['customerName']),
         'phone' => trim($_POST['phone']),
-        'email' => trim($_POST['email'])
+        'email' => trim($_POST['email']),
+        'note' => isset($_POST['note']) ? trim($_POST['note']) : ''
     ];
     
     // Chỉ thêm status nếu có permission manage_customers
@@ -66,7 +68,7 @@ if (isset($_POST['edit_customer']) && hasPermission('manage_users')) {
 }
 
 // Xử lý ĐỔI MẬT KHẨU
-if (isset($_POST['change_password']) && hasPermission('manage_users')) {
+if (isset($_POST['change_password']) && hasPermission('manage_customers')) {
     $customerID = intval($_POST['customerID']);
     $data = [
         'newPassword' => $_POST['newPassword'],
@@ -105,7 +107,7 @@ if (isset($_POST['update_status'])) {
 }
 
 // Xử lý XÓA khách hàng
-if (isset($_GET['delete']) && hasPermission('manage_users')) {
+if (isset($_GET['delete']) && hasPermission('manage_customers')) {
     $customerID = intval($_GET['delete']);
     $result = $customerController->deleteCustomer($customerID);
     
@@ -217,7 +219,7 @@ include __DIR__ . '/../includes/header.php';
                         </button>
                     </form>
                     
-                    <?php if (hasPermission('manage_users')): ?>
+                    <?php if (hasPermission('manage_customers')): ?>
                     <button onclick="openAddModal()" 
                             class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
                         <i class="fas fa-user-plus mr-2"></i>
@@ -351,7 +353,7 @@ include __DIR__ . '/../includes/header.php';
                                                 <i class="fas fa-eye text-lg"></i>
                                             </button>
                                             
-                                            <?php if (hasPermission('manage_users')): ?>
+                                            <?php if (hasPermission('manage_customers')): ?>
                                             <!-- Sửa -->
                                             <button onclick='openEditModal(<?php echo json_encode($customer, JSON_HEX_APOS); ?>)' 
                                                     class="text-green-600 hover:text-green-800 w-8 h-8 flex items-center justify-center" title="Sửa">
@@ -421,6 +423,12 @@ include __DIR__ . '/../includes/header.php';
                 <input type="text" name="customerName" id="customerName" required
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                        placeholder="Nhập tên khách hàng">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="note">
+                    Ghi chú
+                </label>
+                <textarea name="note" id="note" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Nhập ghi chú khách hàng"></textarea>
             </div>
             
             <div class="mb-4">
@@ -502,6 +510,12 @@ include __DIR__ . '/../includes/header.php';
                 </label>
                 <input type="email" name="email" id="edit_email" required
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_note">
+                    Ghi chú
+                </label>
+                <textarea name="note" id="edit_note" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nhập ghi chú khách hàng"></textarea>
             </div>
             
             <?php if (hasPermission('manage_customers')): ?>
@@ -628,6 +642,7 @@ function openEditModal(customer) {
     document.getElementById('edit_customerName').value = customer.customerName;
     document.getElementById('edit_phone').value = customer.phone;
     document.getElementById('edit_email').value = customer.email;
+    document.getElementById('edit_note').value = customer.note ? customer.note : '';
     
     // Set status if field exists
     const statusField = document.getElementById('edit_status');
@@ -750,6 +765,10 @@ function viewCustomerDetail(customerID) {
                                     <div class="flex items-center bg-white bg-opacity-20 rounded-lg p-3">
                                         <i class="fas fa-phone w-6 text-center"></i>
                                         <span class="ml-3 text-sm">${customer.phone}</span>
+                                    </div>
+                                    <div class="flex items-center bg-white bg-opacity-20 rounded-lg p-3">
+                                        <i class="fas fa-sticky-note w-6 text-center"></i>
+                                        <span class="ml-3 text-sm">${customer.note ? customer.note : 'Chưa có ghi chú'}</span>
                                     </div>
                                     <div class="flex items-center bg-white bg-opacity-20 rounded-lg p-3">
                                         <i class="fas ${customer.status == 1 ? 'fa-check-circle' : 'fa-lock'} w-6 text-center"></i>
