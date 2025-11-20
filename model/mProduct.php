@@ -109,11 +109,11 @@ class Product {
     }
     
     // Thêm sản phẩm mới
-    public function addProduct($productName, $SKU_MRK, $stockQuantity, $price, $description, $image, $categoryID) {
-        $sql = "INSERT INTO product (productName, SKU_MRK, stockQuantity, price, description, image, categoryID) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public function addProduct($productName, $SKU_MRK, $stockQuantity, $price, $description, $image, $categoryID, $promotional_price = null) {
+        $sql = "INSERT INTO product (productName, SKU_MRK, stockQuantity, price, promotional_price, description, image, categoryID) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssidssi", $productName, $SKU_MRK, $stockQuantity, $price, $description, $image, $categoryID);
+        mysqli_stmt_bind_param($stmt, "ssiddssi", $productName, $SKU_MRK, $stockQuantity, $price, $promotional_price, $description, $image, $categoryID);
         return mysqli_stmt_execute($stmt);
     }
     
@@ -138,12 +138,12 @@ class Product {
     }
     
     // Cập nhật sản phẩm
-    public function updateProduct($id, $productName, $SKU_MRK, $stockQuantity, $price, $description, $image, $categoryID) {
+    public function updateProduct($id, $productName, $SKU_MRK, $stockQuantity, $price, $description, $image, $categoryID, $promotional_price = null) {
         $sql = "UPDATE product 
-                SET productName = ?, SKU_MRK = ?, stockQuantity = ?, price = ?, description = ?, image = ?, categoryID = ? 
+                SET productName = ?, SKU_MRK = ?, stockQuantity = ?, price = ?, promotional_price = ?, description = ?, image = ?, categoryID = ? 
                 WHERE productID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssidssii", $productName, $SKU_MRK, $stockQuantity, $price, $description, $image, $categoryID, $id);
+        mysqli_stmt_bind_param($stmt, "ssiddssii", $productName, $SKU_MRK, $stockQuantity, $price, $promotional_price, $description, $image, $categoryID, $id);
         return mysqli_stmt_execute($stmt);
     }
     
@@ -177,6 +177,37 @@ class Product {
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
         return mysqli_stmt_execute($stmt);
+    }
+    
+    // Lấy sản phẩm kèm đánh giá và số lượng đã bán
+    public function getProductsWithRatings($limit = null, $offset = 0) {
+        $sql = "SELECT p.*, c.categoryName,
+                COALESCE(AVG(r.rating), 0) as avgRating,
+                COALESCE(COUNT(DISTINCT r.reviewID), 0) as reviewCount,
+                COALESCE(SUM(od.quantity), 0) as soldCount
+                FROM product p 
+                LEFT JOIN category c ON p.categoryID = c.categoryID 
+                LEFT JOIN review r ON p.productID = r.productID
+                LEFT JOIN order_details od ON p.productID = od.productID
+                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
+                GROUP BY p.productID
+                ORDER BY p.productID DESC";
+        
+        if ($limit !== null) {
+            $sql .= " LIMIT " . intval($limit) . " OFFSET " . intval($offset);
+        }
+        
+        $result = mysqli_query($this->conn, $sql);
+        if (!$result) {
+            error_log("SQL Error in getProductsWithRatings: " . mysqli_error($this->conn));
+            return [];
+        }
+        
+        $products = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $products[] = $row;
+        }
+        return $products;
     }
     
     public function __destruct() {

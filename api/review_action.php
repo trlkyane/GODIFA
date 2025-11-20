@@ -26,14 +26,14 @@ $result = ['success' => false, 'message' => 'Lỗi không xác định.'];
 
 // --- Gọi Controller dựa trên Action ---
 if ($reviewID > 0) {
-    if ($action === 'updateStatus' && ($status === 1 || $status === 2)) {
-        // Duyệt (status 1) hoặc Từ chối/Ẩn (status 2)
-        $result = $reviewController->updateStatus($reviewID, $status);
+    if ($action === 'toggle') {
+        // Ẩn/Hiện đánh giá
+        $result = $reviewController->toggleVisibility($reviewID);
     } elseif ($action === 'delete') {
         // Xóa vĩnh viễn
         $result = $reviewController->deleteReview($reviewID);
     } else {
-        $result['message'] = 'Hành động không hợp lệ hoặc thiếu trạng thái.';
+        $result['message'] = 'Hành động không hợp lệ.';
     }
 } else {
     $result['message'] = 'ID Đánh giá không hợp lệ.';

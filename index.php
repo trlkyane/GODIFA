@@ -4,250 +4,314 @@ require_once 'middleware/customer_only.php';
 
 require_once 'model/mProduct.php';
 require_once 'model/mCategory.php';
+require_once 'model/mVoucher.php';
 require_once 'controller/admin/cBlog.php';
 
 $pageTitle = "Trang chủ";
-include 'view/layout/header.php';
-
-// Lấy sản phẩm nổi bật
-$productModel = new Product();
-$featuredProducts = $productModel->getAllProducts(8);
-// Lấy danh mục (chỉ hiển thị danh mục đang hoạt động)
-$categoryModel = new Category();
-$categories = $categoryModel->getActiveCategories();
-// Lấy 3 bài viết mới nhất
-$blogController = new cBlog();
-$recentBlogs = $blogController->getRecentBlogs(3);
+include 'view/layout/header.php'; // Đường dẫn header mới sửa
 ?>
 
-<!-- Banner chính -->
-<section class="relative bg-cover bg-center h-[500px] md:h-[600px]" style="background-image: url('images/bannerr.jpg');">
-  <div class="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-purple-900/70 flex items-center justify-center">
-    <div class="text-center text-white px-4">
-      <h1 class="text-3xl md:text-5xl font-extrabold mb-4 animate-fade-in">
-        <i class="fas fa-shopping-bag mr-3"></i>Chào mừng đến với <span class="text-blue-300">GODIFA</span>
-      </h1>
-      <p class="text-lg md:text-xl mb-6 max-w-2xl mx-auto">
-        Mỹ phẩm & Thực phẩm chức năng chính hãng từ Nhật Bản
-      </p>
-      <p class="text-md mb-8 text-blue-200">
-        <i class="fas fa-shield-alt mr-2"></i>Chính hãng 100% • Giá tốt nhất • Giao hàng toàn quốc
-      </p>
-      <a href="view/product/list.php" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition transform hover:scale-105">
-        <i class="fas fa-shopping-cart mr-2"></i>Khám phá ngay
-      </a>
-    </div>
-  </div>
-</section>
+<?php
+// Lấy dữ liệu
+$productModel = new Product();
+$featuredProducts = $productModel->getProductsWithRatings(14); // Lấy 14 sp cho 2 hàng (7x2)
+$categoryModel = new Category();
+$categories = $categoryModel->getActiveCategories();
+$blogController = new cBlog();
+$recentBlogs = $blogController->getRecentBlogs(3); // Lấy 3 bài cho cân đối
+$voucherModel = new Voucher();
+$activeVouchers = $voucherModel->getActiveVouchers();
+?>
 
-<!-- Danh mục sản phẩm -->
-<section class="py-16 bg-gray-50">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="text-center mb-12">
-      <h2 class="text-3xl font-bold text-gray-800 mb-4">
-        <i class="fas fa-th-large mr-3 text-blue-600"></i>Danh mục sản phẩm
-      </h2>
-      <p class="text-gray-600">Khám phá các danh mục sản phẩm đa dạng</p>
-    </div>
-
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-      <?php foreach ($categories as $category): ?>
-        <a href="view/product/list.php?category=<?php echo $category['categoryID']; ?>" 
-           class="bg-white rounded-xl shadow-md hover:shadow-xl p-6 text-center transition transform hover:scale-105">
-          <div class="text-4xl mb-3">
-            <?php 
-              $icons = ['💊', '💄', '✨', '👶', '🏠'];
-              echo $icons[($category['categoryID'] - 1) % 5]; 
-            ?>
-          </div>
-          <h3 class="font-semibold text-gray-800"><?php echo $category['categoryName']; ?></h3>
-        </a>
-      <?php endforeach; ?>
-    </div>
-  </div>
-</section>
-
-<!-- Sản phẩm nổi bật -->
-<section class="py-16 bg-white">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="text-center mb-12">
-      <h2 class="text-3xl font-bold text-gray-800 mb-4">
-        <i class="fas fa-star mr-3 text-yellow-500"></i>Sản phẩm nổi bật
-      </h2>
-      <p class="text-gray-600">Những sản phẩm được khách hàng yêu thích nhất</p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <?php foreach ($featuredProducts as $product): ?>
-        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden group">
-          <div class="relative overflow-hidden">
-            <img src="image/<?php echo $product['image']; ?>" 
-                 alt="<?php echo $product['productName']; ?>" 
-                 class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
-            <?php if ($product['stockQuantity'] < 10): ?>
-              <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                Sắp hết
-              </span>
-            <?php endif; ?>
-          </div>
-          <div class="p-4">
-            <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2 h-12">
-              <?php echo $product['productName']; ?>
-            </h3>
-            <p class="text-blue-600 font-bold text-lg mb-3">
-              <?php echo number_format($product['price'], 0, ',', '.'); ?>đ
-            </p>
-            <div class="flex gap-2">
-              <a href="controller/cProduct.php?action=detail&id=<?php echo $product['productID']; ?>" 
-                 class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg transition text-sm">
-                <i class="fas fa-eye mr-1"></i>Chi tiết
-              </a>
-              <button onclick="addToCart(<?php echo $product['productID']; ?>)" 
-                      class="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg transition text-sm">
-                <i class="fas fa-cart-plus mr-1"></i>Thêm
-              </button>
+<!-- Categories Sidebar + Banner Carousel -->
+<section class="py-4 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- Categories Sidebar -->
+            <div class="lg:col-span-2">
+                <h2 class="text-sm font-bold text-gray-900 mb-2 brand-font">Danh mục</h2>
+                <div class="space-y-0.5">
+                    <?php foreach ($categories as $cat): ?>
+                        <a href="view/product/list.php?category=<?php echo $cat['categoryID']; ?>" 
+                           class="flex items-center gap-1.5 p-1.5 rounded-sm hover:bg-gray-50 transition group">
+                            <div class="w-8 h-8 flex-shrink-0 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden group-hover:ring-2 ring-black transition">
+                                <?php if(!empty($cat['image'])): ?>
+                                    <img src="image/<?php echo $cat['image']; ?>" 
+                                         alt="<?php echo $cat['categoryName']; ?>" 
+                                         class="w-full h-full object-cover">
+                                <?php else: ?>
+                                    <span class="text-xs font-bold text-gray-400 group-hover:text-gray-600">
+                                        <?php echo substr($cat['categoryName'], 0, 1); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700 group-hover:text-black">
+                                <?php echo $cat['categoryName']; ?>
+                            </span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
             </div>
-          </div>
+
+            <!-- Banner Carousel -->
+            <div class="lg:col-span-10">
+                <div class="relative overflow-hidden rounded-sm bg-gray-100" style="height: 300px;">
+                    <div class="banner-slider h-full">
+                        <!-- Slide 1 -->
+                        <div class="banner-slide active h-full">
+                            <img src="https://images.unsplash.com/photo-1612817288484-6f916006741a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                                 alt="Banner 1" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center">
+                                <div class="max-w-xl px-4 lg:px-6 text-white">
+                                    <span class="text-xs tracking-widest uppercase font-semibold">Bộ sưu tập mới</span>
+                                    <h1 class="mt-1.5 text-xl lg:text-2xl font-extrabold brand-font">
+                                        Tinh hoa mỹ phẩm<br>Nhật Bản
+                                    </h1>
+                                    <p class="mt-1.5 text-xs lg:text-sm text-gray-200">
+                                        Khám phá vẻ đẹp tự nhiên với những sản phẩm chất lượng cao
+                                    </p>
+                                    <a href="view/product/list.php" 
+                                       class="inline-block mt-2 px-4 py-1.5 bg-white text-black font-bold text-xs uppercase tracking-wide hover:bg-gray-100 transition rounded-sm">
+                                        Khám phá ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 2 -->
+                        <div class="banner-slide h-full">
+                            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                                 alt="Banner 2" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center">
+                                <div class="max-w-xl px-4 lg:px-6 text-white">
+                                    <span class="text-xs tracking-widest uppercase font-semibold">Ưu đãi đặc biệt</span>
+                                    <h1 class="mt-1.5 text-xl lg:text-2xl font-extrabold brand-font">
+                                        Giảm giá lên đến 50%
+                                    </h1>
+                                    <p class="mt-1.5 text-xs lg:text-sm text-gray-200">
+                                        Cho tất cả sản phẩm chăm sóc da
+                                    </p>
+                                    <a href="view/product/list.php" 
+                                       class="inline-block mt-2 px-4 py-1.5 bg-white text-black font-bold text-xs uppercase tracking-wide hover:bg-gray-100 transition rounded-sm">
+                                        Mua ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 3 -->
+                        <div class="banner-slide h-full">
+                            <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                                 alt="Banner 3" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center">
+                                <div class="max-w-xl px-4 lg:px-6 text-white">
+                                    <span class="text-xs tracking-widest uppercase font-semibold">Xu hướng 2025</span>
+                                    <h1 class="mt-1.5 text-xl lg:text-2xl font-extrabold brand-font">
+                                        Làn da khỏe đẹp<br>tự nhiên
+                                    </h1>
+                                    <p class="mt-1.5 text-xs lg:text-sm text-gray-200">
+                                        Sản phẩm organic từ thiên nhiên
+                                    </p>
+                                    <a href="view/product/list.php" 
+                                       class="inline-block mt-2 px-4 py-1.5 bg-white text-black font-bold text-xs uppercase tracking-wide hover:bg-gray-100 transition rounded-sm">
+                                        Xem thêm
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Arrows -->
+                    <button onclick="prevSlide()" 
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button onclick="nextSlide()" 
+                            class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Dots -->
+                    <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
+                        <button onclick="goToSlide(0)" class="banner-dot w-2 h-2 rounded-full bg-white/50 hover:bg-white transition"></button>
+                        <button onclick="goToSlide(1)" class="banner-dot w-2 h-2 rounded-full bg-white/50 hover:bg-white transition"></button>
+                        <button onclick="goToSlide(2)" class="banner-dot w-2 h-2 rounded-full bg-white/50 hover:bg-white transition"></button>
+                    </div>
+                </div>
+            </div>
+
         </div>
-      <?php endforeach; ?>
     </div>
-    
-    <div class="text-center mt-10">
-      <a href="view/product/list.php" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition">
-        <i class="fas fa-arrow-right mr-2"></i>Xem tất cả sản phẩm
-      </a>
-    </div>
-  </div>
 </section>
-<!-- News -->
-<!-- Tin tức & Bài viết (DYNAMIC) -->
-<section class="py-16 bg-gray-50">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="text-center mb-12">
-      <h2 class="text-3xl font-bold text-gray-800 mb-4">
-        <i class="fas fa-newspaper mr-3 text-blue-600"></i>Tin tức & Bài viết
-      </h2>
-      <p class="text-gray-600">Cập nhật những thông tin, mẹo chăm sóc sức khỏe & nuôi dạy bé từ Godifa</p>
-    </div>
 
-    <?php if (!empty($recentBlogs)): ?>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <?php foreach ($recentBlogs as $blog): ?>
-        <?php 
-          // Kiểm tra ảnh — nếu trống thì dùng ảnh mặc định
-          $imagePath = (!empty($blog['image']) && file_exists(__DIR__ . '/image/' . $blog['image']))
-            ? 'image/' . $blog['image']
-            : 'image/blog.jpg';
-        ?>
-        <article class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden group">
-          <div class="overflow-hidden">
-            <img src="<?php echo $imagePath; ?>" 
-                 alt="<?php echo htmlspecialchars($blog['title']); ?>" 
-                 class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300"
-                 onerror="this.onerror=null; this.src='image/blog.jpg';">
-          </div>
-          <div class="p-5">
-            <div class="text-sm text-gray-500 mb-2 flex items-center gap-2">
-                <i class="far fa-calendar-alt"></i>
-                <span><?php echo date('d/m/Y', strtotime($blog['date'] ?? 'now')); ?></span>
-            </div>
-            <h3 class="font-semibold text-xl text-gray-800 mb-2 group-hover:text-blue-600 transition line-clamp-2 h-[56px]">
-              <?php echo htmlspecialchars($blog['title']); ?>
-            </h3>
-            <p class="text-gray-600 text-sm mb-4 line-clamp-3 h-16">
-              <!-- Hiển thị 150 ký tự đầu tiên của nội dung và loại bỏ tag HTML -->
-              <?php echo htmlspecialchars(strip_tags(substr($blog['content'], 0, 150))); ?>...
-            </p>
-            <a href="view/news/detail.php?id=<?php echo $blog['blogID']; ?>" class="text-blue-600 font-semibold hover:underline">
-              Đọc thêm →
+<!-- Voucher Section - Moved up -->
+<?php if (!empty($activeVouchers)): ?>
+<section class="py-3 bg-gradient-to-r from-red-50 to-orange-50 border-y border-red-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-2">
+            <h2 class="text-base font-bold text-gray-900 brand-font">🎁 Mã giảm giá</h2>
+            <span class="text-xs text-red-600 font-semibold">Số lượng có hạng</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            <?php foreach ($activeVouchers as $voucher): 
+                $rawValue = isset($voucher['value']) ? (float)$voucher['value'] : 0;
+                $displayValue = $rawValue <= 1 ? round($rawValue * 100) . '%' : number_format($rawValue, 0, ',', '.') . 'đ';
+            ?>
+                <div class="bg-white border border-red-200 p-2 rounded-sm hover:shadow-sm transition group">
+                    <div class="text-center">
+                        <span class="text-red-600 font-bold text-sm block mb-1">-<?php echo $displayValue; ?></span>
+                        <p class="text-gray-700 text-xs font-medium mb-1 line-clamp-1"><?php echo htmlspecialchars($voucher['voucherName']); ?></p>
+                        <button onclick="copyCode('VOUCHER<?php echo $voucher['voucherID']; ?>')" 
+                                class="w-full text-[10px] font-bold bg-black text-white px-2 py-1 hover:bg-gray-800 transition uppercase rounded-sm">
+                            Sao chép
+                        </button>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Products Section - More compact -->
+<section class="py-4 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-lg font-bold text-gray-900 brand-font">Sản phẩm nổi bật</h2>
+            <a href="view/product/list.php" class="text-xs font-medium text-gray-500 hover:text-black border-b border-transparent hover:border-black transition pb-1">
+                Xem tất cả &rarr;
             </a>
-          </div>
-        </article>
-      <?php endforeach; ?>
-    </div>
-    <?php else: ?>
-        <p class="text-center text-gray-600">Hiện chưa có bài viết nào được đăng.</p>
-    <?php endif; ?>
+        </div>
 
-    <div class="text-center mt-10">
-      <a href="view/news/news.php" 
-         class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition">
-        <i class="fas fa-arrow-right mr-2"></i>Xem tất cả bài viết
-      </a>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2">
+            <?php foreach ($featuredProducts as $product): 
+                $imgSrc = !empty($product['image']) ? 'image/' . $product['image'] : 'https://via.placeholder.com/400x500';
+                
+                // Xác định giá hiển thị (ưu tiên giá khuyến mãi)
+                $hasPromotion = !empty($product['promotional_price']) && $product['promotional_price'] > 0;
+                $displayPrice = $hasPromotion ? $product['promotional_price'] : $product['price'];
+                $price = number_format($displayPrice, 0, ',', '.');
+                $originalPrice = number_format($product['price'], 0, ',', '.');
+                $discount = $hasPromotion ? round((($product['price'] - $product['promotional_price']) / $product['price']) * 100) : 0;
+                
+                // Lấy đánh giá và số lượng bán thật từ database
+                $rating = floatval($product['avgRating']);
+                $soldCount = intval($product['soldCount']);
+                $reviewCount = intval($product['reviewCount']);
+            ?>
+            <div class="group relative bg-white">
+                <div class="aspect-square w-full overflow-hidden rounded bg-gray-100 relative">
+                    <a href="controller/cProduct.php?action=detail&id=<?php echo $product['productID']; ?>">
+                        <img src="<?php echo $imgSrc; ?>" 
+                             alt="<?php echo $product['productName']; ?>" 
+                             class="h-full w-full object-cover object-center group-hover:scale-110 transition duration-500">
+                    </a>
+                    
+                    <!-- Quick add button on hover -->
+                    <button onclick="addToCart(<?php echo $product['productID']; ?>)" 
+                            class="absolute bottom-0.5 left-0.5 right-0.5 bg-black/80 text-white py-1 text-xs font-bold uppercase opacity-0 group-hover:opacity-100 transition">
+                        Thêm vào giỏ
+                    </button>
+                    
+                    <!-- Sale badge if applicable -->
+                    <?php if ($hasPromotion): ?>
+                    <span class="absolute top-0.5 left-0.5 bg-red-600 text-white text-xs px-1 py-0.5 font-bold">
+                        -<?php echo $discount; ?>%
+                    </span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="mt-1">
+                    <h3 class="text-xs text-gray-900 line-clamp-2 min-h-[1.75rem] leading-tight">
+                        <a href="controller/cProduct.php?action=detail&id=<?php echo $product['productID']; ?>">
+                            <?php echo $product['productName']; ?>
+                        </a>
+                    </h3>
+                    
+                    <!-- Rating -->
+                    <div class="flex items-center gap-0.5 mt-0.5">
+                        <?php if ($reviewCount > 0): ?>
+                        <div class="flex text-yellow-400">
+                            <?php for($i = 0; $i < 5; $i++): ?>
+                                <svg class="w-2 h-2 <?php echo $i < floor($rating) ? 'fill-current' : 'fill-gray-200'; ?>" viewBox="0 0 20 20">
+                                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                </svg>
+                            <?php endfor; ?>
+                        </div>
+                        <?php endif; ?>
+                        <?php if ($soldCount > 0): ?>
+                        <span class="text-xs text-gray-500">Bán <?php echo $soldCount; ?></span>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="mt-0.5">
+                        <?php if ($hasPromotion): ?>
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-gray-400 line-through text-xs"><?php echo $originalPrice; ?>₫</span>
+                                <span class="text-red-600 font-bold text-xs"><?php echo $price; ?>₫</span>
+                            </div>
+                        <?php else: ?>
+                            <span class="text-red-600 font-bold text-xs"><?php echo $price; ?>₫</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
     </div>
-  </div>
 </section>
 
-<!-- Ưu điểm -->
-<section class="py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-      <div>
-        <i class="fas fa-shield-alt text-5xl mb-4"></i>
-        <h3 class="font-bold text-xl mb-2">Chính hãng 100%</h3>
-        <p class="text-blue-100">Nhập khẩu trực tiếp từ Nhật Bản</p>
-      </div>
-      <div>
-        <i class="fas fa-shipping-fast text-5xl mb-4"></i>
-        <h3 class="font-bold text-xl mb-2">Giao hàng nhanh</h3>
-        <p class="text-blue-100">Giao hàng toàn quốc trong 2-3 ngày</p>
-      </div>
-      <div>
-        <i class="fas fa-undo-alt text-5xl mb-4"></i>
-        <h3 class="font-bold text-xl mb-2">Đổi trả dễ dàng</h3>
-        <p class="text-blue-100">Hỗ trợ đổi trả trong 7 ngày</p>
-      </div>
-      <div>
-        <i class="fas fa-headset text-5xl mb-4"></i>
-        <h3 class="font-bold text-xl mb-2">Hỗ trợ 24/7</h3>
-        <p class="text-blue-100">Tư vấn nhiệt tình, chuyên nghiệp</p>
-      </div>
+<!-- Blog Section - More compact -->
+<section class="py-4 bg-gray-50 border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-lg font-bold mb-3 brand-font">📰 Tin tức làm đẹp</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <?php foreach ($recentBlogs as $blog): ?>
+                <article class="group bg-white rounded overflow-hidden shadow-sm hover:shadow-md transition">
+                    <a href="view/news/detail.php?id=<?php echo $blog['blogID']; ?>">
+                        <div class="aspect-video overflow-hidden bg-gray-100">
+                            <img src="<?php echo !empty($blog['image']) ? 'image/'.$blog['image'] : 'https://via.placeholder.com/600x400'; ?>" 
+                                 class="object-cover w-full h-full group-hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="p-3">
+                            <p class="text-xs text-gray-500 mb-1"><?php echo date('d/m/Y', strtotime($blog['date'] ?? 'now')); ?></p>
+                            <h3 class="text-xs font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-gray-600 transition">
+                                <?php echo htmlspecialchars($blog['title']); ?>
+                            </h3>
+                            <p class="text-xs text-gray-500 line-clamp-2"><?php echo htmlspecialchars(strip_tags(substr($blog['content'], 0, 80))); ?>...</p>
+                        </div>
+                    </a>
+                </article>
+            <?php endforeach; ?>
+        </div>
     </div>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="py-16 bg-white text-center">
-  <div class="max-w-4xl mx-auto px-4">
-    <h2 class="text-3xl font-bold text-gray-800 mb-4">
-      <i class="fas fa-gift mr-3 text-red-500"></i>Nhận ưu đãi ngay hôm nay!
-    </h2>
-    <p class="text-gray-600 mb-8">
-      Đăng ký nhận tin để không bỏ lỡ các chương trình khuyến mãi hấp dẫn
-    </p>
-    <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-      <input type="email" placeholder="Nhập email của bạn" 
-             class="px-6 py-3 rounded-lg border-2 border-gray-300 focus:border-blue-600 outline-none w-full md:w-96">
-      <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-lg shadow hover:shadow-lg transition w-full md:w-auto">
-        <i class="fas fa-paper-plane mr-2"></i>Đăng ký
-      </button>
-    </div>
-  </div>
 </section>
 
 <script>
 function addToCart(productId) {
-    if (!confirm('Bạn có muốn thêm sản phẩm này vào giỏ hàng?')) {
-        return;
-    }
+    if (!confirm('Bạn có muốn thêm sản phẩm này vào giỏ hàng?')) return;
     
     fetch('controller/cCart.php?action=add', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${productId}&quantity=1`
     })
     .then(response => response.json())
-    .then(data => {
+    .then(data => { 
         if (data.success) {
-            alert('✅ Đã thêm sản phẩm vào giỏ hàng!');
-            // Cập nhật số lượng giỏ hàng trên header nếu có
-            if (data.cartCount) {
-                updateCartCount(data.cartCount);
-            }
+            alert('Đã thêm vào giỏ!');
+            location.reload();
         } else {
-            alert('❌ ' + (data.message || 'Có lỗi xảy ra!'));
+            alert('❌ ' + (data.message || 'Lỗi!'));
         }
     })
     .catch(error => {
@@ -256,14 +320,114 @@ function addToCart(productId) {
     });
 }
 
-function updateCartCount(count) {
-    const cartBadge = document.querySelector('.cart-count');
-    if (cartBadge) {
-        cartBadge.textContent = count;
+function copyCode(code) {
+    navigator.clipboard.writeText(code).then(() => {
+        showToast('Đã sao chép mã: ' + code, 'success');
+    }).catch(() => {
+        showToast('❌ Không thể sao chép mã!', 'error');
+    });
+}
+
+function showToast(message, type = 'success') {
+    // Tạo toast element
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-sm shadow-lg text-white text-sm font-medium z-50 transform transition-all duration-300 translate-y-0 opacity-100';
+    toast.style.backgroundColor = type === 'success' ? '#000000' : '#EF4444';
+    toast.textContent = message;
+    
+    // Thêm vào body
+    document.body.appendChild(toast);
+    
+    // Animation
+    setTimeout(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    }, 10);
+    
+    // Xóa sau 3 giây
+    setTimeout(() => {
+        toast.style.transform = 'translateY(100px)';
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Banner Carousel
+let currentSlide = 0;
+const slides = document.querySelectorAll('.banner-slide');
+const dots = document.querySelectorAll('.banner-dot');
+
+function showSlide(index) {
+    slides.forEach((slide, i) => {
+        slide.classList.remove('active');
+        if (i === index) {
+            slide.classList.add('active');
+        }
+    });
+    
+    dots.forEach((dot, i) => {
+        if (i === index) {
+            dot.classList.remove('bg-white/50');
+            dot.classList.add('bg-white');
+        } else {
+            dot.classList.remove('bg-white');
+            dot.classList.add('bg-white/50');
+        }
+    });
+}
+
+function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+}
+
+function prevSlide() {
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    showSlide(currentSlide);
+}
+
+function goToSlide(index) {
+    currentSlide = index;
+    showSlide(currentSlide);
+}
+
+// Auto slide every 5 seconds
+setInterval(nextSlide, 5000);
+
+// Initialize first slide
+showSlide(0);
+</script>
+
+<style>
+.banner-slide {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.banner-slide.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }
-</script>
+
+.banner-slider {
+    position: relative;
+}
+</style>
+
 <?php include 'view/chat/index.php'; ?>
 <?php include 'view/layout/footer.php'; ?>
-
-

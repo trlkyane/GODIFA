@@ -22,11 +22,8 @@ $reviewController = new cReview();
 
 // Xử lý TÌM KIẾM
 $searchKeyword = isset($_GET['search']) ? trim($_GET['search']) : '';
-$filterStatus = isset($_GET['status']) ? intval($_GET['status']) : -1; // -1: All, 0: Pending, 1: Approved, 2: Rejected
-
-$reviews = $reviewController->getReviews($searchKeyword, $filterStatus); 
+$reviews = $reviewController->getReviews($searchKeyword, -1); 
 $totalReviews = $reviewController->countTotalReviews(); 
-$pendingCount = $reviewController->countReviewsByStatus(0);
 
 $pageTitle = 'Quản lý Đánh giá';
 // Giả định các file include (header, sidebar, footer) tồn tại
@@ -46,28 +43,17 @@ include __DIR__ . '/../includes/header.php';
                     </h1>
                     <p class="text-sm text-gray-600 mt-1">
                         Tổng số: <strong><?php echo $totalReviews; ?></strong> đánh giá
-                        <?php if ($pendingCount > 0): ?>
-                        <span class="text-red-500 ml-2">(Chờ duyệt: <?php echo $pendingCount; ?>)</span>
-                        <?php endif; ?>
+                        
                     </p>
                 </div>
                 
                 <div class="flex items-center space-x-2">
                     <form method="GET" class="flex items-center">
                         <input type="hidden" name="page" value="reviews">
-                        
-                        <select name="status" onchange="this.form.submit()" 
-                                class="px-3 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm">
-                            <option value="-1" <?php echo $filterStatus == -1 ? 'selected' : ''; ?>>Tất cả trạng thái</option>
-                            <option value="0" <?php echo $filterStatus == 0 ? 'selected' : ''; ?>>Chờ duyệt (Pending)</option>
-                            <option value="1" <?php echo $filterStatus == 1 ? 'selected' : ''; ?>>Đã duyệt (Approved)</option>
-                            <option value="2" <?php echo $filterStatus == 2 ? 'selected' : ''; ?>>Đã từ chối (Rejected)</option>
-                        </select>
-
                         <div class="relative">
                             <input type="text" name="search" value="<?php echo htmlspecialchars($searchKeyword); ?>"
                                     placeholder="Tìm khách hàng, sản phẩm..." 
-                                    class="pl-10 pr-4 py-2 border-t border-b border-r border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 w-64">
+                                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 w-64">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
                         <button type="submit" class="ml-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
@@ -96,7 +82,7 @@ include __DIR__ . '/../includes/header.php';
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bình luận</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hiển thị</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
                         </tr>
                     </thead>
@@ -108,24 +94,9 @@ include __DIR__ . '/../includes/header.php';
                         $customerName = htmlspecialchars($review['customerName'] ?? 'Khách hàng N/A');
                         $rating = $review['rating'] ?? 0;
                         $comment = htmlspecialchars($review['comment'] ?? 'Không có bình luận.');
-                        $status = $review['status'] ?? 0; // 0: Pending, 1: Approved, 2: Rejected
-
-                        $statusText = '';
-                        $statusColor = '';
-                        switch ($status) {
-                            case 0:
-                                $statusText = 'Chờ duyệt';
-                                $statusColor = 'bg-yellow-100 text-yellow-800';
-                                break;
-                            case 1:
-                                $statusText = 'Đã duyệt';
-                                $statusColor = 'bg-green-100 text-green-800';
-                                break;
-                            case 2:
-                                $statusText = 'Đã từ chối/Ẩn';
-                                $statusColor = 'bg-red-100 text-red-800';
-                                break;
-                        }
+                        $status = $review['status'] ?? 1; // 1: hiển thị, khác: ẩn
+                        $statusText = ($status == 1) ? 'Hiển thị' : 'Đang ẩn';
+                        $statusColor = ($status == 1) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700';
 
                         // --- LOGIC MỚI: Cắt ngắn Tên sản phẩm ---
                         $maxProductNameLength = 10; // Giới hạn ký tự tên sản phẩm hiển thị trên bảng
@@ -137,7 +108,7 @@ include __DIR__ . '/../includes/header.php';
 
                         $commentExcerpt = mb_substr($comment, 0, 50) . (mb_strlen($comment) > 50 ? '...' : '');
                         ?>
-                        <tr class="<?php echo $status == 2 ? 'opacity-75' : ''; ?>" data-review-id="<?php echo $reviewID; ?>">
+                        <tr class="<?php echo $status != 1 ? 'opacity-75' : ''; ?>" data-review-id="<?php echo $reviewID; ?>">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?php echo $reviewID; ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" title="<?php echo $productName; ?>"><?php echo $productNameExcerpt; ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"><?php echo $customerName; ?></td>
@@ -158,24 +129,15 @@ include __DIR__ . '/../includes/header.php';
                                     </button>
 
                                     <?php if (hasPermission('manage_reviews')): ?>
-                                        <?php if ($status == 0): // Duyệt và Từ chối chỉ hiển thị khi Pending ?>
-                                        <button onclick='changeStatus(<?php echo $reviewID; ?>, "approve", <?php echo json_encode($productName); ?>)' 
-                                                class="px-2 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 text-sm" title="Duyệt đánh giá">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                        <button onclick='changeStatus(<?php echo $reviewID; ?>, "reject", <?php echo json_encode($productName); ?>)' 
-                                                class="px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm" title="Từ chối (Ẩn)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                        <?php elseif ($status == 1): // Nếu đã duyệt, cho phép ẩn/từ chối lại ?>
-                                        <button onclick='changeStatus(<?php echo $reviewID; ?>, "reject", <?php echo json_encode($productName); ?>)' 
-                                                class="px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm" title="Ẩn/Từ chối">
+                                        <?php if ($status == 1): ?>
+                                        <button onclick='toggleVisibility(<?php echo $reviewID; ?>, <?php echo json_encode($productName); ?>)'
+                                                class="px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm" title="Ẩn đánh giá">
                                             <i class="fas fa-eye-slash"></i>
                                         </button>
-                                        <?php elseif ($status == 2): // Nếu đã từ chối/ẩn, cho phép duyệt lại ?>
-                                        <button onclick='changeStatus(<?php echo $reviewID; ?>, "approve", <?php echo json_encode($productName); ?>)' 
-                                                class="px-2 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 text-sm" title="Duyệt lại">
-                                            <i class="fas fa-check"></i>
+                                        <?php else: ?>
+                                        <button onclick='toggleVisibility(<?php echo $reviewID; ?>, <?php echo json_encode($productName); ?>)'
+                                                class="px-2 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 text-sm" title="Hiển thị lại">
+                                            <i class="fas fa-eye"></i>
                                         </button>
                                         <?php endif; ?>
                                         
@@ -299,14 +261,8 @@ function closeViewModal() {
 // JS HANDLERS (Hàm gọi Modal Xác nhận)
 // ----------------------------------------------------------------------------------
 
-/**
- * Hàm trung gian gọi Modal Xác nhận cho hành động Duyệt/Ẩn.
- * @param {number} id ID của đánh giá
- * @param {string} action 'approve' (Duyệt) hoặc 'reject' (Ẩn/Từ chối)
- * @param {string} productName Tên sản phẩm
- */
-function changeStatus(id, action, productName) {
-    openConfirmModal(id, action, productName);
+function toggleVisibility(id, productName) {
+    openConfirmModal(id, 'toggle', productName);
 }
 
 /**
@@ -333,16 +289,11 @@ function openConfirmModal(id, action, productName) {
     let btnText = '';
     let btnClass = '';
 
-    if (action === 'approve') {
-        title = 'Duyệt Đánh giá';
-        message = `Bạn có chắc muốn **DUYỆT** đánh giá cho sản phẩm **"${productName}"**? (Đánh giá sẽ hiển thị công khai).`;
-        btnText = 'Xác nhận Duyệt';
-        btnClass = 'bg-green-600 hover:bg-green-700';
-    } else if (action === 'reject') {
-        title = 'Từ chối/Ẩn Đánh giá';
-        message = `Bạn có chắc muốn **TỪ CHỐI/ẨN** đánh giá cho sản phẩm **"${productName}"**?`;
-        btnText = 'Xác nhận Ẩn';
-        btnClass = 'bg-red-600 hover:bg-red-700';
+    if (action === 'toggle') {
+        title = 'Thay đổi hiển thị đánh giá';
+        message = `Bạn có chắc muốn **ẨN/HIỂN THỊ** đánh giá cho sản phẩm **"${productName}"**?`;
+        btnText = 'Xác nhận';
+        btnClass = 'bg-yellow-600 hover:bg-yellow-700';
     } else if (action === 'delete') {
         title = 'Xóa Vĩnh viễn Đánh giá';
         message = `CẢNH BÁO: Bạn có chắc muốn **XÓA VĨNH VIỄN** đánh giá cho sản phẩm **"${productName}"**? Hành động này không thể hoàn tác!`;
@@ -379,18 +330,8 @@ function executeAction() {
         
         let postData = {
             reviewID: currentReviewId,
-            action: currentAction === 'delete' ? 'delete' : 'updateStatus',
-            status: -1
+            action: currentAction === 'delete' ? 'delete' : 'toggle'
         };
-
-        if (currentAction === 'approve') {
-            postData.status = 1;
-        } else if (currentAction === 'reject') {
-            postData.status = 2;
-        } else if (currentAction !== 'delete') {
-            closeConfirmModal();
-            return;
-        }
 
         // 1. Gửi yêu cầu AJAX
         fetch(apiUrl, { 

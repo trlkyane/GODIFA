@@ -101,115 +101,117 @@ $rolePermissions = [
         'full_access'           // Toàn quyền
     ],
     ROLE_ADMIN => [
-        // Dashboard & Thống kê
+        // Dashboard & Thống kê (Chỉ xem)
         'view_dashboard',       // Xem dashboard
         'view_statistics',      // Xem thống kê
         
-        // Nhân viên (chỉ quản lý cấp dưới)
-        'manage_users',         // Quản lý nhân viên (không sửa roleID >= 2)
-        // Không có quyền xóa nhân viên
-        
-        // Sản phẩm & Danh mục
+        // Sản phẩm & Danh mục (Toàn quyền)
         'view_products',        // Xem sản phẩm
-        'manage_products',      // Quản lý sản phẩm
-        'delete_product',       // Xóa sản phẩm (Owner & Admin)
+        'manage_products',      // Quản lý sản phẩm (thêm, sửa)
+        'delete_product',       // Xóa sản phẩm
         'view_categories',      // Xem danh mục
-        'manage_categories',    // Quản lý danh mục
+        'manage_categories',    // Quản lý danh mục (thêm, sửa, xóa)
         
-        // Đơn hàng
-        'view_orders',          // Xem đơn hàng
-        'create_order',         // Tạo đơn hàng
-        'edit_all_orders',      // Sửa tất cả đơn hàng
-        'update_order_status',  // Cập nhật trạng thái
-        'enter_order',          // Nhập đơn
+        // Nhân viên (Toàn quyền)
+        'manage_users',         // Quản lý nhân viên (thêm, sửa, xóa)
+        'delete_user',          // Xóa nhân viên
         
-        // Voucher
-        'view_vouchers',        // Xem voucher
-        'create_voucher',       // Tạo voucher
-        'apply_voucher',        // Áp dụng voucher
-        'manage_vouchers',      // Quản lý voucher
-        
-        // Bài viết
+        // Bài viết (Toàn quyền)
         'view_blog',            // Xem bài viết
-        'manage_blog',          // Quản lý bài viết
-        'delete_blog',          // Xóa bài viết (Owner & Admin)
+        'manage_blog',          // Quản lý bài viết (thêm, sửa)
+        'delete_blog',          // Xóa bài viết
         
-        // Chat
-        'view_chat',            // Xem chat
-        'manage_chat',          // Quản lý chat
+        // Đơn hàng (Chỉ xem)
+        'view_orders',          // Xem đơn hàng
         
-        // Khách hàng
-        'view_customers',       // Xem khách hàng
-        'manage_customers',     // Quản lý khách hàng
-        'view_customer_history',// Xem lịch sử
+        // Voucher (Chỉ xem)
+        'view_vouchers',        // Xem voucher
         
-        // Đánh giá
+        // Chat (Chỉ xem tin nhắn)
+        'view_chat',            // Xem tin nhắn khách hàng
+        
+        // Khách hàng (Chỉ xem)
+        'view_customers',       // Xem thông tin khách hàng
+        'view_customer_history',// Xem lịch sử mua hàng
+        
+        // Nhóm khách hàng (Chỉ xem)
+        'view_customer_groups', // Xem nhóm khách hàng
+        
+        // Đánh giá (Chỉ xem)
         'view_reviews',         // Xem đánh giá
-        'manage_reviews',       // Quản lý đánh giá
     ],
     ROLE_SALES => [
-        // Dashboard & Thống kê
-        'view_dashboard',       // Xem dashboard (tổng quan)
-        'view_statistics',      // Xem thống kê doanh thu
+        // Dashboard & Thống kê (Chỉ xem)
+        'view_dashboard',       // Xem dashboard
+        'view_statistics',      // Xem thống kê
         
-        // Sản phẩm & Danh mục (Chỉ xem)
-        'view_products',        // Xem sản phẩm (đặc biệt tồn kho để tạo đơn)
-        'view_categories',      // Xem danh mục
-        
-        // Đơn hàng (Tạo, sửa đơn do mình tạo, xác nhận)
+        // Đơn hàng (Toàn quyền)
         'view_orders',          // Xem đơn hàng
         'create_order',         // Tạo đơn hàng mới
         'edit_own_order',       // Chỉnh sửa đơn do mình tạo
-        'update_order_status',  // Xác nhận đơn hàng
+        'edit_all_orders',      // Sửa tất cả đơn hàng
+        'update_order_status',  // Cập nhật trạng thái
         'enter_order',          // Nhập đơn thủ công
+        'delete_order',         // Xóa đơn hàng
         
-        // Voucher (Toàn quyền: Xem, Tạo, Sửa, Xóa, Áp dụng)
+        // Voucher (Toàn quyền)
         'view_vouchers',        // Xem voucher
-        'create_voucher',       // Tạo voucher khuyến mãi
+        'create_voucher',       // Tạo voucher
         'manage_vouchers',      // Sửa, xóa voucher
-        'apply_voucher',        // Áp dụng voucher vào đơn hàng
+        'apply_voucher',        // Áp dụng voucher
         
-        // Bài viết (Chỉ xem)
-        'view_blog',            // Xem bài viết tin tức
-        
-        // Khách hàng (Xem thông tin)
-        'view_customers',       // Xem thông tin khách hàng
-        'view_customer_history',// Xem lịch sử mua hàng khách
-        
-        // Đánh giá (Chỉ xem)
-        'view_reviews',         // Xem đánh giá khách hàng
-    ],
-    ROLE_SUPPORT => [
-        // Dashboard & Thống kê (Xem toàn bộ và doanh thu)
-        'view_dashboard',       // Xem trang tổng quan
-        'view_statistics',      // Xem thống kê doanh thu
-        
-        // Sản phẩm & Danh mục (Chỉ xem để tư vấn)
-        'view_products',        // Xem sản phẩm để tư vấn
+        // Sản phẩm & Danh mục (Chỉ xem)
+        'view_products',        // Xem sản phẩm
         'view_categories',      // Xem danh mục
         
-        // Đơn hàng (Chỉ xem để tra cứu, hỗ trợ khách)
-        'view_orders',          // Xem đơn hàng để hỗ trợ khách
+        // Bài viết (Chỉ xem)
+        'view_blog',            // Xem bài viết
         
-        // Voucher (Xem để tư vấn khách)
-        'view_vouchers',        // Xem voucher để tư vấn
+        // Chat (Chỉ xem)
+        'view_chat',            // Xem chat
         
-        // Bài viết (Xem)
-        'view_blog',            // Xem bài viết/tin tức
+        // Khách hàng (Chỉ xem)
+        'view_customers',       // Xem khách hàng
+        'view_customer_history',// Xem lịch sử mua hàng
+        'view_customer_groups', // Xem nhóm khách hàng
+        
+        // Đánh giá (Chỉ xem)
+        'view_reviews',         // Xem đánh giá
+    ],
+    ROLE_SUPPORT => [
+        // Dashboard & Thống kê (Chỉ xem)
+        'view_dashboard',       // Xem dashboard
+        'view_statistics',      // Xem thống kê
+        
+        // Đánh giá (Toàn quyền)
+        'view_reviews',         // Xem đánh giá
+        'manage_reviews',       // Quản lý đánh giá (duyệt, ẩn/hiện, xóa)
+        'respond_to_reviews',   // Phản hồi đánh giá
         
         // Chat (Toàn quyền)
         'view_chat',            // Xem chat
         'manage_chat',          // Quản lý chat, phản hồi khách hàng
         
-        // Khách hàng (Xem, cập nhật thông tin, ghi chú)
-        'view_customers',       // Xem danh sách khách hàng
-        'view_customer_history',// Xem lịch sử khách hàng
+        // Khách hàng (Toàn quyền)
+        'view_customers',       // Xem khách hàng
+        'manage_customers',     // Quản lý khách hàng (sửa thông tin, khóa/mở)
+        'view_customer_history',// Xem lịch sử mua hàng
+        'view_customer_groups', // Xem nhóm khách hàng
         'edit_customer_info',   // Cập nhật thông tin khách hàng
         'add_customer_notes',   // Ghi chú khách hàng
         
-        // Đánh giá (Xem & phản hồi)
-        'view_reviews',         // Xem đánh giá khách hàng
-        'respond_to_reviews'    // Phản hồi đánh giá
+        // Sản phẩm & Danh mục (Chỉ xem)
+        'view_products',        // Xem sản phẩm
+        'view_categories',      // Xem danh mục
+        
+        // Đơn hàng (Chỉ xem)
+        'view_orders',          // Xem đơn hàng
+        
+        // Voucher (Chỉ xem)
+        'view_vouchers',        // Xem voucher
+        
+        // Bài viết (Chỉ xem)
+        'view_blog',            // Xem bài viết
     ]
 ];
 

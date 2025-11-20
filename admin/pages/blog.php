@@ -21,9 +21,27 @@ $error = '';
 
 // Xử lý THÊM bài viết
 if (isset($_POST['add_blog']) && hasPermission('manage_blog')) {
+    // Xử lý upload ảnh
+    $image = '';
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $targetDir = __DIR__ . "/../../image/";
+        $imageFileType = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
+        $newFileName = uniqid() . '.' . $imageFileType;
+        $targetFile = $targetDir . $newFileName;
+        
+        // Kiểm tra file là ảnh thật
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (in_array($imageFileType, $allowedTypes)) {
+            if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
+                $image = $newFileName;
+            }
+        }
+    }
+    
     $data = [
         'title' => trim($_POST['title']),
-        'content' => trim($_POST['content'])
+        'content' => trim($_POST['content']),
+        'image' => $image
     ];
     
     $result = $blogController->addBlog($data);
@@ -38,9 +56,35 @@ if (isset($_POST['add_blog']) && hasPermission('manage_blog')) {
 // Xử lý SỬA bài viết
 if (isset($_POST['edit_blog'])) {
     $blogID = intval($_POST['blogID']);
+    
+    // Lấy ảnh cũ
+    $currentBlog = $blogController->getBlogById($blogID);
+    $image = $currentBlog['image'] ?? '';
+    
+    // Xử lý upload ảnh mới (nếu có)
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $targetDir = __DIR__ . "/../../image/";
+        $imageFileType = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
+        $newFileName = uniqid() . '.' . $imageFileType;
+        $targetFile = $targetDir . $newFileName;
+        
+        // Kiểm tra file là ảnh thật
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (in_array($imageFileType, $allowedTypes)) {
+            if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
+                // Xóa ảnh cũ nếu có
+                if ($image && file_exists($targetDir . $image)) {
+                    unlink($targetDir . $image);
+                }
+                $image = $newFileName;
+            }
+        }
+    }
+    
     $data = [
         'title' => trim($_POST['title']),
-        'content' => trim($_POST['content'])
+        'content' => trim($_POST['content']),
+        'image' => $image
     ];
     
     $result = $blogController->updateBlog($blogID, $data);
@@ -175,6 +219,7 @@ include __DIR__ . '/../includes/header.php';
                     $date = $blog['date'] ?? '';
                     $authorName = $blog['authorName'] ?? 'N/A';
                     $status = $blog['status'] ?? 1;
+                    $image = $blog['image'] ?? '';
                     
                     // Excerpt (100 ký tự đầu)
                     $excerpt = mb_substr(strip_tags($content), 0, 100) . '...';
@@ -185,6 +230,15 @@ include __DIR__ . '/../includes/header.php';
                         : 'bg-gradient-to-r from-gray-400 to-gray-500';
                     ?>
                     <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden <?php echo $status == 0 ? 'opacity-75' : ''; ?>">
+                        <!-- Hình ảnh -->
+                        <?php if ($image): ?>
+                        <div class="aspect-video w-full overflow-hidden bg-gray-100">
+                            <img src="/GODIFA/image/<?php echo htmlspecialchars($image); ?>" 
+                                 alt="<?php echo htmlspecialchars($title); ?>"
+                                 class="w-full h-full object-cover">
+                        </div>
+                        <?php endif; ?>
+                        
                         <!-- Header với màu động theo trạng thái -->
                         <div class="<?php echo $headerColor; ?> p-4">
                             <h3 class="text-white font-bold text-lg line-clamp-2">
@@ -264,7 +318,7 @@ include __DIR__ . '/../includes/header.php';
             </button>
         </div>
         
-        <form method="POST" class="mt-4">
+        <form method="POST" enctype="multipart/form-data" class="mt-4">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
                     Tiêu đề <span class="text-red-500">*</span>
@@ -272,6 +326,15 @@ include __DIR__ . '/../includes/header.php';
                 <input type="text" name="title" id="title" required
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                        placeholder="Nhập tiêu đề bài viết">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="image">
+                    Hình ảnh đại diện
+                </label>
+                <input type="file" name="image" id="image" accept="image/*"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <p class="text-xs text-gray-500 mt-1">Chấp nhận: JPG, JPEG, PNG, GIF, WEBP</p>
             </div>
             
             <div class="mb-4">
@@ -310,7 +373,7 @@ include __DIR__ . '/../includes/header.php';
             </button>
         </div>
         
-        <form method="POST" class="mt-4">
+        <form method="POST" enctype="multipart/form-data" class="mt-4">
             <input type="hidden" name="blogID" id="edit_blogID">
             
             <div class="mb-4">
@@ -319,6 +382,19 @@ include __DIR__ . '/../includes/header.php';
                 </label>
                 <input type="text" name="title" id="edit_title" required
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Hình ảnh hiện tại
+                </label>
+                <div id="edit_currentImage" class="mb-2"></div>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_image">
+                    Thay đổi hình ảnh (để trống nếu không đổi)
+                </label>
+                <input type="file" name="image" id="edit_image" accept="image/*"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs text-gray-500 mt-1">Chấp nhận: JPG, JPEG, PNG, GIF, WEBP</p>
             </div>
             
             <div class="mb-4">
@@ -385,6 +461,14 @@ function openEditModal(blog) {
     document.getElementById('edit_blogID').value = blog.blogID;
     document.getElementById('edit_title').value = blog.title;
     document.getElementById('edit_content').value = blog.content;
+    
+    // Hiển thị ảnh hiện tại
+    const imageDiv = document.getElementById('edit_currentImage');
+    if (blog.image) {
+        imageDiv.innerHTML = `<img src="/GODIFA/image/${blog.image}" alt="Current" class="w-48 h-32 object-cover rounded border">`;
+    } else {
+        imageDiv.innerHTML = '<p class="text-gray-500 text-sm">Chưa có hình ảnh</p>';
+    }
     
     document.getElementById('editModal').classList.remove('hidden');
 }

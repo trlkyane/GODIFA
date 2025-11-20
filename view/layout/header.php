@@ -1,10 +1,9 @@
 <?php
   if (session_status() === PHP_SESSION_NONE) {
-      session_name('GODIFA_USER_SESSION'); // Session riêng cho user
+      session_name('GODIFA_USER_SESSION');
       session_start();
   }
-  
-  // Đếm số lượng sản phẩm trong giỏ hàng từ Session
+  // Đếm số lượng giỏ hàng
   $cartCount = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
 ?>
 <!DOCTYPE html>
@@ -12,242 +11,107 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><?php echo isset($pageTitle) ? $pageTitle : 'GODIFA Shop'; ?> - Mỹ phẩm & Thực phẩm chức năng Nhật Bản</title>
+  <title><?php echo isset($pageTitle) ? $pageTitle : 'GODIFA'; ?> - Minimalist Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  
   <style>
-    /* CSS Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    
-    .cart-badge {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: #ef4444;
-      color: white;
-      font-size: 0.75rem;
-      padding: 2px 6px;
-      border-radius: 9999px;
-      min-width: 20px;
-      text-align: center;
-    }
-    
-    /* Dropdown menu - Improved UX */
-    .user-dropdown {
-      position: relative;
-    }
-    
-    /* Tạo vùng hover invisible để không bị mất dropdown */
-    .user-dropdown::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      height: 12px; /* Khoảng cách hover */
-      display: none;
-    }
-    
-    .user-dropdown:hover::after,
-    .user-dropdown:hover .dropdown-menu {
-      display: block;
-    }
-    
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: calc(100% + 12px); /* Cách button 12px */
-      width: 13rem;
-      background: white;
-      border-radius: 0.75rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      padding: 0.5rem 0;
-      z-index: 1000;
-      animation: slideDown 0.2s ease-out;
-      border: 1px solid #e5e7eb;
-    }
-    
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .dropdown-menu a {
-      transition: all 0.15s ease;
-    }
-    
-    .dropdown-menu a:hover {
-      background-color: #f3f4f6;
-      padding-left: 1.25rem;
-    }
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, .brand-font { font-family: 'Playfair Display', serif; }
+    /* Ẩn thanh cuộn */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-800"> 
-  <!-- Header -->
-  <header class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-4">
-      <div class="flex justify-between items-center">
-        <!-- Logo -->
-        <a href="/GODIFA/index.php" class="text-2xl font-bold text-blue-600 hover:text-blue-700">
-          <i class="fas fa-shopping-bag mr-2"></i>GODIFA
-        </a>
+<body class="bg-white text-gray-900 antialiased">
+
+  <header class="fixed top-0 left-0 right-0 w-full bg-white shadow-sm z-50 border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-20">
         
-        <!-- Navigation -->
-        <nav class="hidden md:flex space-x-6 text-sm font-semibold">
-          <a href="/GODIFA/index.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-home mr-1"></i>Trang chủ
+        <div class="flex-shrink-0 flex items-center">
+          <a href="/GODIFA/index.php" class="block">
+            <img src="/GODIFA/image/logo.jpg" alt="GODIFA Logo" class="h-16 w-auto object-contain">
           </a>
-          <a href="/GODIFA/view/product/list.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-box mr-1"></i>Sản phẩm
-          </a>
-          <a href="/GODIFA/view/pages/about.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-info-circle mr-1"></i>Về chúng tôi
-          </a>
-          <a href="/GODIFA/view/news/news.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-blog mr-1"></i>Tin tức
-          </a>
-          <a href="/GODIFA/view/pages/contact.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-phone mr-1"></i>Liên hệ
-          </a>
+        </div>
+
+        <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-500">
+          <a href="/GODIFA/index.php" class="hover:text-black transition-colors">Trang chủ</a>
+          <a href="/GODIFA/view/product/list.php" class="hover:text-black transition-colors">Sản phẩm</a>
+          <a href="/GODIFA/view/news/news.php" class="hover:text-black transition-colors">Tin tức</a>
+          <a href="/GODIFA/view/pages/about.php" class="hover:text-black transition-colors">Về chúng tôi</a>
+          <a href="/GODIFA/view/pages/contact.php" class="hover:text-black transition-colors">Liên hệ</a>
         </nav>
-        
-        <!-- User Menu -->
-        <div class="flex items-center space-x-4">
-          <!-- Cart -->
-          <a href="/GODIFA/view/cart/viewcart.php" 
-             class="relative hover:text-blue-600 transition" title="Giỏ hàng">
-            <i class="fas fa-shopping-cart text-xl"></i>
-            <?php if ($cartCount > 0): ?>
-              <span class="cart-badge cart-count"><?php echo $cartCount; ?></span>
-            <?php endif; ?>
-          </a>
-          
-          <!-- User -->
-          <?php if (isset($_SESSION['customer_id']) || isset($_SESSION['user_id'])): ?>
-            <?php 
-              // Xác định tên hiển thị và vai trò
-              $displayName = '';
-              $isStaff = false;
-              $roleName = '';
-              
-              if (isset($_SESSION['user_id'])) {
-                // Nhân viên/Admin
-                $isStaff = true;
-                $displayName = $_SESSION['hoten'] ?? $_SESSION['username'] ?? 'User';
-                
-                // Lấy tên vai trò
-                if (isset($_SESSION['role_id'])) {
-                  switch($_SESSION['role_id']) {
-                    case 1: $roleName = 'Chủ DN'; break;
-                    case 2: $roleName = 'Admin'; break;
-                    case 3: $roleName = 'Bán hàng'; break;
-                    case 4: $roleName = 'CSKH'; break;
-                    default: $roleName = 'Staff';
-                  }
-                }
-              } else {
-                // Khách hàng
-                $displayName = $_SESSION['customer_name'] ?? 'Khách hàng';
-              }
-            ?>
-            <div class="user-dropdown">
-              <button class="flex items-center space-x-2 hover:text-blue-600 transition">
-                <i class="fas <?php echo $isStaff ? 'fa-user-shield' : 'fa-user-circle'; ?> text-xl"></i>
-                <div class="text-left">
-                  <div class="text-sm font-semibold"><?php echo htmlspecialchars($displayName); ?></div>
-                  <?php if ($isStaff): ?>
-                    <div class="text-xs text-gray-500"><?php echo $roleName; ?></div>
-                  <?php endif; ?>
-                </div>
-                <i class="fas fa-chevron-down text-xs"></i>
-              </button>
-              <div class="dropdown-menu">
-                <a href="/GODIFA/view/account/order_history.php" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50">
-                  <i class="fas fa-history mr-3 w-5 text-gray-400"></i>
-                  <span>Lịch sử đơn hàng</span>
-                </a>
-                <a href="/GODIFA/view/account/profile.php" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50">
-                  <i class="fas fa-user mr-3 w-5 text-gray-400"></i>
-                  <span>Quản lý tài khoản</span>
-                </a>
-                <div class="border-t border-gray-200 my-1"></div>
-                <a href="/GODIFA/view/auth/logout.php" class="flex items-center px-4 py-2.5 text-red-600 hover:bg-red-50 font-medium">
-                  <i class="fas fa-sign-out-alt mr-3 w-5"></i>
-                  <span>Đăng xuất</span>
-                </a>
-              </div>
-            </div>
-          <?php else: ?>
-            <a href="/GODIFA/view/auth/customer-login.php" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
-              <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập
+
+    <div class="flex items-center space-x-5">
+      <div class="relative group">
+        <a href="/GODIFA/view/product/list.php" class="text-gray-500 hover:text-black transition" aria-label="Tìm kiếm">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+        </a>
+      </div>
+
+            <a href="/GODIFA/view/cart/viewcart.php" class="relative text-gray-500 hover:text-black transition">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+                <?php if($cartCount > 0): ?>
+                  <span class="absolute -top-1 -right-2 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    <?php echo $cartCount; ?>
+                  </span>
+                <?php endif; ?>
             </a>
-          <?php endif; ?>
-          
-          <!-- Mobile Menu Button -->
-          <button class="md:hidden text-2xl" onclick="toggleMobileMenu()">
-            <i class="fas fa-bars"></i>
-          </button>
+
+            <div class="relative group">
+                <button class="text-gray-500 hover:text-black focus:outline-none flex items-center h-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                </button>
+                
+                <div class="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-lg rounded-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <?php if (isset($_SESSION['customer_id'])): ?>
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-xs text-gray-500">Xin chào,</p>
+                            <p class="text-sm font-medium truncate"><?php echo htmlspecialchars($_SESSION['customer_name'] ?? 'Khách hàng'); ?></p>
+                        </div>
+                        <a href="/GODIFA/view/account/profile.php" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black">Tài khoản</a>
+                        <a href="/GODIFA/view/account/order_history.php" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black">Đơn mua</a>
+                        <a href="/GODIFA/view/auth/logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Đăng xuất</a>
+                    <?php else: ?>
+                        <a href="/GODIFA/view/auth/customer-login.php" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black">Đăng nhập</a>
+                        <a href="/GODIFA/view/auth/customer-register.php" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black">Đăng ký</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <button onclick="toggleMobileMenu()" class="md:hidden text-gray-500 hover:text-black">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
         </div>
       </div>
-      
-      <!-- Mobile Menu -->
-      <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4">
-        <nav class="flex flex-col space-y-3">
-          <a href="/GODIFA/index.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-home mr-2"></i>Trang chủ
-          </a>
-          <a href="/GODIFA/view/product/list.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-box mr-2"></i>Sản phẩm
-          </a>
-          <a href="/GODIFA/view/pages/about.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-info-circle mr-2"></i>Về chúng tôi
-          </a>
-          <a href="/GODIFA/view/pages/contact.php" class="hover:text-blue-600 transition">
-            <i class="fas fa-phone mr-2"></i>Liên hệ
-          </a>
-        </nav>
-      </div>
+    </div>
+
+    
+
+    <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-100">
+    <div class="px-4 pt-2 pb-6 space-y-1">
+            <a href="/GODIFA/index.php" class="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Trang chủ</a>
+            <a href="/GODIFA/view/product/list.php" class="block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-black">Sản phẩm</a>
+            <a href="/GODIFA/view/news/news.php" class="block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-black">Tin tức</a>
+            <a href="/GODIFA/view/pages/about.php" class="block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-black">Về chúng tôi</a>
+        </div>
     </div>
   </header>
   
+  <div class="h-20"></div>
+
   <script>
     function toggleMobileMenu() {
       const menu = document.getElementById('mobileMenu');
       menu.classList.toggle('hidden');
     }
-    
-    // Đóng dropdown khi click ra ngoài (Optional - giúp UX tốt hơn trên mobile)
-    document.addEventListener('click', function(event) {
-      const dropdown = document.querySelector('.user-dropdown');
-      if (!dropdown) return;
-      
-      const dropdownMenu = dropdown.querySelector('.dropdown-menu');
-      if (!dropdown.contains(event.target)) {
-        // Click outside - không làm gì vì dùng CSS hover
-      }
-    });
-    
-    // Prevent dropdown close on click inside (cho mobile)
-    const dropdownMenus = document.querySelectorAll('.dropdown-menu');
-    dropdownMenus.forEach(menu => {
-      menu.addEventListener('click', function(e) {
-        // Link vẫn hoạt động bình thường
-      });
-    });
   </script>

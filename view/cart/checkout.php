@@ -272,44 +272,75 @@ foreach ($_SESSION['cart'] as $item) {
                         <?php endforeach; ?>
                     </div>
 
-                    <div class="border-t pt-3 mb-3">
-                        <div class="flex justify-between text-sm mb-2">
+                    <div class="border-t border-gray-200 pt-4 mb-4">
+                        <div class="flex justify-between text-sm mb-3">
                             <span class="text-gray-600">Tạm tính:</span>
-                            <span class="font-semibold" id="subtotal"><?= number_format($totalAmount, 0, ',', '.') ?>₫</span>
+                            <span class="font-semibold text-gray-900" id="subtotal"><?= number_format($totalAmount, 0, ',', '.') ?>₫</span>
                         </div>
-                        <div class="flex justify-between text-sm mb-2">
+                        <div class="flex justify-between text-sm mb-3">
                             <span class="text-gray-600">Phí vận chuyển:</span>
-                            <span id="shipping-fee" class="text-indigo-600 font-semibold">0₫</span>
+                            <span id="shipping-fee" class="font-semibold text-gray-900">0₫</span>
                         </div>
                         
                         <!-- Voucher Section -->
-                        <div class="flex justify-between text-sm mb-2">
+                        <div class="flex justify-between text-sm mb-4">
                             <span class="text-gray-600">Giảm giá:</span>
-                            <span id="discount-display" class="text-green-600 font-semibold">0₫</span>
+                            <span id="discount-display" class="font-semibold text-green-600">-0₫</span>
+                        </div>
+                        
+                        <!-- Voucher Input Section -->
+                        <div class="mb-4 p-3 bg-gray-50 rounded-sm border border-gray-200">
+                            <label class="flex items-center text-xs font-semibold text-gray-900 mb-2 uppercase tracking-wide">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                                </svg>
+                                Mã giảm giá
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" 
+                                       id="voucher-code-input"
+                                       placeholder="Nhập mã" 
+                                       class="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm bg-white"
+                                       onkeypress="if(event.key === 'Enter') { event.preventDefault(); applyVoucherByCode(); }"
+                       >
+                                <button type="button" 
+                                        onclick="applyVoucherByCode()"
+                                        class="flex-shrink-0 px-3 py-2 bg-black text-white text-xs font-bold rounded-sm hover:bg-gray-800 transition">
+                                    Áp dụng
+                                </button>
+                            </div>
+                            <div id="voucher-message" class="text-xs mt-2 hidden"></div>
                         </div>
                         
                         <!-- Voucher Selector -->
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <button type="button" 
                                     onclick="showVoucherModal()"
-                                    class="w-full text-left px-3 py-2 border-2 border-dashed border-indigo-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition flex items-center justify-between">
-                                <span id="voucher-label" class="text-sm text-gray-600">
-                                    <i class="fas fa-ticket-alt text-indigo-600 mr-2"></i>
-                                    <span>Chọn voucher</span>
+                                    class="w-full text-left px-3 py-2 border border-gray-300 rounded-sm hover:border-black hover:bg-gray-50 transition flex items-center justify-between group">
+                                <span id="voucher-label" class="text-xs text-gray-600 group-hover:text-black">
+                                    <svg class="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                    </svg>
+                                    <span>Chọn từ danh sách voucher</span>
                                 </span>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
                             </button>
                         </div>
                         
-                        <div class="text-xs text-gray-500 italic mt-1">
-                            <i class="fas fa-info-circle"></i> Chọn địa chỉ để tính phí ship
+                        <div class="flex items-start gap-2 text-xs text-gray-500 mt-3">
+                            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Chọn địa chỉ để tính phí vận chuyển</span>
                         </div>
                     </div>
 
-                    <div class="border-t pt-3">
-                        <div class="flex justify-between text-lg font-bold">
-                            <span>Tổng cộng:</span>
-                            <span id="total-amount" class="text-indigo-600"><?= number_format($totalAmount, 0, ',', '.') ?>₫</span>
+                    <div class="border-t-2 border-gray-900 pt-4 mt-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-base font-bold text-gray-900 brand-font">Tổng cộng:</span>
+                            <span id="total-amount" class="text-2xl font-bold text-black"><?= number_format($totalAmount, 0, ',', '.') ?>₫</span>
                         </div>
                     </div>
 
@@ -531,6 +562,52 @@ foreach ($_SESSION['cart'] as $item) {
         
         // Close modal
         closeVoucherModal();
+    }
+    
+    // Áp dụng voucher bằng code
+    function applyVoucherByCode() {
+        const input = document.getElementById('voucher-code-input');
+        const code = input.value.trim().toUpperCase();
+        const messageDiv = document.getElementById('voucher-message');
+        
+        if (!code) {
+            showVoucherMessage('Vui lòng nhập mã giảm giá', 'error');
+            return;
+        }
+        
+        // Tìm voucher theo code trong danh sách
+        const voucher = availableVouchers.find(v => {
+            const voucherCode = `VOUCHER${v.voucherID}`.toUpperCase();
+            return voucherCode === code;
+        });
+        
+        if (voucher) {
+            // Kiểm tra điều kiện áp dụng
+            if (voucher.minOrderValue && SUBTOTAL < voucher.minOrderValue) {
+                showVoucherMessage(`Đơn hàng tối thiểu ${formatMoney(voucher.minOrderValue)}₫ để áp dụng mã này`, 'error');
+                return;
+            }
+            
+            // Áp dụng voucher
+            selectVoucher(voucher);
+            input.value = '';
+            showVoucherMessage(`✅ Đã áp dụng mã ${code} thành công!`, 'success');
+        } else {
+            showVoucherMessage('❌ Mã giảm giá không tồn tại hoặc đã hết hạn', 'error');
+        }
+    }
+    
+    // Hiển thị thông báo voucher
+    function showVoucherMessage(message, type) {
+        const messageDiv = document.getElementById('voucher-message');
+        messageDiv.textContent = message;
+        messageDiv.className = `text-xs mt-1 ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
+        messageDiv.classList.remove('hidden');
+        
+        // Ẩn sau 5 giây
+        setTimeout(() => {
+            messageDiv.classList.add('hidden');
+        }, 5000);
     }
     
     // Đóng modal

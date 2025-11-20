@@ -10,11 +10,8 @@
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
 
-// Sau đó check owner permission
-require_once __DIR__ . '/../middleware/owner_only.php';
-
-// Check permission
-if (!hasPermission('manage_customers') && !hasPermission('view_customers')) {
+// Check permission - Chủ DN và CSKH được xem, chỉ Chủ DN được sửa
+if (!hasPermission('view_customer_groups') && !hasPermission('full_access')) {
     die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">Bạn không có quyền truy cập trang này!</div></div>');
 }
 
@@ -25,8 +22,8 @@ $groupController = new cCustomerGroup();
 $success = '';
 $error = '';
 
-// Xử lý THÊM nhóm (DISABLED)
-if (isset($_POST['add_group']) && hasPermission('manage_customers')) {
+// Xử lý THÊM nhóm (DISABLED - chỉ Owner)
+if (isset($_POST['add_group']) && hasPermission('full_access')) {
     $data = [
         'groupName' => trim($_POST['groupName']),
         'description' => trim($_POST['description']),
@@ -44,8 +41,8 @@ if (isset($_POST['add_group']) && hasPermission('manage_customers')) {
     }
 }
 
-// Xử lý SỬA nhóm
-if (isset($_POST['edit_group']) && hasPermission('manage_customers')) {
+// Xử lý SỬA nhóm (chỉ Owner)
+if (isset($_POST['edit_group']) && hasPermission('full_access')) {
     $groupID = intval($_POST['groupID']);
     
     $data = [
@@ -65,8 +62,8 @@ if (isset($_POST['edit_group']) && hasPermission('manage_customers')) {
 
 // ❌ XÓA TOGGLE STATUS (không cần nữa)
 
-// Xử lý XÓA nhóm (DISABLED - CỐ ĐỊNH 5 HẠNG)
-if (isset($_GET['delete']) && hasPermission('manage_customers')) {
+// Xử lý XÓA nhóm (DISABLED - CỐ ĐỊNH 5 HẠNG, chỉ Owner)
+if (isset($_GET['delete']) && hasPermission('full_access')) {
     $groupID = intval($_GET['delete']);
     
     $result = $groupController->deleteGroup($groupID);
@@ -234,7 +231,7 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                         
                         <!-- Actions -->
-                        <?php if (hasPermission('manage_customers')): ?>
+                        <?php if (hasPermission('full_access')): ?>
                         <div class="p-4 bg-white border-t border-gray-200 flex justify-center">
                             <button onclick='openEditModal(<?php echo json_encode($group, JSON_HEX_APOS); ?>)' 
                                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">

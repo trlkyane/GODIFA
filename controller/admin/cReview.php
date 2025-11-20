@@ -40,16 +40,13 @@ class cReview {
     }
 
     /**
-     * Cập nhật trạng thái đánh giá (Admin Action)
-     * 0: Chờ duyệt, 1: Đã duyệt, 2: Từ chối/Ẩn
+     * Toggle ẩn/hiện đánh giá (Admin Action)
      */
-    public function updateStatus($reviewID, $status) {
-        if ($this->reviewModel->updateReviewStatus($reviewID, $status)) {
-            $statusText = $status == 1 ? 'duyệt' : 'ẩn';
-            return ['success' => true, 'message' => "Đã $statusText đánh giá thành công."];
-        } else {
-            return ['success' => false, 'message' => "Lỗi khi cập nhật trạng thái."];
+    public function toggleVisibility($reviewID) {
+        if ($this->reviewModel->toggleVisibility($reviewID)) {
+            return ['success' => true, 'message' => "Đã thay đổi hiển thị đánh giá thành công."];
         }
+        return ['success' => false, 'message' => "Lỗi khi thay đổi hiển thị đánh giá."];
     }
 
     /**

@@ -8,9 +8,8 @@ require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
 
 // Check permission
-$currentRoleID = $_SESSION['roleID'] ?? $_SESSION['user_role_id'] ?? null;
-if ($currentRoleID == 3) {
-    die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">Nhân viên Bán Hàng không có quyền truy cập Chat!</div></div>');
+if (!hasPermission('view_chat')) {
+    die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">Bạn không có quyền truy cập Chat!</div></div>');
 }
 
 // Load Controller
@@ -19,7 +18,8 @@ $chatController = new ChatController();
 
 $success = '';
 $error = '';
-$currentUserID = $_SESSION['user_id'] ?? 0; 
+$currentUserID = $_SESSION['user_id'] ?? 0;
+$currentRoleID = $_SESSION['role_id'] ?? 0; 
 
 // --- Xử lý DELETE MESSAGE / DELETE CONVERSATION (giữ nguyên) ---
 
