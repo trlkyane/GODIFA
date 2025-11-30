@@ -1,0 +1,14 @@
+{
+    "name": "godifa/admin",
+    "description": "GODIFA E-commerce Admin System",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "phpoffice/phpspreadsheet": "^1.30"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}

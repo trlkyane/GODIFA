@@ -3,16 +3,35 @@ if (session_status() === PHP_SESSION_NONE) {
     session_name('GODIFA_USER_SESSION');
     session_start();
 }
-require_once '../model/mCart.php';
-require_once '../model/mProduct.php';
+require_once __DIR__ . '/../model/mCart.php';
+require_once __DIR__ . '/../model/mProduct.php';
+require_once __DIR__ . '/cCartSync.php';
 
 class CartController {
     private $cartModel;
     private $productModel;
+    private $cartSync;
     
     public function __construct() {
         $this->cartModel = new Cart();
         $this->productModel = new Product();
+        $this->cartSync = new CartSync();
+    }
+    
+    /**
+     * Kiểm tra khách đã đăng nhập chưa
+     */
+    private function isCustomerLoggedIn() {
+        return isset($_SESSION['customer_id']) && isset($_SESSION['is_customer_logged_in']);
+    }
+    
+    /**
+     * Lưu giỏ hàng vào database nếu khách đã đăng nhập
+     */
+    private function syncToDatabase() {
+        if ($this->isCustomerLoggedIn()) {
+            $this->cartSync->saveCartToDatabase($_SESSION['customer_id']);
+        }
     }
     
     // Khởi tạo giỏ hàng trong session
@@ -62,6 +81,10 @@ class CartController {
             }
             
             $cartCount = count($_SESSION['cart']);
+            
+            // ✅ Lưu vào database nếu đã đăng nhập
+            $this->syncToDatabase();
+            
             return ['success' => true, 'message' => 'Thêm vào giỏ hàng thành công', 'cartCount' => $cartCount];
         }
         
@@ -101,6 +124,9 @@ class CartController {
                 if ($product && $product['stockQuantity'] >= $quantity) {
                     $_SESSION['cart'][$productId]['quantity'] = $quantity;
                     
+                    // ✅ Lưu vào database nếu đã đăng nhập
+                    $this->syncToDatabase();
+                    
                     $cartData = $this->viewCart();
                     return [
                         'success' => true, 
@@ -128,6 +154,10 @@ class CartController {
             
             if (isset($_SESSION['cart'][$productId])) {
                 unset($_SESSION['cart'][$productId]);
+                
+                // ✅ Lưu vào database nếu đã đăng nhập
+                $this->syncToDatabase();
+                
                 $cartCount = count($_SESSION['cart']);
                 $cartData = $this->viewCart();
                 return [
@@ -148,6 +178,10 @@ class CartController {
     // Xóa toàn bộ giỏ hàng (không cần đăng nhập)
     public function clearCart() {
         $_SESSION['cart'] = [];
+        
+        // ✅ Lưu vào database nếu đã đăng nhập
+        $this->syncToDatabase();
+        
         return ['success' => true, 'message' => 'Đã xóa toàn bộ giỏ hàng'];
     }
 }

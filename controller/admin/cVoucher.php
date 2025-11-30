@@ -102,6 +102,12 @@ class cVoucher {
         if (!isset($data['quantity']) || $data['quantity'] <= 0) {
             $errors[] = "Số lượng phải lớn hơn 0!";
         }
+
+        // Min order value (đơn tối thiểu) - optional, >=0
+        $minOrderValue = isset($data['minOrderValue']) ? (int)$data['minOrderValue'] : 0;
+        if ($minOrderValue < 0) {
+            $errors[] = "Đơn tối thiểu không được âm!";
+        }
         
         if (strtotime($data['endDate']) < strtotime($data['startDate'])) {
             $errors[] = "Ngày kết thúc phải sau ngày bắt đầu!";
@@ -118,6 +124,7 @@ class cVoucher {
             $data['quantity'],
             $data['startDate'],
             $data['endDate'],
+            $minOrderValue,
             $data['requirement'] ?? ''
         );
         
@@ -146,6 +153,11 @@ class cVoucher {
         if (!isset($data['quantity']) || $data['quantity'] < 0) {
             $errors[] = "Số lượng không được âm!";
         }
+
+        $minOrderValue = isset($data['minOrderValue']) ? (int)$data['minOrderValue'] : 0;
+        if ($minOrderValue < 0) {
+            $errors[] = "Đơn tối thiểu không được âm!";
+        }
         
         if (strtotime($data['endDate']) < strtotime($data['startDate'])) {
             $errors[] = "Ngày kết thúc phải sau ngày bắt đầu!";
@@ -163,6 +175,7 @@ class cVoucher {
             $data['quantity'],
             $data['startDate'],
             $data['endDate'],
+            $minOrderValue,
             $data['requirement'] ?? ''
         );
         

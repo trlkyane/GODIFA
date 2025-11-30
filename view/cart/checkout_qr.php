@@ -16,6 +16,7 @@ $conn = $db->connect();
 
 $stmt = $conn->prepare("
     SELECT o.orderID, o.orderDate, o.totalAmount, o.paymentStatus, o.transactionCode,
+           o.qrUrl, o.qrExpiredAt,
            d.recipientName, d.recipientPhone, d.fullAddress
     FROM `order` o
     LEFT JOIN order_delivery d ON o.orderID = d.orderID
@@ -26,11 +27,11 @@ $stmt->execute();
 $result = $stmt->get_result();
 $order = $result->fetch_assoc();
 
-// Lấy QR info từ session (được tạo từ cCheckout.php)
-$qrUrl = $_SESSION['qr_url'] ?? null;
-$qrExpiredAt = $_SESSION['qr_expired_at'] ?? null;
+// ✅ Ưu tiên load từ database, fallback sang session nếu DB NULL
+$qrUrl = $order['qrUrl'] ?? $_SESSION['qr_url'] ?? null;
+$qrExpiredAt = $order['qrExpiredAt'] ?? $_SESSION['qr_expired_at'] ?? null;
 
-// Nếu không có trong session, tạo mới
+// Nếu vẫn không có (đơn hàng cũ trước khi có cột mới), tạo mới
 if (!$qrUrl || !$qrExpiredAt) {
     $account = '105875539922';
     $bank = 'VietinBank';
@@ -38,7 +39,12 @@ if (!$qrUrl || !$qrExpiredAt) {
     $qrUrl = "https://qr.sepay.vn/img?acc=$account&bank=$bank&amount={$order['totalAmount']}&des=" . urlencode($description);
     $qrExpiredAt = date('Y-m-d H:i:s', time() + 15 * 60); // 15 phút
     
-    // Lưu vào session
+    // ✅ Lưu vào database
+    $stmtUpdate = $conn->prepare("UPDATE `order` SET qrUrl = ?, qrExpiredAt = ? WHERE orderID = ?");
+    $stmtUpdate->bind_param("ssi", $qrUrl, $qrExpiredAt, $orderID);
+    $stmtUpdate->execute();
+    
+    // Lưu vào session (fallback)
     $_SESSION['qr_url'] = $qrUrl;
     $_SESSION['qr_expired_at'] = $qrExpiredAt;
 }

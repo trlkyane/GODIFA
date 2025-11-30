@@ -123,7 +123,6 @@ include '../layout/header.php';
                         $rating = isset($product['avgRating']) ? floatval($product['avgRating']) : 0;
                         $reviewCount = isset($product['reviewCount']) ? intval($product['reviewCount']) : 0;
                         ?>
-                        <?php if ($reviewCount > 0): ?>
                         <div class="flex items-center gap-0.5 mt-1">
                             <div class="flex text-yellow-400">
                                 <?php for($i = 0; $i < 5; $i++): ?>
@@ -132,9 +131,13 @@ include '../layout/header.php';
                                     </svg>
                                 <?php endfor; ?>
                             </div>
-                            <span class="text-[10px] text-gray-500">(<?php echo $reviewCount; ?>)</span>
+                            <span class="text-[10px] text-gray-500">
+                                (<?php echo $reviewCount > 0 ? $reviewCount : 'Chưa có đánh giá'; ?>)
+                            </span>
+                            <span class="text-[10px] text-gray-500 ml-2">
+                                Bán <?php echo isset($product['soldCount']) && $product['soldCount'] > 0 ? $product['soldCount'] : 0; ?>
+                            </span>
                         </div>
-                        <?php endif; ?>
                         
                         <div class="mt-1">
                             <?php if (!empty($product['promotional_price']) && $product['promotional_price'] > 0): ?>

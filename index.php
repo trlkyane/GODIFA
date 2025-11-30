@@ -152,35 +152,6 @@ $activeVouchers = $voucherModel->getActiveVouchers();
     </div>
 </section>
 
-<!-- Voucher Section - Moved up -->
-<?php if (!empty($activeVouchers)): ?>
-<section class="py-3 bg-gradient-to-r from-red-50 to-orange-50 border-y border-red-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-2">
-            <h2 class="text-base font-bold text-gray-900 brand-font">🎁 Mã giảm giá</h2>
-            <span class="text-xs text-red-600 font-semibold">Số lượng có hạng</span>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            <?php foreach ($activeVouchers as $voucher): 
-                $rawValue = isset($voucher['value']) ? (float)$voucher['value'] : 0;
-                $displayValue = $rawValue <= 1 ? round($rawValue * 100) . '%' : number_format($rawValue, 0, ',', '.') . 'đ';
-            ?>
-                <div class="bg-white border border-red-200 p-2 rounded-sm hover:shadow-sm transition group">
-                    <div class="text-center">
-                        <span class="text-red-600 font-bold text-sm block mb-1">-<?php echo $displayValue; ?></span>
-                        <p class="text-gray-700 text-xs font-medium mb-1 line-clamp-1"><?php echo htmlspecialchars($voucher['voucherName']); ?></p>
-                        <button onclick="copyCode('VOUCHER<?php echo $voucher['voucherID']; ?>')" 
-                                class="w-full text-[10px] font-bold bg-black text-white px-2 py-1 hover:bg-gray-800 transition uppercase rounded-sm">
-                            Sao chép
-                        </button>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
-
 <!-- Products Section - More compact -->
 <section class="py-4 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -238,7 +209,6 @@ $activeVouchers = $voucherModel->getActiveVouchers();
                     
                     <!-- Rating -->
                     <div class="flex items-center gap-0.5 mt-0.5">
-                        <?php if ($reviewCount > 0): ?>
                         <div class="flex text-yellow-400">
                             <?php for($i = 0; $i < 5; $i++): ?>
                                 <svg class="w-2 h-2 <?php echo $i < floor($rating) ? 'fill-current' : 'fill-gray-200'; ?>" viewBox="0 0 20 20">
@@ -246,10 +216,9 @@ $activeVouchers = $voucherModel->getActiveVouchers();
                                 </svg>
                             <?php endfor; ?>
                         </div>
-                        <?php endif; ?>
-                        <?php if ($soldCount > 0): ?>
-                        <span class="text-xs text-gray-500">Bán <?php echo $soldCount; ?></span>
-                        <?php endif; ?>
+                        <span class="text-xs text-gray-500 ml-2">
+                            Bán <?php echo isset($soldCount) && $soldCount > 0 ? $soldCount : 0; ?>
+                        </span>
                     </div>
                     
                     <!-- Price -->

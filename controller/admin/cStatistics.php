@@ -18,17 +18,35 @@ class cStatistics {
      */
     public function getAllStatistics() {
         $period = $_GET['period'] ?? 'month';
+        $originalPeriod = $period; // Lưu lại period gốc để hiển thị
         $startDate = $_GET['start_date'] ?? null;
         $endDate = $_GET['end_date'] ?? null;
-        
+
+        // Hỗ trợ các period mới - chuyển thành custom cho xử lý dữ liệu
+        $periodForQuery = $period;
+        if ($period == '7days') {
+            $startDate = date('Y-m-d', strtotime('-6 days'));
+            $endDate = date('Y-m-d');
+            $periodForQuery = 'custom';
+        } elseif ($period == '30days') {
+            $startDate = date('Y-m-d', strtotime('-29 days'));
+            $endDate = date('Y-m-d');
+            $periodForQuery = 'custom';
+        } elseif ($period == 'lastmonth') {
+            $startDate = date('Y-m-01', strtotime('-1 month'));
+            $endDate = date('Y-m-t', strtotime('-1 month'));
+            $periodForQuery = 'custom';
+        }
+
         // Validate period
-        $validPeriods = ['day', 'week', 'month', 'year', 'custom'];
+        $validPeriods = ['day', 'week', 'month', 'year', 'custom', '7days', '30days', 'lastmonth'];
         if (!in_array($period, $validPeriods)) {
             $period = 'month';
+            $originalPeriod = 'month';
         }
-        
+
         // Validate dates for custom period
-        if ($period == 'custom') {
+        if ($periodForQuery == 'custom') {
             if (!$startDate || !$endDate) {
                 $startDate = date('Y-m-01');
                 $endDate = date('Y-m-d');
@@ -36,12 +54,12 @@ class cStatistics {
         }
         
         return [
-            'revenue' => $this->model->getRevenueStats($period, $startDate, $endDate),
-            'orders' => $this->model->getOrderStats($period, $startDate, $endDate),
-            'topProducts' => $this->model->getTopProducts($period, 5, $startDate, $endDate),
-            'paymentMethods' => $this->model->getPaymentMethods($period, $startDate, $endDate),
-            'chartData' => $this->model->getRevenueChartData(30),
-            'period' => $period,
+            'revenue' => $this->model->getRevenueStats($periodForQuery, $startDate, $endDate),
+            'orders' => $this->model->getOrderStats($periodForQuery, $startDate, $endDate),
+            'topProducts' => $this->model->getTopProducts($periodForQuery, 5, $startDate, $endDate),
+            'paymentMethods' => $this->model->getPaymentMethods($periodForQuery, $startDate, $endDate),
+            'chartData' => $this->model->getRevenueChartData($periodForQuery, $startDate, $endDate),
+            'period' => $originalPeriod, // Trả về period gốc để hiển thị đúng
             'startDate' => $startDate,
             'endDate' => $endDate
         ];
@@ -53,12 +71,14 @@ class cStatistics {
     public function getPeriodLabel($period) {
         $labels = [
             'day' => 'Hôm nay',
-            'week' => 'Tuần này',
+            '7days' => '7 ngày trước',
+            '30days' => '30 ngày trước',
             'month' => 'Tháng này',
+            'lastmonth' => 'Tháng trước',
+            'week' => 'Tuần này',
             'year' => 'Năm nay',
             'custom' => 'Tùy chỉnh'
         ];
-        
         return $labels[$period] ?? 'Tháng này';
     }
     

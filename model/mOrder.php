@@ -35,7 +35,13 @@ class Order {
     // Lấy đơn hàng theo ID
     public function getOrderById($orderId) {
         $sql = "SELECT o.*, c.customerName, c.email, c.phone,
-                d.recipientName, d.recipientPhone, d.recipientEmail, d.fullAddress, d.deliveryNotes
+                d.recipientName, d.recipientPhone, d.recipientEmail, d.fullAddress, d.deliveryNotes,
+                TIMESTAMPDIFF(MINUTE, o.orderDate, o.paymentDate) as paymentDelayMinutes,
+                CASE 
+                    WHEN o.paymentDate IS NOT NULL AND TIMESTAMPDIFF(HOUR, o.orderDate, o.paymentDate) >= 1 
+                    THEN 1 
+                    ELSE 0 
+                END as isLatePayment
                 FROM `order` o 
                 INNER JOIN customer c ON o.customerID = c.customerID 
                 LEFT JOIN order_delivery d ON o.orderID = d.orderID
@@ -82,7 +88,13 @@ class Order {
     public function getAllOrders($limit = null, $offset = 0) {
         $sql = "SELECT o.*, c.customerName, c.phone,
                 d.recipientName, d.recipientPhone, d.fullAddress,
-                (SELECT SUM(quantity) FROM order_details WHERE orderID = o.orderID) as totalProducts
+                (SELECT SUM(quantity) FROM order_details WHERE orderID = o.orderID) as totalProducts,
+                TIMESTAMPDIFF(MINUTE, o.orderDate, o.paymentDate) as paymentDelayMinutes,
+                CASE 
+                    WHEN o.paymentDate IS NOT NULL AND TIMESTAMPDIFF(HOUR, o.orderDate, o.paymentDate) >= 1 
+                    THEN 1 
+                    ELSE 0 
+                END as isLatePayment
                 FROM `order` o 
                 INNER JOIN customer c ON o.customerID = c.customerID 
                 LEFT JOIN order_delivery d ON o.orderID = d.orderID
@@ -101,10 +113,23 @@ class Order {
     }
     
     // Cập nhật trạng thái thanh toán
-    public function updatePaymentStatus($orderId, $paymentStatus) {
-        $sql = "UPDATE `order` SET paymentStatus = ? WHERE orderID = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "si", $paymentStatus, $orderId);
+    public function updatePaymentStatus($orderId, $paymentStatus, $paymentDate = null) {
+        // Nếu chuyển sang "Đã thanh toán" và không có paymentDate, tự động set thời gian hiện tại
+        if ($paymentStatus === 'Đã thanh toán' && $paymentDate === null) {
+            $paymentDate = date('Y-m-d H:i:s');
+        }
+        
+        // Nếu chuyển về "Chờ thanh toán" hoặc "Đã hủy", xóa paymentDate
+        if (in_array($paymentStatus, ['Chờ thanh toán', 'Đã hủy'])) {
+            $sql = "UPDATE `order` SET paymentStatus = ?, paymentDate = NULL WHERE orderID = ?";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "si", $paymentStatus, $orderId);
+        } else {
+            $sql = "UPDATE `order` SET paymentStatus = ?, paymentDate = ? WHERE orderID = ?";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "ssi", $paymentStatus, $paymentDate, $orderId);
+        }
+        
         return mysqli_stmt_execute($stmt);
     }
     
@@ -118,6 +143,8 @@ class Order {
     
     // Cập nhật cả 2 trạng thái
     public function updateOrderStatus($orderId, $paymentStatus, $deliveryStatus, $cancelReason = null) {
+        $paymentDate = null;
+        
         // Auto update payment status for COD when delivery is completed
         if ($deliveryStatus === 'Hoàn thành') {
             // Get order payment method
@@ -132,17 +159,23 @@ class Order {
             if ($order && $order['paymentMethod'] === 'COD' && 
                 strpos($order['paymentStatus'], 'Chờ thanh toán') !== false) {
                 $paymentStatus = 'Đã thanh toán';
+                $paymentDate = date('Y-m-d H:i:s'); // Ghi nhận thời điểm hoàn thành giao hàng COD
             }
         }
         
+        // Nếu chuyển sang "Đã thanh toán", ghi nhận paymentDate
+        if ($paymentStatus === 'Đã thanh toán' && $paymentDate === null) {
+            $paymentDate = date('Y-m-d H:i:s');
+        }
+        
         if ($cancelReason !== null) {
-            $sql = "UPDATE `order` SET paymentStatus = ?, deliveryStatus = ?, cancelReason = ? WHERE orderID = ?";
+            $sql = "UPDATE `order` SET paymentStatus = ?, paymentDate = ?, deliveryStatus = ?, cancelReason = ? WHERE orderID = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "sssi", $paymentStatus, $deliveryStatus, $cancelReason, $orderId);
+            mysqli_stmt_bind_param($stmt, "ssssi", $paymentStatus, $paymentDate, $deliveryStatus, $cancelReason, $orderId);
         } else {
-            $sql = "UPDATE `order` SET paymentStatus = ?, deliveryStatus = ? WHERE orderID = ?";
+            $sql = "UPDATE `order` SET paymentStatus = ?, paymentDate = ?, deliveryStatus = ? WHERE orderID = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "ssi", $paymentStatus, $deliveryStatus, $orderId);
+            mysqli_stmt_bind_param($stmt, "sssi", $paymentStatus, $paymentDate, $deliveryStatus, $orderId);
         }
         return mysqli_stmt_execute($stmt);
     }

@@ -12,6 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../model/database.php';
+require_once __DIR__ . '/cCartSync.php';
 
 // Kiểm tra đăng nhập
 if (!isset($_SESSION['customer_id']) || !isset($_SESSION['is_customer_logged_in'])) {
@@ -125,7 +126,7 @@ try {
     // ✅ Kiểm tra và validate voucher (nếu có)
     if ($voucherID) {
         $stmtVoucher = $conn->prepare("
-            SELECT voucherID, voucherName, value, quantity, status, startDate, endDate 
+            SELECT voucherID, voucherName, value, quantity, status, startDate, endDate, minOrderValue 
             FROM voucher 
             WHERE voucherID = ? AND status = 1 AND quantity > 0 
             AND startDate <= CURDATE() AND endDate >= CURDATE()
@@ -141,6 +142,12 @@ try {
         // Validate discount amount
         if ($discountAmount != $voucher['value']) {
             throw new Exception("Số tiền giảm giá không khớp");
+        }
+        
+        // Validate đơn tối thiểu nếu có
+        $minOrderValue = isset($voucher['minOrderValue']) ? (int)$voucher['minOrderValue'] : 0;
+        if ($minOrderValue > 0 && $subtotal < $minOrderValue) {
+            throw new Exception("Đơn hàng chưa đạt tối thiểu " . number_format($minOrderValue, 0, ',', '.') . "₫ để sử dụng voucher");
         }
         
         // Trừ số lượng voucher
@@ -237,16 +244,16 @@ try {
         $description = 'SEVQR TKP155 ' . $transactionCode; // Format: SEVQR TKP{mã VA} {mã giao dịch}
         $qrUrl = "https://qr.sepay.vn/img?acc=$account&bank=$bank&amount=$finalAmount&des=" . urlencode($description);
         
-        // 3.3. Update transactionCode vào order (qrExpiredAt và qrUrl không có trong bảng order)
+        // 3.3. ✅ Update transactionCode, qrUrl và qrExpiredAt vào database
         $stmt = $conn->prepare("
             UPDATE `order` 
-            SET transactionCode = ?
+            SET transactionCode = ?, qrUrl = ?, qrExpiredAt = ?
             WHERE orderID = ?
         ");
-        $stmt->bind_param("si", $transactionCode, $orderID);
+        $stmt->bind_param("sssi", $transactionCode, $qrUrl, $qrExpiredAt, $orderID);
         $stmt->execute();
         
-        // Store QR info in session for display
+        // Store QR info in session for display (fallback)
         $_SESSION['qr_url'] = $qrUrl;
         $_SESSION['qr_expired_at'] = $qrExpiredAt;
     }
@@ -265,8 +272,12 @@ try {
     // 5. Commit transaction
     $conn->commit();
     
-    // 6. Xóa giỏ hàng
+    // 6. Xóa giỏ hàng (session + database)
     unset($_SESSION['cart']);
+    
+    // ✅ Xóa giỏ hàng trong database
+    $cartSync = new CartSync();
+    $cartSync->clearDatabaseCart($customerID);
     
     // 7. Chuyển hướng theo phương thức thanh toán
     if ($paymentMethod === 'COD') {

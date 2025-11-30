@@ -141,36 +141,44 @@ class Statistics {
     }
     
     /**
-     * Lấy dữ liệu biểu đồ doanh thu (30 ngày gần nhất)
+     * Lấy dữ liệu biểu đồ doanh thu theo khoảng thời gian
      */
-    public function getRevenueChartData($days = 30) {
+    public function getRevenueChartData($period = 'month', $startDate = null, $endDate = null) {
         $chartData = [];
-        
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $date = date('Y-m-d', strtotime("-$i days"));
-            
+        $dates = [];
+        // Xác định danh sách ngày cần lấy
+        if ($period == 'custom' && $startDate && $endDate) {
+            $begin = new DateTime($startDate);
+            $end = new DateTime($endDate);
+            for ($dt = clone $begin; $dt <= $end; $dt->modify('+1 day')) {
+                $dates[] = $dt->format('Y-m-d');
+            }
+        } else {
+            $days = 30;
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $dates[] = date('Y-m-d', strtotime("-$i days"));
+            }
+        }
+
+        foreach ($dates as $date) {
             $sql = "SELECT COALESCE(SUM(totalAmount), 0) as revenue 
                     FROM `order` 
                     WHERE DATE(orderDate) = ? 
                     AND paymentStatus = 'Đã thanh toán'";
-            
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "s", $date);
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
-            
             $revenue = 0;
             if ($row = mysqli_fetch_assoc($result)) {
                 $revenue = $row['revenue'];
             }
-            
             $chartData[] = [
                 'date' => date('d/m', strtotime($date)),
                 'fullDate' => $date,
                 'revenue' => $revenue
             ];
         }
-        
         return $chartData;
     }
     

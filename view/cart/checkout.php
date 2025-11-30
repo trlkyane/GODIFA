@@ -327,6 +327,12 @@ foreach ($_SESSION['cart'] as $item) {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
                             </button>
+                            
+                            <!-- Link xem tất cả voucher -->
+                            <a href="/GODIFA/view/voucher/vouchers.php" target="_blank"
+                               class="mt-2 block text-center text-xs text-indigo-600 hover:text-indigo-800 hover:underline">
+                                <i class="fas fa-external-link-alt mr-1"></i>Xem tất cả mã giảm giá
+                            </a>
                         </div>
                         
                         <div class="flex items-start gap-2 text-xs text-gray-500 mt-3">
@@ -425,6 +431,12 @@ foreach ($_SESSION['cart'] as $item) {
     <script>
     // Load vouchers khi trang load
     document.addEventListener('DOMContentLoaded', function() {
+        // Reset voucher inputs khi load trang để tránh dính mã cũ
+        selectedVoucher = null;
+        discountAmount = 0;
+        document.getElementById('voucher-id').value = '';
+        document.getElementById('discount-amount').value = '0';
+        
         loadVouchers();
     });
     
@@ -485,27 +497,64 @@ foreach ($_SESSION['cart'] as $item) {
             const isSelected = selectedVoucher && selectedVoucher.voucherID === voucher.voucherID;
             const borderClass = isSelected ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-indigo-500 hover:bg-gray-50';
             const groupBadge = voucher.isGroupVoucher ? 
-                `<span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full ml-2">
+                `<span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
                     <i class="fas fa-crown"></i> ${voucher.groupName || 'VIP'}
                 </span>` : '';
             
+            // Build điều kiện áp dụng
+            let conditionText = '';
+            if (voucher.minOrderValue && voucher.minOrderValue > 0) {
+                conditionText = `Cho đơn hàng từ ${formatMoney(voucher.minOrderValue)}₫`;
+            } else {
+                conditionText = 'Không có điều kiện tối thiểu';
+            }
+            
+            // Mô tả voucher
+            const description = voucher.requirement && voucher.requirement.trim() !== '' 
+                ? voucher.requirement 
+                : '';
+            
+            // Kiểm tra xem có đủ điều kiện không
+            const isEligible = !voucher.minOrderValue || voucher.minOrderValue <= 0 || SUBTOTAL >= voucher.minOrderValue;
+            const notEligibleClass = !isEligible ? 'opacity-50' : '';
+            const notEligibleBadge = !isEligible ? 
+                `<span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full ml-2">
+                    <i class="fas fa-lock"></i> Chưa đủ điều kiện
+                </span>` : '';
+            
             html += `
-                <button onclick='selectVoucher(${JSON.stringify(voucher)})' 
-                        class="w-full p-4 border-2 ${borderClass} rounded-lg transition text-left">
+                <button onclick='${isEligible ? `selectVoucher(${JSON.stringify(voucher)})` : `alert("Đơn hàng chưa đạt tối thiểu ${formatMoney(voucher.minOrderValue)}₫")`}' 
+                        class="w-full p-4 border-2 ${borderClass} ${notEligibleClass} rounded-lg transition text-left ${isEligible ? '' : 'cursor-not-allowed'}">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <div class="flex items-center mb-1">
-                                <i class="fas fa-ticket-alt text-indigo-600 mr-2"></i>
+                            <div class="flex items-center mb-1 flex-wrap gap-1">
+                                <i class="fas fa-ticket-alt text-indigo-600 mr-1"></i>
                                 <p class="font-semibold">${voucher.voucherName}</p>
                                 ${groupBadge}
+                                ${notEligibleBadge}
                             </div>
                             <p class="text-2xl font-bold text-indigo-600 mb-2">
                                 -${voucher.discountFormatted}
                             </p>
+                            
+                            ${description ? `
+                            <!-- Mô tả -->
+                            <div class="bg-gray-50 border border-gray-200 rounded p-2 mb-2">
+                                <p class="text-xs text-gray-700">${description}</p>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Điều kiện áp dụng -->
+                            <div class="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
+                                <p class="text-xs text-blue-900">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    <strong>Điều kiện:</strong> ${conditionText}
+                                </p>
+                            </div>
+                            
                             <div class="text-xs text-gray-600 space-y-1">
                                 <p><i class="fas fa-calendar mr-1"></i> HSD: ${voucher.endDate}</p>
                                 <p><i class="fas fa-box mr-1"></i> Còn ${voucher.quantity} voucher</p>
-                                ${voucher.requirement ? `<p><i class="fas fa-info-circle mr-1"></i> ${voucher.requirement}</p>` : ''}
                             </div>
                         </div>
                         ${isSelected ? `

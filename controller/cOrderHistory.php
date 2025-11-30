@@ -23,6 +23,7 @@ class OrderHistoryController {
             SELECT 
                 o.orderID,
                 o.orderDate,
+                o.paymentDate,
                 o.totalAmount,
                 o.paymentStatus,
                 o.deliveryStatus,

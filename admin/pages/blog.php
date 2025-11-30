@@ -134,6 +134,7 @@ $pageTitle = 'Quản lý Bài viết';
 include __DIR__ . '/../includes/header.php';
 ?>
 
+
 <div class="flex h-screen bg-gray-100">
     <!-- Sidebar -->
     <?php include __DIR__ . '/../includes/sidebar.php'; ?>
@@ -460,6 +461,7 @@ function closeAddModal() {
 function openEditModal(blog) {
     document.getElementById('edit_blogID').value = blog.blogID;
     document.getElementById('edit_title').value = blog.title;
+    
     document.getElementById('edit_content').value = blog.content;
     
     // Hiển thị ảnh hiện tại
@@ -489,7 +491,7 @@ function viewBlog(blog) {
     document.getElementById('view_title').textContent = blog.title;
     document.getElementById('view_author').textContent = blog.authorName || 'N/A';
     document.getElementById('view_date').textContent = new Date(blog.date).toLocaleString('vi-VN');
-    document.getElementById('view_content').textContent = blog.content;
+    document.getElementById('view_content').innerHTML = blog.content; // Use innerHTML for rich content
     
     document.getElementById('viewModal').classList.remove('hidden');
 }
@@ -515,6 +517,7 @@ window.onclick = function(event) {
     if (event.target == editModal) closeEditModal();
     if (event.target == viewModal) closeViewModal();
 }
+
 </script>
 
 <style>
