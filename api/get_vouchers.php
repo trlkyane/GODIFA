@@ -50,6 +50,7 @@ try {
                 v.voucherID,
                 v.voucherName,
                 v.value as discountValue,
+                v.minOrderValue,
                 v.quantity,
                 v.startDate,
                 v.endDate,
@@ -77,6 +78,7 @@ try {
                 v.voucherID,
                 v.voucherName,
                 v.value as discountValue,
+                v.minOrderValue,
                 v.quantity,
                 v.startDate,
                 v.endDate,
@@ -110,7 +112,8 @@ try {
     
     // Format data
     foreach ($vouchers as &$voucher) {
-        $voucher['discountValue'] = (int)$voucher['discountValue'];
+    $voucher['discountValue'] = (int)$voucher['discountValue'];
+    $voucher['minOrderValue'] = isset($voucher['minOrderValue']) ? (int)$voucher['minOrderValue'] : 0;
         $voucher['discountFormatted'] = number_format($voucher['discountValue'], 0, ',', '.') . '₫';
         $voucher['quantity'] = (int)$voucher['quantity'];
         $voucher['startDate'] = date('d/m/Y', strtotime($voucher['startDate']));

@@ -14,6 +14,7 @@
   <title><?php echo isset($pageTitle) ? $pageTitle : 'GODIFA'; ?> - Minimalist Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -38,6 +39,7 @@
         <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-500">
           <a href="/GODIFA/index.php" class="hover:text-black transition-colors">Trang chủ</a>
           <a href="/GODIFA/view/product/list.php" class="hover:text-black transition-colors">Sản phẩm</a>
+          <a href="/GODIFA/view/voucher/vouchers.php" class="hover:text-black transition-colors">Mã giảm giá</a>
           <a href="/GODIFA/view/news/news.php" class="hover:text-black transition-colors">Tin tức</a>
           <a href="/GODIFA/view/pages/about.php" class="hover:text-black transition-colors">Về chúng tôi</a>
           <a href="/GODIFA/view/pages/contact.php" class="hover:text-black transition-colors">Liên hệ</a>
@@ -81,7 +83,7 @@
                         <a href="/GODIFA/view/auth/logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Đăng xuất</a>
                     <?php else: ?>
                         <a href="/GODIFA/view/auth/customer-login.php" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black">Đăng nhập</a>
-                        <a href="/GODIFA/view/auth/customer-register.php" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black">Đăng ký</a>
+                        <a href="/GODIFA/view/auth/register.php" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black">Đăng ký</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -101,6 +103,7 @@
     <div class="px-4 pt-2 pb-6 space-y-1">
             <a href="/GODIFA/index.php" class="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Trang chủ</a>
             <a href="/GODIFA/view/product/list.php" class="block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-black">Sản phẩm</a>
+            <a href="/GODIFA/view/voucher/vouchers.php" class="block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-black">Mã giảm giá</a>
             <a href="/GODIFA/view/news/news.php" class="block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-black">Tin tức</a>
             <a href="/GODIFA/view/pages/about.php" class="block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-black">Về chúng tôi</a>
         </div>

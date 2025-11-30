@@ -65,23 +65,43 @@ class Voucher {
     }
     
     // Thêm voucher mới
-    public function addVoucher($voucherName, $value, $quantity, $startDate, $endDate, $requirement) {
-        $sql = "INSERT INTO voucher (voucherName, value, quantity, startDate, endDate, requirement) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = mysqli_prepare($this->conn, $sql);
-        // Fix: startDate và endDate phải là 's' (string) không phải 'i' (integer)
-        mysqli_stmt_bind_param($stmt, "sdisss", $voucherName, $value, $quantity, $startDate, $endDate, $requirement);
+    public function addVoucher($voucherName, $value, $quantity, $startDate, $endDate, $minOrderValue, $requirement) {
+        // Đảm bảo minOrderValue không âm
+        if ($minOrderValue < 0) { $minOrderValue = 0; }
+        // Một số môi trường chưa có cột minOrderValue -> fallback
+        $hasMinOrderColumn = $this->hasMinOrderValueColumn();
+        if ($hasMinOrderColumn) {
+            $sql = "INSERT INTO voucher (voucherName, value, quantity, startDate, endDate, minOrderValue, requirement) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "sdissis", $voucherName, $value, $quantity, $startDate, $endDate, $minOrderValue, $requirement);
+        } else {
+            // Fallback nếu chưa chạy migration
+            $sql = "INSERT INTO voucher (voucherName, value, quantity, startDate, endDate, requirement) 
+                    VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "sdisss", $voucherName, $value, $quantity, $startDate, $endDate, $requirement);
+        }
         return mysqli_stmt_execute($stmt);
     }
     
     // Cập nhật voucher
-    public function updateVoucher($id, $voucherName, $value, $quantity, $startDate, $endDate, $requirement) {
-        $sql = "UPDATE voucher 
-                SET voucherName = ?, value = ?, quantity = ?, startDate = ?, endDate = ?, requirement = ? 
-                WHERE voucherID = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
-        // Fix: startDate phải là 's' (string) không phải 'i' (integer)
-        mysqli_stmt_bind_param($stmt, "sdisssi", $voucherName, $value, $quantity, $startDate, $endDate, $requirement, $id);
+    public function updateVoucher($id, $voucherName, $value, $quantity, $startDate, $endDate, $minOrderValue, $requirement) {
+        if ($minOrderValue < 0) { $minOrderValue = 0; }
+        $hasMinOrderColumn = $this->hasMinOrderValueColumn();
+        if ($hasMinOrderColumn) {
+            $sql = "UPDATE voucher 
+                    SET voucherName = ?, value = ?, quantity = ?, startDate = ?, endDate = ?, minOrderValue = ?, requirement = ? 
+                    WHERE voucherID = ?";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "sdissisi", $voucherName, $value, $quantity, $startDate, $endDate, $minOrderValue, $requirement, $id);
+        } else {
+            $sql = "UPDATE voucher 
+                    SET voucherName = ?, value = ?, quantity = ?, startDate = ?, endDate = ?, requirement = ? 
+                    WHERE voucherID = ?";
+            $stmt = mysqli_prepare($this->conn, $sql);
+            mysqli_stmt_bind_param($stmt, "sdisssi", $voucherName, $value, $quantity, $startDate, $endDate, $requirement, $id);
+        }
         return mysqli_stmt_execute($stmt);
     }
     
@@ -119,6 +139,15 @@ class Voucher {
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         return mysqli_num_rows($result) > 0;
+    }
+
+    // Helper: kiểm tra cột minOrderValue đã tồn tại chưa
+    private function hasMinOrderValueColumn() {
+        static $cached = null;
+        if ($cached !== null) return $cached;
+        $res = mysqli_query($this->conn, "SHOW COLUMNS FROM voucher LIKE 'minOrderValue'");
+        $cached = ($res && mysqli_num_rows($res) > 0);
+        return $cached;
     }
     
     // Giảm số lượng voucher khi sử dụng

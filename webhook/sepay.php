@@ -102,22 +102,47 @@ try {
     }
     
     // ===== 4. CẬP NHẬT ORDER =====
-    $stmt = $conn->prepare("
-        UPDATE `order` 
-        SET paymentStatus = 'Đã thanh toán',
-            deliveryStatus = 'Đang xử lý',
-            bankTransactionId = ?
-        WHERE orderID = ?
-    ");
-    $stmt->bind_param("si", $bankTransactionId, $order['orderID']);
+    // Lấy thời gian thanh toán từ webhook (nếu có) hoặc dùng thời gian hiện tại
+    $paymentDate = date('Y-m-d H:i:s');
+    if (!empty($data['transaction_date'])) {
+        $paymentDate = date('Y-m-d H:i:s', strtotime($data['transaction_date']));
+    } elseif (!empty($data['when'])) {
+        $paymentDate = date('Y-m-d H:i:s', strtotime($data['when']));
+    }
+    
+    // Kiểm tra xem cột paymentDate có tồn tại không
+    $checkColumn = $conn->query("SHOW COLUMNS FROM `order` LIKE 'paymentDate'");
+    $hasPaymentDate = ($checkColumn && $checkColumn->num_rows > 0);
+    
+    if ($hasPaymentDate) {
+        // Nếu có cột paymentDate, update cả paymentDate
+        $stmt = $conn->prepare("
+            UPDATE `order` 
+            SET paymentStatus = 'Đã thanh toán',
+                paymentDate = ?,
+                deliveryStatus = 'Đang xử lý'
+            WHERE orderID = ?
+        ");
+        $stmt->bind_param("si", $paymentDate, $order['orderID']);
+    } else {
+        // Nếu chưa có cột paymentDate, chỉ update paymentStatus
+        $stmt = $conn->prepare("
+            UPDATE `order` 
+            SET paymentStatus = 'Đã thanh toán',
+                deliveryStatus = 'Đang xử lý'
+            WHERE orderID = ?
+        ");
+        $stmt->bind_param("i", $order['orderID']);
+    }
     
     if ($stmt->execute()) {
-        logWebhook("SUCCESS: Order #{$order['orderID']} paid successfully");
+        logWebhook("SUCCESS: Order #{$order['orderID']} paid successfully at $paymentDate");
         http_response_code(200);
         echo json_encode([
             'success' => true,
             'message' => 'Payment confirmed',
-            'orderID' => $order['orderID']
+            'orderID' => $order['orderID'],
+            'paymentDate' => $paymentDate
         ]);
     } else {
         throw new Exception("Database update failed");

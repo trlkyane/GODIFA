@@ -8,6 +8,7 @@
 
 ob_start();
 include_once(__DIR__ . "/../model/mCustomer.php");
+include_once(__DIR__ . "/cCartSync.php");
 
 class cCustomerLogin {
     
@@ -26,6 +27,10 @@ class cCustomerLogin {
             $_SESSION["customer_email"] = $customer["email"];
             $_SESSION["customer_phone"] = $customer["phone"];
             $_SESSION["is_customer_logged_in"] = true;
+            
+            // ✅ Đồng bộ giỏ hàng từ database và merge với session
+            $cartSync = new CartSync();
+            $cartSync->syncCartOnLogin($customer["customerID"]);
             
             // Kiểm tra có redirect sau login không (ví dụ từ checkout)
             $redirectUrl = '/GODIFA/index.php';

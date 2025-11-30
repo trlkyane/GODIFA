@@ -73,37 +73,34 @@ include __DIR__ . '/../includes/sidebar.php';
             </div>
             <?php endif; ?>
             
-            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+            <div class="flex flex-row justify-between items-start gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
                         <i class="fas fa-chart-line mr-2 text-blue-600"></i>Thống kê & Báo cáo
                     </h1>
                     <p class="text-sm text-gray-600 mt-1">Kỳ: <?php echo $periodLabel; ?></p>
                 </div>
-                
-                <!-- Period Filter -->
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <select id="periodFilter" onchange="changePeriod(this.value)" 
+                <div class="flex gap-2 items-center">
+                    <select id="periodFilter" onchange="updateDateRange(this.value)" 
                             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="day" <?php echo $period == 'day' ? 'selected' : ''; ?>>Hôm nay</option>
-                        <option value="week" <?php echo $period == 'week' ? 'selected' : ''; ?>>Tuần này</option>
+                        <option value="7days" <?php echo $period == '7days' ? 'selected' : ''; ?>>7 ngày trước</option>
+                        <option value="30days" <?php echo $period == '30days' ? 'selected' : ''; ?>>30 ngày trước</option>
                         <option value="month" <?php echo $period == 'month' ? 'selected' : ''; ?>>Tháng này</option>
-                        <option value="year" <?php echo $period == 'year' ? 'selected' : ''; ?>>Năm nay</option>
+                        <option value="lastmonth" <?php echo $period == 'lastmonth' ? 'selected' : ''; ?>>Tháng trước</option>
                         <option value="custom" <?php echo $period == 'custom' ? 'selected' : ''; ?>>Tùy chỉnh</option>
                     </select>
-                    
-                    <?php if ($period == 'custom'): ?>
-                    <div class="flex gap-2 items-center">
-                        <input type="date" id="startDate" value="<?php echo $startDate; ?>" 
-                               class="px-3 py-2 border rounded-lg">
-                        <span>đến</span>
-                        <input type="date" id="endDate" value="<?php echo $endDate; ?>" 
-                               class="px-3 py-2 border rounded-lg">
-                        <button onclick="applyCustomDate()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            <i class="fas fa-filter mr-1"></i>Áp dụng
-                        </button>
-                    </div>
-                    <?php endif; ?>
+                    <input type="date" id="startDate" value="<?php echo $startDate; ?>" 
+                           class="px-3 py-2 border rounded-lg">
+                    <span>đến</span>
+                    <input type="date" id="endDate" value="<?php echo $endDate; ?>" 
+                           class="px-3 py-2 border rounded-lg">
+                    <button onclick="applyCustomDate()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">
+                        <i class="fas fa-filter mr-1"></i>Áp dụng
+                    </button>
+                    <button onclick="exportToExcel()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap">
+                        <i class="fas fa-file-excel mr-1"></i>Xuất Excel
+                    </button>
                 </div>
             </div>
         </div>
@@ -204,7 +201,12 @@ include __DIR__ . '/../includes/sidebar.php';
         <!-- Chart Section -->
         <div class="bg-white rounded-lg shadow-lg p-4 mb-6">
             <h2 class="text-lg font-bold mb-3">
-                <i class="fas fa-chart-area mr-2 text-blue-600"></i>Biểu đồ doanh thu (30 ngày gần nhất)
+                <i class="fas fa-chart-area mr-2 text-blue-600"></i>Biểu đồ doanh thu
+                <?php if ($period == 'custom' && $startDate && $endDate): ?>
+                    <span class="text-xs text-gray-500">(<?php echo date('d/m/Y', strtotime($startDate)); ?> - <?php echo date('d/m/Y', strtotime($endDate)); ?>)</span>
+                <?php else: ?>
+                    <span class="text-xs text-gray-500">(<?php echo $periodLabel; ?>)</span>
+                <?php endif; ?>
             </h2>
             <div class="w-full" style="height: 250px;">
                 <canvas id="revenueChart"></canvas>
@@ -306,84 +308,166 @@ include __DIR__ . '/../includes/sidebar.php';
 
 <!-- JavaScript -->
 <script>
-        // Chart.js Configuration
-        const chartData = <?php echo json_encode($chartData); ?>;
-        const labels = chartData.map(item => item.date);
-        const revenues = chartData.map(item => item.revenue);
+    // --- 1. Chart.js Config (Giữ nguyên phần này) ---
+    const chartData = <?php echo json_encode($chartData); ?>;
+    const labels = chartData.map(item => item.date);
+    const revenues = chartData.map(item => item.revenue);
 
-        const ctx = document.getElementById('revenueChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: revenues,
-                    borderColor: 'rgb(59, 130, 246)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' đ';
-                            }
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: revenues,
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' đ';
                         }
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return new Intl.NumberFormat('vi-VN', { 
-                                    notation: 'compact',
-                                    compactDisplay: 'short'
-                                }).format(value) + ' đ';
-                            }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return new Intl.NumberFormat('vi-VN', { 
+                                notation: 'compact', 
+                                compactDisplay: 'short' 
+                            }).format(value) + ' đ';
                         }
                     }
                 }
             }
-        });
-
-        // Period Filter Functions
-        function changePeriod(period) {
-            if (period === 'custom') {
-                window.location.href = '?page=statistics&period=custom&start=<?php echo date('Y-m-01'); ?>&end=<?php echo date('Y-m-d'); ?>';
-            } else {
-                window.location.href = '?page=statistics&period=' + period;
-            }
         }
+    });
 
-        function applyCustomDate() {
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
-            
-            if (!start || !end) {
-                alert('Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc');
-                return;
-            }
-            
-            if (start > end) {
-                alert('Ngày bắt đầu phải nhỏ hơn ngày kết thúc');
-                return;
-            }
-            
-            window.location.href = `?page=statistics&period=custom&start_date=${start}&end_date=${end}`;
+    // --- 2. Xử lý Logic bộ lọc ngày (ĐÃ TỐI ƯU) ---
+
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const periodSelect = document.getElementById('periodFilter');
+
+    // Nếu người dùng sửa tay vào ô ngày -> Tự động chuyển Dropdown sang "Tùy chỉnh"
+    function switchToCustom() {
+        periodSelect.value = 'custom';
+    }
+    
+    // Sự kiện 'change' chỉ kích hoạt khi NGƯỜI DÙNG thao tác, không kích hoạt khi JS đổi giá trị
+    startDateInput.addEventListener('change', switchToCustom);
+    endDateInput.addEventListener('change', switchToCustom);
+
+    // Hàm xử lý khi chọn Dropdown (Preset)
+    function updateDateRange(period) {
+        const today = new Date();
+        let startDate, endDate;
+        
+        // Nếu chọn custom thì dừng, để người dùng tự nhập
+        if (period === 'custom') return;
+
+        switch(period) {
+            case 'day':
+                startDate = endDate = today.toISOString().split('T')[0];
+                break;
+            case '7days':
+                endDate = today.toISOString().split('T')[0];
+                const date7 = new Date(today);
+                date7.setDate(date7.getDate() - 6);
+                startDate = date7.toISOString().split('T')[0];
+                break;
+            case '30days':
+                endDate = today.toISOString().split('T')[0];
+                const date30 = new Date(today);
+                date30.setDate(date30.getDate() - 29);
+                startDate = date30.toISOString().split('T')[0];
+                break;
+            case 'month':
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+                endDate = today.toISOString().split('T')[0];
+                break;
+            case 'lastmonth':
+                const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                startDate = lastMonth.toISOString().split('T')[0];
+                const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+                endDate = lastDay.toISOString().split('T')[0];
+                break;
         }
-    </script>
+        
+        // Cập nhật giao diện
+        startDateInput.value = startDate;
+        endDateInput.value = endDate;
+        
+        // [QUAN TRỌNG] Submit ngay lập tức với đúng PERIOD đó
+        submitFilter(period, startDate, endDate);
+    }
+
+    // Hàm xử lý khi bấm nút "Áp dụng"
+    function applyCustomDate() {
+        // Khi bấm nút, ta luôn coi là Custom (hoặc giữ giá trị hiện tại của select)
+        // Nhưng an toàn nhất là ép về custom để backend ưu tiên ngày tháng
+        // Tuy nhiên, nếu dropdown đang là '7days' mà bấm Áp dụng thì vẫn nên giữ '7days'
+        
+        let currentPeriod = periodSelect.value;
+        const start = startDateInput.value;
+        const end = endDateInput.value;
+        
+        submitFilter(currentPeriod, start, end);
+    }
+
+    // Hàm điều hướng chung (Helper)
+    function submitFilter(period, start, end) {
+        if (!start || !end) {
+            alert('Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc');
+            return;
+        }
+        
+        if (start > end) {
+            alert('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc');
+            return;
+        }
+        
+        // Redirect
+        window.location.href = `?page=statistics&period=${period}&start_date=${start}&end_date=${end}`;
+    }
+
+    // Hàm xuất Excel
+    function exportToExcel() {
+        const period = periodSelect.value;
+        const start = startDateInput.value;
+        const end = endDateInput.value;
+        
+        if (!start || !end) {
+            alert('Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc');
+            return;
+        }
+        
+        if (start > end) {
+            alert('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc');
+            return;
+        }
+        
+        // Tạo URL xuất file
+        const exportUrl = `/GODIFA/admin/export_statistics.php?period=${period}&start_date=${start}&end_date=${end}`;
+        
+        // Mở trong tab mới để tải file
+        window.open(exportUrl, '_blank');
+    }
+</script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

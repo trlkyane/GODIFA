@@ -248,6 +248,10 @@ foreach ($orders as $order) {
 }
 
 $pageTitle = 'Quản lý Đơn hàng';
+
+// Load helper để hiển thị thời gian thanh toán
+require_once __DIR__ . '/../includes/payment_delay_helper.php';
+
 include __DIR__ . '/../includes/header.php';
 ?>
 
@@ -381,6 +385,7 @@ include __DIR__ . '/../includes/header.php';
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Khách hàng</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Phương thức</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Thanh toán</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Ngày thanh toán</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Giao hàng</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">SL</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Tổng tiền</th>
@@ -390,7 +395,7 @@ include __DIR__ . '/../includes/header.php';
                         <tbody class="divide-y divide-gray-200">
                             <?php if (empty($orders)): ?>
                             <tr>
-                                <td colspan="9" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="10" class="px-4 py-8 text-center text-gray-500">
                                     <i class="fas fa-shopping-cart text-4xl mb-2 text-gray-300"></i>
                                     <p>Chưa có đơn hàng nào</p>
                                 </td>
@@ -403,11 +408,14 @@ include __DIR__ . '/../includes/header.php';
                                 $customerName = $order['customerName'] ?? 'N/A';
                                 $phone = $order['phone'] ?? '';
                                 $orderDate = $order['orderDate'] ?? '';
+                                $paymentDate = $order['paymentDate'] ?? null;
                                 $totalAmount = $order['totalAmount'] ?? 0;
                                 $paymentMethod = $order['paymentMethod'] ?? 'N/A';
                                 $paymentStatus = $order['paymentStatus'] ?? 'Chờ thanh toán';
                                 $deliveryStatus = $order['deliveryStatus'] ?? 'Chờ xử lý';
                                 $totalProducts = $order['totalProducts'] ?? 0;
+                                $isLatePayment = $order['isLatePayment'] ?? 0;
+                                $paymentDelayMinutes = $order['paymentDelayMinutes'] ?? null;
                                 
                                 // Phương thức thanh toán - Hiển thị icon + text
                                 $isCOD = (strtolower($paymentMethod) === 'cod' || stripos($paymentMethod, 'cod') !== false);
@@ -526,6 +534,18 @@ include __DIR__ . '/../includes/header.php';
                                         <span class="px-3 py-1 <?php echo $paymentColor; ?> border rounded-full text-xs font-medium">
                                             <?php echo htmlspecialchars($paymentStatusLabel); ?>
                                         </span>
+                                    </td>
+                                    
+                                    <!-- Ngày thanh toán -->
+                                    <td class="px-4 py-3">
+                                        <?php if ($paymentStatus === 'Đã thanh toán' && $paymentDate): ?>
+                                            <div class="text-sm text-gray-900"><?php echo date('d/m/Y H:i', strtotime($paymentDate)); ?></div>
+                                            <div class="text-xs text-gray-500"><?php echo strtoupper(date('D', strtotime($paymentDate))); ?></div>
+                                        <?php elseif ($paymentStatus === 'Chờ thanh toán'): ?>
+                                            <span class="text-xs text-gray-400 italic">Chưa thanh toán</span>
+                                        <?php else: ?>
+                                            <span class="text-xs text-gray-400">-</span>
+                                        <?php endif; ?>
                                     </td>
                                     
                                     <!-- Giao hàng -->

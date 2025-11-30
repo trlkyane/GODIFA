@@ -26,7 +26,7 @@ try {
     $conn = $db->connect();
     
     // Lấy thông tin đơn hàng
-    $stmt = $conn->prepare("SELECT paymentStatus FROM `order` WHERE orderID = ?");
+    $stmt = $conn->prepare("SELECT paymentStatus, paymentDate FROM `order` WHERE orderID = ?");
     $stmt->bind_param("i", $orderID);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -44,7 +44,8 @@ try {
     http_response_code(200);
     echo json_encode([
         'success' => true,
-        'status' => $order['paymentStatus']
+        'status' => $order['paymentStatus'],
+        'paymentDate' => $order['paymentDate']
     ]);
     
 } catch (Exception $e) {

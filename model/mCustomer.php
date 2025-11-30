@@ -102,7 +102,7 @@ public function updateCustomer($id, $data) {
     
     // Lấy thông tin khách hàng theo ID
     public function getCustomerById($id) {
-    $sql = "SELECT * FROM customer WHERE customerID = ?";
+    $sql = "SELECT * FROM customer WHERE customerID = ?";             
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
         mysqli_stmt_execute($stmt);

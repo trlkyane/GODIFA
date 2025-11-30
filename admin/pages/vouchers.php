@@ -65,6 +65,7 @@ if (isset($_POST['add_voucher']) && (hasPermission('create_voucher') || hasPermi
             'quantity' => intval($_POST['quantity']),
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'minOrderValue' => isset($_POST['minOrderValue']) ? intval($_POST['minOrderValue']) : 0,
             'requirement' => trim($_POST['requirement'] ?? '')
         ];
         
@@ -132,6 +133,7 @@ if (isset($_POST['edit_voucher']) && hasPermission('manage_vouchers')) {
             'quantity' => intval($_POST['quantity']),
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'minOrderValue' => isset($_POST['minOrderValue']) ? intval($_POST['minOrderValue']) : 0,
             'requirement' => trim($_POST['requirement'] ?? '')
         ];
         
@@ -390,8 +392,8 @@ include __DIR__ . '/../includes/header.php';
                                         
                                         <?php if ($requirement): ?>
                                         <div class="text-xs text-gray-500 mt-1">
-                                            <i class="fas fa-info-circle mr-1"></i>
-                                            <?php echo htmlspecialchars(mb_substr($requirement, 0, 50)); ?>...
+                                            <i class="fas fa-align-left mr-1"></i>
+                                            <strong>Mô tả:</strong> <?php echo htmlspecialchars(mb_substr($requirement, 0, 50)); ?><?php echo mb_strlen($requirement) > 50 ? '...' : ''; ?>
                                         </div>
                                         <?php endif; ?>
                                     </td>
@@ -524,6 +526,14 @@ include __DIR__ . '/../includes/header.php';
                            placeholder="50000"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
                 </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Đơn tối thiểu (VNĐ)</label>
+                    <input type="number" name="minOrderValue" min="0" step="1000"
+                           placeholder="VD: 100000"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                    <p class="text-xs text-gray-500 mt-1">Để trống hoặc 0 = không yêu cầu tối thiểu.</p>
+                </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Số lượng <span class="text-red-500">*</span></label>
@@ -553,10 +563,13 @@ include __DIR__ . '/../includes/header.php';
                 </div>
                 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Điều kiện áp dụng</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả voucher</label>
                     <textarea name="requirement" rows="3"
-                              placeholder="VD: Áp dụng cho đơn hàng từ 500.000đ"
+                              placeholder="VD: Voucher đặc biệt dành cho khách hàng thân thiết, áp dụng cho tất cả sản phẩm"
                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle"></i> Điều kiện tối thiểu sẽ tự động hiển thị dựa trên "Đơn tối thiểu" bên trên
+                    </p>
                 </div>
                 
                 <!-- Phần chọn nhóm khách hàng -->
@@ -624,6 +637,13 @@ include __DIR__ . '/../includes/header.php';
                     <input type="number" name="value" id="edit_value" required min="1000" step="1000"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Đơn tối thiểu (VNĐ)</label>
+                    <input type="number" name="minOrderValue" id="edit_minOrderValue" min="0" step="1000"
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">0 = không yêu cầu.</p>
+                </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Số lượng <span class="text-red-500">*</span></label>
@@ -648,9 +668,13 @@ include __DIR__ . '/../includes/header.php';
                 </div>
                 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Điều kiện áp dụng</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả voucher</label>
                     <textarea name="requirement" id="edit_requirement" rows="3"
+                              placeholder="Mô tả chi tiết về voucher..."
                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle"></i> Điều kiện tối thiểu sẽ tự động hiển thị dựa trên "Đơn tối thiểu"
+                    </p>
                 </div>
                 
                 <!-- Phần chọn nhóm khách hàng -->
@@ -826,6 +850,8 @@ function openEditModal(voucher) {
     document.getElementById('edit_startDate').value = startDate;
     document.getElementById('edit_endDate').value = endDate;
     document.getElementById('edit_requirement').value = voucher.requirement || '';
+    // Min order value (fallback 0 if missing)
+    document.getElementById('edit_minOrderValue').value = (voucher.minOrderValue !== undefined && voucher.minOrderValue !== null) ? voucher.minOrderValue : 0;
     
     // Load existing group assignments
     // First, uncheck all checkboxes
