@@ -8,6 +8,9 @@
  * - Redirect về trang đăng nhập admin
  */
 
+// Load constants để có ADMIN_BASE_URL
+require_once __DIR__ . '/../config/constants.php';
+
 if (session_status() === PHP_SESSION_NONE) {
     session_name('GODIFA_ADMIN_SESSION'); // Session riêng cho admin
     session_start();
@@ -49,5 +52,5 @@ if (ini_get("session.use_cookies")) {
 }
 
 // Redirect về trang đăng nhập admin
-header("Location: /GODIFA/admin/login.php?logout=success");
+header("Location: " . ADMIN_BASE_URL . "login.php?logout=success");
 exit();

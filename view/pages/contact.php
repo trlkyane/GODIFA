@@ -29,7 +29,7 @@
           <div class="w-8 h-8 bg-black text-white rounded-sm flex items-center justify-center text-sm flex-shrink-0">📍</div>
           <div>
             <div class="font-semibold text-sm text-gray-900">Địa chỉ</div>
-            <div class="text-sm text-gray-600">4 Nguyễn Văn Bảo, Phường, Gò Vấp, TP.HCM</div>
+            <div class="text-sm text-gray-600">4 Nguyễn Văn Bảo, Phường 4, Gò Vấp, TP.HCM</div>
           </div>
         </div>
 

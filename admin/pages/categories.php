@@ -6,7 +6,7 @@
 
 // Check permission - Có thể xem hoặc quản lý danh mục
 if (!hasPermission('view_categories') && !hasPermission('manage_categories')) {
-    header('Location: ../index.php?error=permission_denied');
+    header('Location: ' . ADMIN_BASE_URL . 'index.php?error=permission_denied');
     exit();
 }
 
@@ -17,10 +17,10 @@ $categoryController = new cCategory();
 $message = '';
 $messageType = '';
 
-// Xử lý các action
+// Xá»­ lÃ½ cÃ¡c action
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
-    // Thêm danh mục mới
+    // ThÃªm danh má»¥c má»›i
     if (isset($_POST['add_category']) && hasPermission('manage_categories')) {
         $data = [
             'categoryName' => trim($_POST['categoryName']),
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     
-    // Cập nhật danh mục
+    // Cáº­p nháº­t danh má»¥c
     if (isset($_POST['update_category'])) {
         $categoryID = intval($_POST['categoryID']);
         $data = [
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     
-    // Toggle trạng thái
+    // Toggle tráº¡ng thÃ¡i
     if (isset($_POST['toggle_status'])) {
         $categoryID = intval($_POST['categoryID']);
         
@@ -75,10 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Lấy danh sách danh mục
+// Láº¥y danh sÃ¡ch danh má»¥c
 $categories = $categoryController->getAllCategories();
 
-// Lấy danh mục để edit (nếu có)
+// Láº¥y danh má»¥c Ä‘á»ƒ edit (náº¿u cÃ³)
 $editCategory = null;
 if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
     $editCategory = $categoryController->getCategoryById($_GET['id']);
@@ -133,10 +133,10 @@ include __DIR__ . '/../includes/header.php';
                                 SỐ SẢN PHẨM
                             </th>
                             <th style="width: 15%;" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                TRẠNG THÁI
+                                Trạng Thái
                             </th>
                             <th style="width: 35%;" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                HÀNH ĐỘNG
+                                Hành Động
                             </th>
                         </tr>
                     </thead>
@@ -211,7 +211,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal Thêm danh mục -->
+<!-- Modal ThÃªm danh má»¥c -->
 <div id="addModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="flex justify-between items-center mb-4">
@@ -252,7 +252,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal Sửa danh mục -->
+<!-- Modal Sá»­a danh má»¥c -->
 <div id="editModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="flex justify-between items-center mb-4">
@@ -309,7 +309,7 @@ table th, table td {
     vertical-align: middle;
 }
 
-/* Đảm bảo text trong cột hiển thị đầy đủ */
+/* Äáº£m báº£o text trong cá»™t hiá»ƒn thá»‹ Ä‘áº§y Ä‘á»§ */
 table td:nth-child(2) {
     min-width: 250px;
     max-width: none;

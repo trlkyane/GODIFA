@@ -6,7 +6,7 @@
  * ⚠️ CHỈ CHỦ DOANH NGHIỆP MỚI TRUY CẬP ĐƯỢC
  */
 
-// Load auth middleware TRƯỚC để khởi tạo session và constants
+// Load auth middleware TRÆ¯á»šC Ä‘á»ƒ khá»Ÿi táº¡o session vÃ  constants
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
 
@@ -62,7 +62,7 @@ if (isset($_POST['edit_group']) && hasPermission('full_access')) {
 
 // ❌ XÓA TOGGLE STATUS (không cần nữa)
 
-// Xử lý XÓA nhóm (DISABLED - CỐ ĐỊNH 5 HẠNG, chỉ Owner)
+// Xử lý XÓA nhóm (DISABLED - CỐ ĐỊNH 5 HÀNG, chỉ Owner)
 if (isset($_GET['delete']) && hasPermission('full_access')) {
     $groupID = intval($_GET['delete']);
     
@@ -130,7 +130,7 @@ include __DIR__ . '/../includes/header.php';
                         </button>
                     </form>
                     
-                    <!-- ❌ ẨN NÚT THÊM NHÓM (CỐ ĐỊNH 5 HẠNG) -->
+                    <!-- ❌ ẨN NÚT THÊM NHÓM (CỐ ĐỊNH 5 HÀNG) -->
                     <?php if (false && hasPermission('manage_customers')): ?>
                     <button onclick="openAddModal()" 
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center">
@@ -205,7 +205,7 @@ include __DIR__ . '/../includes/header.php';
                                         Chi tiêu: <?php echo $spentRange; ?>
                                     </span>
                                 </div>
-                                <!-- ✅ LUÔN HOẠT ĐỘNG -->
+                                <!-- ✔ LUÔN HOẠT ĐỘNG -->
                                 <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     <i class="fas fa-check-circle"></i> Hoạt động
                                 </span>
@@ -238,8 +238,8 @@ include __DIR__ . '/../includes/header.php';
                                 <i class="fas fa-edit mr-1"></i> Sửa tên & màu
                             </button>
                             
-                            <!-- ❌ ẨN NÚT TOGGLE STATUS (LUÔN HOẠT ĐỘNG) -->
-                            <!-- ❌ ẨN NÚT XÓA (CỐ ĐỊNH 5 HẠNG) -->
+                            <!-- âŒ áº¨N NÃšT TOGGLE STATUS (LUÃ”N HOáº T Äá»˜NG) -->
+                            <!-- âŒ áº¨N NÃšT XÃ“A (Cá» Äá»ŠNH 5 Háº NG) -->
                         </div>
                         <?php endif; ?>
                     </div>
@@ -250,7 +250,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal: Thêm nhóm -->
+<!-- Modal: ThÃªm nhÃ³m -->
 <div id="addModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-10 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white mb-10">
         <div class="flex justify-between items-center pb-3 border-b border-indigo-200">
@@ -384,7 +384,7 @@ include __DIR__ . '/../includes/header.php';
             
             <!-- ❌ XÓA DROPDOWN STATUS (luôn hoạt động) -->
             
-            <!-- ✅ HIỂN THỊ NHƯNG KHÔNG CHO SỬA (CỐ ĐỊNH) -->
+            <!-- ✓ HIỆN THỂ NHƯNG KHÔNG CHO SỬA (CỐ ĐỊNH) -->
             <div class="mb-4 p-4 bg-gray-100 border border-gray-300 rounded-lg">
                 <h4 class="font-bold text-gray-800 mb-3 flex items-center">
                     <i class="fas fa-lock text-gray-600 mr-2"></i>
@@ -454,7 +454,7 @@ function closeEditModal() {
     document.getElementById('editModal').classList.add('hidden');
 }
 
-// ❌ XÓA TOGGLE STATUS (không cần nữa)
+// âŒ XÃ“A TOGGLE STATUS (khÃ´ng cáº§n ná»¯a)
 
 // Delete group
 function deleteGroup(groupID, groupName, totalCustomers) {

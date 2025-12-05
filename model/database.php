@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Database Configuration & Connection
  * File: model/mketnoi.php
@@ -6,7 +6,7 @@
  */
 
 class Database {
-    // Database credentials
+    // Database credentials (sẽ cần thay đổi khi deploy lên VPS)
     private const DB_HOST = 'localhost';
     private const DB_USER = 'root';
     private const DB_PASS = '';
@@ -107,13 +107,14 @@ class clsKetNoi {
 // Cấu hình ứng dụng
 // ============================================
 
-// URL Configuration
-define('BASE_URL', 'http://localhost/GODIFA/');
-define('ADMIN_URL', BASE_URL . 'admin/');
+// Load constants if not already loaded (includes BASE_URL)
+if (!defined('BASE_URL')) {
+    require_once(__DIR__ . '/../config/constants.php');
+}
 
 // Upload Configuration
-define('UPLOAD_DIR', __DIR__ . '/../images/');
-define('UPLOAD_URL', BASE_URL . 'images/');
+define('UPLOAD_DIR', __DIR__ . '/../image/');
+define('UPLOAD_URL', BASE_URL . 'image/');
 
 // Session Configuration
 // MOVED: Session start should be handled by individual pages before any output
@@ -169,4 +170,3 @@ function formatDate($date) {
 function getDB() {
     return Database::getInstance()->getConnection();
 }
-?>

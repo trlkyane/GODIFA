@@ -26,11 +26,11 @@ try {
     $conn = $db->connect();
     
     // Lấy thông tin đơn hàng
-    $stmt = $conn->prepare("SELECT paymentStatus, paymentDate FROM `order` WHERE orderID = ?");
-    $stmt->bind_param("i", $orderID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $order = $result->fetch_assoc();
+    $stmt = mysqli_prepare($conn, "SELECT paymentStatus, paymentDate FROM `order` WHERE orderID = ?");
+    mysqli_stmt_bind_param($stmt, "i", $orderID);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $order = mysqli_fetch_assoc($result);
     
     if (!$order) {
         http_response_code(404);

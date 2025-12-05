@@ -21,7 +21,7 @@
 
         <div class="mb-8">
             <div class="bg-white rounded-sm shadow-sm overflow-hidden">
-                <img src="/GODIFA/image/news.jpg" alt="Godifa Banner" class="w-full h-[300px] object-cover">
+                <img src="<?php echo BASE_URL; ?>image/news.jpg" alt="Godifa Banner" class="w-full h-[300px] object-cover">
             </div>
         </div>
 

@@ -1,4 +1,4 @@
-// FILE: GODIFA/public/js/admin_chat_client.js (Phiên bản cuối cùng đã fix lỗi kiểm tra kiểu dữ liệu)
+﻿// FILE: GODIFA/public/js/admin_chat_client.js (Phiên bản cuối cùng đã fix lỗi kiểm tra kiểu dữ liệu)
 
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------------------
@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ĐÃ CẬP NHẬT: Sử dụng ID mới từ HTML
     const searchConversationInput = document.getElementById('searchConversation'); 
 
-    const SOCKET_SERVER_URL = 'http://localhost:3000'; 
+    // Lấy Socket Server URL từ metadata (tự động điều chỉnh theo môi trường)
+    const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('data-socket-url') : 'http://localhost:3000'; 
     const socket = io(SOCKET_SERVER_URL);
     
     // ----------------------------------------------------------------
@@ -280,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             messagesList.innerHTML = '<div class="w-full text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải lịch sử chat...</div>';
         }
 
-        const apiUrl = `/GODIFA/controller/ChatController.php?action=getMessages&conv_id=${currentConvID}`; 
+        const apiUrl = `/controller/ChatController.php?action=getMessages&conv_id=${currentConvID}`; 
         
         fetch(apiUrl)
             .then(response => {

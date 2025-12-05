@@ -13,7 +13,7 @@
 
         // Confirm before delete
         function confirmDelete(message) {
-            return confirm(message || 'Bạn có chắc muốn xóa?');
+            return confirm(message || 'Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a?');
         }
 
         // Toast notification

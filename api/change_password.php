@@ -66,11 +66,11 @@ try {
     $conn = $db->connect();
     
     // Lấy mật khẩu hiện tại
-    $stmt = $conn->prepare("SELECT password FROM customer WHERE customerID = ?");
-    $stmt->bind_param("i", $customerID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $customer = $result->fetch_assoc();
+    $stmt = mysqli_prepare($conn, "SELECT password FROM customer WHERE customerID = ?");
+    mysqli_stmt_bind_param($stmt, "i", $customerID);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $customer = mysqli_fetch_assoc($result);
     
     if (!$customer) {
         echo json_encode([
@@ -93,10 +93,10 @@ try {
     $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
     
     // Cập nhật
-    $stmt = $conn->prepare("UPDATE customer SET password = ? WHERE customerID = ?");
-    $stmt->bind_param("si", $hashedPassword, $customerID);
+    $stmt = mysqli_prepare($conn, "UPDATE customer SET password = ? WHERE customerID = ?");
+    mysqli_stmt_bind_param($stmt, "si", $hashedPassword, $customerID);
     
-    if ($stmt->execute()) {
+    if (mysqli_stmt_execute($stmt)) {
         echo json_encode([
             'success' => true,
             'message' => 'Đổi mật khẩu thành công'

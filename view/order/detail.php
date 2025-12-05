@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (!isset($_SESSION['customer_id'])) {
-    header('Location: /GODIFA/view/auth/customer-login.php');
+    header('Location: ' . BASE_URL . 'view/auth/customer-login.php');
     exit;
 }
 
@@ -22,15 +22,15 @@ $orderID = $_GET['id'] ?? 0;
 $customerID = $_SESSION['customer_id'];
 
 if (!$orderID) {
-    header('Location: /GODIFA/view/account/order_history.php');
+    header('Location: ' . BASE_URL . 'view/account/order_history.php');
     exit;
 }
 
 $db = Database::getInstance();
 $conn = $db->connect();
 
-// Lấy thông tin đơn hàng (chỉ của customer này)
-$stmt = $conn->prepare("
+// L?y thông tin don hàng (ch? c?a customer này)
+$stmt = mysqli_prepare($conn, "
     SELECT 
         o.orderID,
         o.orderDate,
@@ -52,17 +52,18 @@ $stmt = $conn->prepare("
     LEFT JOIN order_delivery od ON o.orderID = od.orderID
     WHERE o.orderID = ? AND o.customerID = ?
 ");
-$stmt->bind_param("ii", $orderID, $customerID);
-$stmt->execute();
-$order = $stmt->get_result()->fetch_assoc();
+mysqli_stmt_bind_param($stmt, "ii", $orderID, $customerID);
+mysqli_stmt_execute($stmt);
+$resultOrder = mysqli_stmt_get_result($stmt);
+$order = mysqli_fetch_assoc($resultOrder);
 
 if (!$order) {
-    header('Location: /GODIFA/view/account/order_history.php');
+    header('Location: ' . BASE_URL . 'view/account/order_history.php');
     exit;
 }
 
 // Lấy chi tiết sản phẩm
-$stmt = $conn->prepare("
+$stmt = mysqli_prepare($conn, "
     SELECT 
         od.productID,
         od.quantity,
@@ -73,9 +74,10 @@ $stmt = $conn->prepare("
     JOIN product p ON od.productID = p.productID
     WHERE od.orderID = ?
 ");
-$stmt->bind_param("i", $orderID);
-$stmt->execute();
-$rawOrderDetails = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+mysqli_stmt_bind_param($stmt, "i", $orderID);
+mysqli_stmt_execute($stmt);
+$resultDetails = mysqli_stmt_get_result($stmt);
+$rawOrderDetails = mysqli_fetch_all($resultDetails, MYSQLI_ASSOC);
 
 $orderDetails = [];
 // Điều kiện đánh giá: Đơn hàng phải ở trạng thái "Hoàn thành" hoặc "Đã giao"
@@ -83,7 +85,7 @@ $canReviewOrder = ($order['deliveryStatus'] === 'Hoàn thành' || $order['delive
 
 // Chuẩn bị statement để kiểm tra từng sản phẩm đã được đánh giá chưa
 // ⚠️ LƯU Ý: Bảng review phải tồn tại để câu lệnh này không báo lỗi.
-$stmtReview = $conn->prepare("
+$stmtReview = mysqli_prepare($conn, "
     SELECT COUNT(*) FROM review 
     WHERE orderID = ? AND productID = ? AND customerID = ?
 ");
@@ -97,9 +99,9 @@ foreach ($rawOrderDetails as $item) {
         $productID = $item['productID'];
         
         // 1. Kiểm tra sản phẩm đã được đánh giá chưa
-        $stmtReview->bind_param("iii", $orderID, $productID, $customerID);
-        $stmtReview->execute();
-        $isReviewed = $stmtReview->get_result()->fetch_row()[0] > 0;
+        mysqli_stmt_bind_param($stmtReview, "iii", $orderID, $productID, $customerID);
+        mysqli_stmt_execute($stmtReview);
+        $isReviewed = mysqli_stmt_get_result($stmtReview)->fetch_row()[0] > 0;
         
         $item['isReviewed'] = $isReviewed;
         
@@ -112,7 +114,7 @@ foreach ($rawOrderDetails as $item) {
 }
 
 if ($stmtReview) {
-    $stmtReview->close();
+    mysqli_stmt_close($stmtReview);
 }
 
 // Lịch sử vận chuyển đã bị xóa (simplified)
@@ -139,7 +141,7 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-6">
-            <a href="/GODIFA/view/account/order_history.php" class="text-indigo-600 hover:text-indigo-800 font-semibold">
+            <a href="<?php echo BASE_URL; ?>view/account/order_history.php" class="text-indigo-600 hover:text-indigo-800 font-semibold">
                 <i class="fas fa-arrow-left mr-2"></i>Quay lại lịch sử đơn hàng
             </a>
         </div>
@@ -159,7 +161,7 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">
                         <i class="fas fa-receipt text-indigo-600 mr-2"></i>
-                        Đơn hàng #<?= $orderID ?>
+                        Ðon hàng #<?= $orderID ?>
                     </h1>
                     <p class="text-gray-600 mt-2">
                         <i class="far fa-clock mr-1"></i>
@@ -232,7 +234,7 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
                     <div class="space-y-3">
                         <?php foreach ($orderDetails as $item): ?>
                         <div class="flex flex-wrap md:flex-nowrap items-center bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition">
-                            <img src="/GODIFA/image/<?= htmlspecialchars($item['image']) ?>" 
+                            <img src="<?php echo BASE_URL; ?>image/<?= htmlspecialchars($item['image']) ?>" 
                                  alt="<?= htmlspecialchars($item['productName']) ?>"
                                  class="w-16 h-16 object-cover rounded-lg mr-4 flex-shrink-0">
                             
@@ -251,7 +253,7 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
 
                             <div class="w-full md:w-1/6 text-center mt-3 md:mt-0 pl-4">
                                 <?php if (isset($item['isReviewed']) && $item['isReviewed']): ?>
-                                    <span class="inline-block bg-indigo-100 text-indigo-700 px-2 py-1 text-xs font-semibold rounded-full">Đã đánh giá</span>
+                                    <span class="inline-block bg-indigo-100 text-indigo-700 px-2 py-1 text-xs font-semibold rounded-full">Ðã dánh giá</span>
                                 
                                 <?php elseif (isset($item['canReview']) && $item['canReview']): ?>
                                     <button 
@@ -262,7 +264,7 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
                                         data-product-name="<?php echo htmlspecialchars($item['productName']); ?>"
                                         data-order-id="<?php echo htmlspecialchars($orderID); ?>"
                                     >
-                                        Đánh Giá Ngay
+                                        Ðánh Giá Ngay
                                     </button>
                                 
                                 <?php else: ?>
@@ -369,8 +371,8 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
                         <i class="fas fa-tools mr-2"></i>Thao tác
                     </h2>
                     <div class="space-y-2">
-                        <?php if ($order['paymentStatus'] === 'Chờ thanh toán'): ?>
-                        <a href="/GODIFA/view/cart/checkout_qr.php?orderID=<?= $orderID ?>" 
+                        <?php if ($order['paymentStatus'] === 'Ch? thanh toán'): ?>
+                        <a href="<?php echo BASE_URL; ?>view/cart/checkout_qr.php?orderID=<?= $orderID ?>" 
                            class="block w-full text-center bg-yellow-600 text-white px-4 py-3 rounded-lg hover:bg-yellow-700 transition font-semibold">
                             <i class="fas fa-credit-card mr-2"></i>Thanh Toán Ngay
                         </a>
@@ -403,7 +405,7 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
                 </div>
                 
                 <div class="modal-body">
-                    <form id="reviewForm" action="/GODIFA/controller/cOrder.php?action=submit_review" method="POST">
+                    <form id="reviewForm" action="<?php echo BASE_URL; ?>controller/cOrder.php?action=submit_review" method="POST">
                         
                         <input type="hidden" name="order_id" id="modalOrderId" value="">
                         <input type="hidden" name="product_id" id="modalProductId" value="">

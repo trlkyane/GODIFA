@@ -22,7 +22,7 @@ $districtId = $input['districtId'] ?? null;
 $wardCode = $input['wardCode'] ?? null;
 $weight = $input['weight'] ?? 500; // Default 500g (GHN minimum: 200g)
 $insurance = $input['insurance'] ?? 0;
-$serviceTypeId = $input['service_type_id'] ?? 2; // Default: Tiêu chuẩn
+$serviceTypeId = $input['service_type_id'] ?? 2; // Default: TiÃªu chuáº©n
 
 // Validate weight (GHN requires >= 200g)
 if ($weight < 200) {

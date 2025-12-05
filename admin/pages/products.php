@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Quản lý Sản phẩm
  * File: admin/pages/products.php
@@ -81,7 +81,7 @@ if (isset($_POST['edit_product']) && hasPermission('manage_products')) {
     
     $data = [
         'productName' => trim($_POST['productName']),
-        'SKU' => trim($_POST['SKU_MRK']),
+        'SKU_MRK' => trim($_POST['SKU_MRK']),
         'stockQuantity' => intval($_POST['stockQuantity']),
         'price' => floatval($_POST['price']),
         'promotional_price' => !empty($_POST['promotional_price']) ? floatval($_POST['promotional_price']) : null,
@@ -163,7 +163,8 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="flex h-screen bg-gray-100">
     <!-- Sidebar -->
-    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+    <?php
+include __DIR__ . '/../includes/sidebar.php'; ?>
     
     <!-- Main Content -->
     <div class="flex-1 overflow-y-auto ml-64">
@@ -176,47 +177,59 @@ include __DIR__ . '/../includes/header.php';
                         Quản lý Sản phẩm
                     </h1>
                     <p class="text-sm text-gray-600 mt-1">
-                        Tổng số: <strong><?php echo $totalRows; ?></strong> sản phẩm
+                        Tổng số: <strong><?php
+echo $totalRows; ?></strong> sản phẩm
                     </p>
                 </div>
-                <?php if (hasPermission('manage_products')): ?>
+                <?php
+if (hasPermission('manage_products')): ?>
                 <button onclick="openAddModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg inline-flex items-center text-sm md:text-base">
                     <i class="fas fa-plus mr-2"></i>Thêm sản phẩm
                 </button>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
         </div>
 
         <!-- Content -->
         <div class="p-4 md:p-6">
             <!-- Success/Error Messages -->
-            <?php if ($success): ?>
+            <?php
+if ($success): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                <i class="fas fa-check-circle mr-2"></i><?php echo $success; ?>
+                <i class="fas fa-check-circle mr-2"></i><?php
+echo $success; ?>
             </div>
-            <?php endif; ?>
+            <?php
+endif; ?>
             
-            <?php if ($error): ?>
+            <?php
+if ($error): ?>
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <i class="fas fa-exclamation-circle mr-2"></i><?php echo $error; ?>
+                <i class="fas fa-exclamation-circle mr-2"></i><?php
+echo $error; ?>
             </div>
-            <?php endif; ?>
+            <?php
+endif; ?>
 
             <!-- Search -->
             <div class="bg-white rounded-lg shadow p-4 mb-6">
                 <form method="GET" class="flex flex-wrap gap-2">
                     <input type="hidden" name="page" value="products">
-                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" 
+                    <input type="text" name="search" value="<?php
+echo htmlspecialchars($search); ?>" 
                            placeholder="Tìm kiếm sản phẩm..." 
                            class="flex-1 min-w-[200px] px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                     <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
                         <i class="fas fa-search mr-2"></i>Tìm kiếm
                     </button>
-                    <?php if ($search): ?>
+                    <?php
+if ($search): ?>
                     <a href="?page=products" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">
                         <i class="fas fa-times mr-2"></i>Xóa
                     </a>
-                    <?php endif; ?>
+                    <?php
+endif; ?>
                 </form>
             </div>
 
@@ -236,144 +249,202 @@ include __DIR__ . '/../includes/header.php';
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            <?php if (empty($products)): ?>
+                            <?php
+if (empty($products)): ?>
                             <tr>
                                 <td colspan="7" class="px-4 py-8 text-center text-gray-500">
                                     <i class="fas fa-inbox text-4xl mb-2"></i>
                                     <p>Không có sản phẩm nào</p>
                                 </td>
                             </tr>
-                            <?php else: ?>
-                                <?php foreach ($products as $product): ?>
+                            <?php
+else: ?>
+                                <?php
+foreach ($products as $product): ?>
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3">
-                                        <?php if ($product['image']): ?>
-                                        <img src="/GODIFA/image/<?php echo htmlspecialchars($product['image']); ?>" 
-                                             alt="<?php echo htmlspecialchars($product['productName']); ?>"
+                                        <?php
+if ($product['image']): ?>
+                                        <img src="<?php
+echo BASE_URL; ?>image/<?php
+echo htmlspecialchars($product['image']); ?>" 
+                                             alt="<?php
+echo htmlspecialchars($product['productName']); ?>"
                                              class="w-14 h-14 object-cover rounded">
-                                        <?php else: ?>
+                                        <?php
+else: ?>
                                         <div class="w-14 h-14 bg-gray-200 rounded flex items-center justify-center">
                                             <i class="fas fa-image text-gray-400"></i>
                                         </div>
-                                        <?php endif; ?>
+                                        <?php
+endif; ?>
                                     </td>
                                     <td class="px-4 py-3 text-sm">
-                                        <div onclick='openViewModal(<?php echo json_encode($product, JSON_HEX_APOS); ?>)' class="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600" style="max-width: 250px;" title="Xem chi tiết: <?php echo htmlspecialchars($product['productName']); ?>">
-                                            <?php echo htmlspecialchars($product['productName']); ?>
+                                        <div onclick='openViewModal(<?php
+echo json_encode($product, JSON_HEX_APOS); ?>)' class="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600" style="max-width: 250px;" title="Xem chi ti?t: <?php
+echo htmlspecialchars($product['productName']); ?>">
+                                            <?php
+echo htmlspecialchars($product['productName']); ?>
                                         </div>
                                         <div class="text-xs text-gray-500 truncate" style="max-width: 250px;">
-                                            <?php echo htmlspecialchars(mb_substr($product['description'], 0, 40)); ?>...
+                                            <?php
+echo htmlspecialchars(mb_substr($product['description'], 0, 40)); ?>...
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 text-sm">
                                         <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                                            <?php echo htmlspecialchars($product['categoryName'] ?? 'N/A'); ?>
+                                            <?php
+echo htmlspecialchars($product['categoryName'] ?? 'N/A'); ?>
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-sm">
-                                        <?php if (!empty($product['promotional_price']) && $product['promotional_price'] > 0): ?>
+                                        <?php
+if (!empty($product['promotional_price']) && $product['promotional_price'] > 0): ?>
                                             <div class="flex flex-col">
-                                                <span class="text-gray-400 line-through text-xs"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</span>
-                                                <span class="font-semibold text-red-600"><?php echo number_format($product['promotional_price'], 0, ',', '.'); ?>₫</span>
+                                                <span class="text-gray-400 line-through text-xs"><?php
+echo number_format($product['price'], 0, ',', '.'); ?>₫</span>
+                                                <span class="font-semibold text-red-600"><?php
+echo number_format($product['promotional_price'], 0, ',', '.'); ?>₫</span>
                                             </div>
-                                        <?php else: ?>
-                                            <span class="font-semibold text-green-600"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</span>
-                                        <?php endif; ?>
+                                        <?php
+else: ?>
+                                            <span class="font-semibold text-green-600"><?php
+echo number_format($product['price'], 0, ',', '.'); ?>₫</span>
+                                        <?php
+endif; ?>
                                     </td>
                                     <td class="px-2 py-3 text-center text-sm">
-                                        <span class="px-2 py-0.5 <?php echo $product['stockQuantity'] > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?> rounded text-xs font-medium">
-                                            <?php echo $product['stockQuantity']; ?>
+                                        <span class="px-2 py-0.5 <?php
+echo $product['stockQuantity'] > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?> rounded text-xs font-medium">
+                                            <?php
+echo $product['stockQuantity']; ?>
                                         </span>
                                     </td>
                                     <td class="px-2 py-3 text-center text-sm">
-                                        <span class="px-3 py-1 <?php echo $product['status'] == 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?> rounded-full text-xs font-medium inline-flex items-center">
-                                            <i class="fas fa-<?php echo $product['status'] == 1 ? 'check-circle' : 'times-circle'; ?> mr-1"></i>
-                                            <?php echo $product['status'] == 1 ? 'Hoạt động' : 'Đã khóa'; ?>
+                                        <span class="px-3 py-1 <?php
+echo $product['status'] == 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?> rounded-full text-xs font-medium inline-flex items-center">
+                                            <i class="fas fa-<?php
+echo $product['status'] == 1 ? 'check-circle' : 'times-circle'; ?> mr-1"></i>
+                                            <?php
+echo $product['status'] == 1 ? 'Hoạt động' : 'Đã khóa'; ?>
                                         </span>
                                     </td>
                                     <td class="px-2 py-3 text-center">
                                         <div class="flex justify-center items-center space-x-2">
                                             <!-- Xem nhanh -->
-                                            <button onclick='openViewModal(<?php echo json_encode($product, JSON_HEX_APOS); ?>)'
+                                            <button onclick='openViewModal(<?php
+echo json_encode($product, JSON_HEX_APOS); ?>)'
                                                     class="text-gray-600 hover:text-blue-600" title="Xem chi tiết">
                                                 <i class="fas fa-eye text-lg"></i>
                                             </button>
-                                            <?php if (hasPermission('manage_products')): ?>
+                                            <?php
+if (hasPermission('manage_products')): ?>
                                             <!-- Sửa -->
-                                            <button onclick='openEditModal(<?php echo json_encode($product, JSON_HEX_APOS); ?>)' 
+                                            <button onclick='openEditModal(<?php
+echo json_encode($product, JSON_HEX_APOS); ?>)' 
                                                     class="text-blue-600 hover:text-blue-800" title="Sửa">
                                                 <i class="fas fa-edit text-lg"></i>
                                             </button>
                                             
                                             <!-- Khóa/Mở khóa -->
-                                            <?php if ($product['status'] == 1): ?>
-                                            <button onclick="toggleStatus(<?php echo $product['productID']; ?>)" 
+                                            <?php
+if ($product['status'] == 1): ?>
+                                            <button onclick="toggleStatus(<?php
+echo $product['productID']; ?>)" 
                                                     class="text-orange-600 hover:text-orange-800" title="Khóa sản phẩm">
                                                 <i class="fas fa-lock text-lg"></i>
                                             </button>
-                                            <?php else: ?>
-                                            <button onclick="toggleStatus(<?php echo $product['productID']; ?>)" 
+                                            <?php
+else: ?>
+                                            <button onclick="toggleStatus(<?php
+echo $product['productID']; ?>)" 
                                                     class="text-green-600 hover:text-green-800" title="Mở khóa sản phẩm">
                                                 <i class="fas fa-lock-open text-lg"></i>
                                             </button>
-                                            <?php endif; ?>
+                                            <?php
+endif; ?>
                                             
                                             <!-- Xóa -->
-                                            <?php if (hasPermission('delete_product')): ?>
-                                            <button onclick="deleteProduct(<?php echo $product['productID']; ?>)" 
+                                            <?php
+if (hasPermission('delete_product')): ?>
+                                            <button onclick="deleteProduct(<?php
+echo $product['productID']; ?>)" 
                                                     class="text-red-600 hover:text-red-800" title="Xóa">
                                                 <i class="fas fa-trash text-lg"></i>
                                             </button>
-                                            <?php endif; ?>
-                                            <?php else: ?>
+                                            <?php
+endif; ?>
+                                            <?php
+else: ?>
                                             <!-- Chỉ xem -->
                                             <span class="text-gray-400 text-sm">Không có quyền</span>
-                                            <?php endif; ?>
+                                            <?php
+endif; ?>
                                         </div>
                                     </td>
                                 </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                                <?php
+endforeach; ?>
+                            <?php
+endif; ?>
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
+                <?php
+if ($totalPages > 1): ?>
                 <div class="px-4 py-3 bg-gray-50 border-t flex flex-wrap justify-between items-center gap-2">
                     <div class="text-sm text-gray-600">
-                        Trang <?php echo $page; ?> / <?php echo $totalPages; ?>
+                        Trang <?php
+echo $page; ?> / <?php
+echo $totalPages; ?>
                     </div>
                     <div class="flex gap-1">
-                        <?php if ($page > 1): ?>
-                        <a href="?page=products&p=<?php echo $page-1; ?><?php echo $search ? '&search='.urlencode($search) : ''; ?>" 
+                        <?php
+if ($page > 1): ?>
+                        <a href="?page=products&p=<?php
+echo $page-1; ?><?php
+echo $search ? '&search='.urlencode($search) : ''; ?>" 
                            class="px-3 py-1 bg-white border rounded hover:bg-gray-100 text-sm">
                             <i class="fas fa-chevron-left"></i>
                         </a>
-                        <?php endif; ?>
+                        <?php
+endif; ?>
                         
-                        <?php for ($i = max(1, $page-2); $i <= min($totalPages, $page+2); $i++): ?>
-                        <a href="?page=products&p=<?php echo $i; ?><?php echo $search ? '&search='.urlencode($search) : ''; ?>" 
-                           class="px-3 py-1 <?php echo $i == $page ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'; ?> border rounded text-sm">
-                            <?php echo $i; ?>
+                        <?php
+for ($i = max(1, $page-2); $i <= min($totalPages, $page+2); $i++): ?>
+                        <a href="?page=products&p=<?php
+echo $i; ?><?php
+echo $search ? '&search='.urlencode($search) : ''; ?>" 
+                           class="px-3 py-1 <?php
+echo $i == $page ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'; ?> border rounded text-sm">
+                            <?php
+echo $i; ?>
                         </a>
-                        <?php endfor; ?>
+                        <?php
+endfor; ?>
                         
-                        <?php if ($page < $totalPages): ?>
-                        <a href="?page=products&p=<?php echo $page+1; ?><?php echo $search ? '&search='.urlencode($search) : ''; ?>" 
+                        <?php
+if ($page < $totalPages): ?>
+                        <a href="?page=products&p=<?php
+echo $page+1; ?><?php
+echo $search ? '&search='.urlencode($search) : ''; ?>" 
                            class="px-3 py-1 bg-white border rounded hover:bg-gray-100 text-sm">
                             <i class="fas fa-chevron-right"></i>
                         </a>
-                        <?php endif; ?>
+                        <?php
+endif; ?>
                     </div>
                 </div>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal THÊM sản phẩm -->
+<!-- Modal THÊM s?n ph?m -->
 <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
@@ -403,24 +474,33 @@ include __DIR__ . '/../includes/header.php';
                     <label class="block text-sm font-medium text-gray-700 mb-2">Danh mục <span class="text-red-500">*</span></label>
                     <select name="categoryID" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">-- Chọn danh mục --</option>
-                        <?php foreach ($categories as $cat): ?>
-                        <option value="<?php echo $cat['categoryID']; ?>"><?php echo htmlspecialchars($cat['categoryName']); ?></option>
-                        <?php endforeach; ?>
+                        <?php
+foreach ($categories as $cat): ?>
+                        <option value="<?php
+echo $cat['categoryID']; ?>"><?php
+echo htmlspecialchars($cat['categoryName']); ?></option>
+                        <?php
+endforeach; ?>
                     </select>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá gốc (VNĐ) <span class="text-red-500">*</span></label>
-                    <input type="number" name="price" required min="0" step="1000"
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá gốc (VNÐ) <span class="text-red-500">*</span></label>
+                    <input type="number" name="price" required min="1" step="1"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           title="Giá phải là số nguyên dương, không có số thập phân"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Chỉ nhập số nguyên, không nhập số thập phân</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá khuyến mãi (VNĐ)</label>
-                    <input type="number" name="promotional_price" min="0" step="1000"
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá khuyến mãi (VNÐ)</label>
+                    <input type="number" name="promotional_price" min="0" step="1"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                            placeholder="Để trống nếu không có KM"
+                           title="Giá phải là số nguyên dương, không có số thập phân"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <p class="text-xs text-gray-500 mt-1">Giá khuyến mãi phải nhỏ hơn giá gốc</p>
+                    <p class="text-xs text-gray-500 mt-1">Giá khuyến mãi phải nhỏ hơn giá gốc, chỉ nhập số nguyên</p>
                 </div>
                 
                 <div>
@@ -456,7 +536,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal SỬA sản phẩm -->
+<!-- Modal S?A s?n ph?m -->
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
@@ -488,24 +568,33 @@ include __DIR__ . '/../includes/header.php';
                     <label class="block text-sm font-medium text-gray-700 mb-2">Danh mục <span class="text-red-500">*</span></label>
                     <select name="categoryID" id="edit_categoryID" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">-- Chọn danh mục --</option>
-                        <?php foreach ($categories as $cat): ?>
-                        <option value="<?php echo $cat['categoryID']; ?>"><?php echo htmlspecialchars($cat['categoryName']); ?></option>
-                        <?php endforeach; ?>
+                        <?php
+foreach ($categories as $cat): ?>
+                        <option value="<?php
+echo $cat['categoryID']; ?>"><?php
+echo htmlspecialchars($cat['categoryName']); ?></option>
+                        <?php
+endforeach; ?>
                     </select>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá gốc (VNĐ) <span class="text-red-500">*</span></label>
-                    <input type="number" name="price" id="edit_price" required min="0" step="1000"
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá gốc (VNÐ) <span class="text-red-500">*</span></label>
+                    <input type="number" name="price" id="edit_price" required min="1" step="1"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           title="Giá phải là số nguyên dương, không có số thập phân"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Chỉ nhập số nguyên, không nhập số thập phân</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá khuyến mãi (VNĐ)</label>
-                    <input type="number" name="promotional_price" id="edit_promotional_price" min="0" step="1000"
-                           placeholder="Để trống nếu không có KM"
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giá khuyến mãi (VNÐ)</label>
+                    <input type="number" name="promotional_price" id="edit_promotional_price" min="0" step="1"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           placeholder="Ð? tr?ng n?u không có KM"
+                           title="Giá phải là số nguyên dương, không có số thập phân"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <p class="text-xs text-gray-500 mt-1">Giá khuyến mãi phải nhỏ hơn giá gốc</p>
+                    <p class="text-xs text-gray-500 mt-1">Giá khuyến mãi phải nhỏ hơn giá gốc, chỉ nhập số nguyên</p>
                 </div>
                 
                 <div>
@@ -543,7 +632,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal XEM NHANH sản phẩm -->
+<!-- Modal XEM NHANH s?n ph?m -->
 <div id="viewModal" class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
         <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
@@ -585,9 +674,12 @@ include __DIR__ . '/../includes/header.php';
             </div>
             <div class="mt-6 flex justify-end gap-2">
                 <button onclick="closeViewModal()" class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm">Đóng</button>
-                <?php /* Optional quick edit */ ?>
-                <?php if (hasPermission('manage_products')): ?>
-                <?php endif; ?>
+                <?php
+/* Optional quick edit */ ?>
+                <?php
+if (hasPermission('manage_products')): ?>
+                <?php
+endif; ?>
             </div>
         </div>
     </div>
@@ -604,7 +696,8 @@ function openViewModal(product) {
     // Image
     const imgBox = document.getElementById('viewImage');
     if (product.image) {
-        imgBox.innerHTML = `<img src="/GODIFA/image/${product.image}" alt="${product.productName}" class="w-full h-full object-cover"/>`;
+        imgBox.innerHTML = `<img src="<?php
+echo BASE_URL; ?>image/${product.image}" alt="${product.productName}" class="w-full h-full object-cover"/>`;
     } else {
         imgBox.innerHTML = '<div class="text-gray-400 text-sm"><i class="fas fa-image text-3xl mb-2"></i><p>Không có hình</p></div>';
     }
@@ -661,10 +754,11 @@ function openEditModal(product) {
     document.getElementById('edit_stockQuantity').value = product.stockQuantity;
     document.getElementById('edit_description').value = product.description || '';
     
-    // Hiển thị ảnh hiện tại
+    // Hi?n th? ?nh hi?n t?i
     const imageDiv = document.getElementById('edit_currentImage');
     if (product.image) {
-        imageDiv.innerHTML = `<img src="/GODIFA/image/${product.image}" alt="Current" class="w-32 h-32 object-cover rounded">`;
+        imageDiv.innerHTML = `<img src="<?php
+echo BASE_URL; ?>image/${product.image}" alt="Current" class="w-32 h-32 object-cover rounded">`;
     } else {
         imageDiv.innerHTML = '<p class="text-gray-500 text-sm">Chưa có hình ảnh</p>';
     }
@@ -678,14 +772,14 @@ function closeEditModal() {
 
 // Toggle status
 function toggleStatus(id) {
-    if (confirm('Bạn có chắc muốn thay đổi trạng thái sản phẩm này?\n\n• Hoạt động → Đã khóa\n• Đã khóa → Hoạt động')) {
+    if (confirm('Bạn có chắc muốn thay đổi trạng thái sản phẩm này?\n\n• Hoạt động ↔ Đã khóa\n• Đã khóa ↔ Hoạt động')) {
         window.location.href = `?page=products&toggle=${id}`;
     }
 }
 
 // Delete product
 function deleteProduct(id) {
-    if (confirm('Bạn có chắc muốn XÓA sản phẩm này?\n\nLưu ý: Hành động này không thể hoàn tác!')) {
+    if (confirm('Bạn có chắc muốn XÓA sản phẩm này?\n\nưu ý: Hành động này không thể hoàn tác!')) {
         window.location.href = `?page=products&delete=${id}`;
     }
 }
@@ -822,4 +916,5 @@ table td button:hover {
 }
 </style>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+<?php
+include __DIR__ . '/../includes/footer.php'; ?>

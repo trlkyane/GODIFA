@@ -1,7 +1,7 @@
 <?php
 /**
  * Controller: cProduct (Admin version)
- * Xử lý logic nghiệp vụ và validation cho quản lý sản phẩm (Admin)
+ * Xá»­ lÃ½ logic nghiá»‡p vá»¥ vÃ  validation cho quáº£n lÃ½ sáº£n pháº©m (Admin)
  */
 
 require_once __DIR__ . '/../../model/mProduct.php';
@@ -17,44 +17,44 @@ class cProduct {
     }
     
     /**
-     * Lấy tất cả sản phẩm
+     * Láº¥y táº¥t cáº£ sáº£n pháº©m
      */
     public function getAllProducts() {
         return $this->productModel->getAllProducts();
     }
     
     /**
-     * Lấy sản phẩm theo ID
+     * Láº¥y sáº£n pháº©m theo ID
      */
     public function getProductById($id) {
         return $this->productModel->getProductById($id);
     }
     
     /**
-     * Lấy tất cả danh mục (cho dropdown)
+     * Láº¥y táº¥t cáº£ danh má»¥c (cho dropdown)
      */
     public function getAllCategories() {
         return $this->categoryModel->getAllCategories();
     }
     
     /**
-     * Tìm kiếm sản phẩm
+     * TÃ¬m kiáº¿m sáº£n pháº©m
      */
     public function searchProducts($keyword) {
         return $this->productModel->searchProducts($keyword);
     }
     
     /**
-     * Đếm tổng số sản phẩm
+     * Äáº¿m tá»•ng sá»‘ sáº£n pháº©m
      */
     public function countProducts() {
         return $this->productModel->countProducts();
     }
     
     /**
-     * Thêm sản phẩm mới (Admin)
-     * @param array $data - Dữ liệu sản phẩm
-     * @return array ['success' => bool, 'message' hoặc 'errors' => mixed]
+     * ThÃªm sáº£n pháº©m má»›i (Admin)
+     * @param array $data - Dá»¯ liá»‡u sáº£n pháº©m
+     * @return array ['success' => bool, 'message' hoáº·c 'errors' => mixed]
      */
     public function addProduct($data) {
         $errors = [];
@@ -101,7 +101,7 @@ class cProduct {
             }
         }
         
-        // Nếu có lỗi, trả về danh sách lỗi
+        // Náº¿u cÃ³ lá»—i, tráº£ vá» danh sÃ¡ch lá»—i
         if (!empty($errors)) {
             return [
                 'success' => false,
@@ -136,7 +136,7 @@ class cProduct {
     }
     
     /**
-     * Cập nhật sản phẩm (Admin)
+     * Cáº­p nháº­t sáº£n pháº©m (Admin)
      * @param int $id - ID sản phẩm
      * @param array $data - Dữ liệu cập nhật
      * @return array ['success' => bool, 'message' hoặc 'errors' => mixed]
@@ -144,7 +144,7 @@ class cProduct {
     public function updateProduct($id, $data) {
         $errors = [];
         
-        // Validate: Tên sản phẩm
+        // Validate: TÃªn sáº£n pháº©m
         if (empty($data['productName'])) {
             $errors[] = "Vui lòng nhập tên sản phẩm!";
         }
@@ -170,7 +170,7 @@ class cProduct {
         
         // Validate: Danh mục
         if (empty($data['categoryID'])) {
-            $errors[] = "Vui lòng chọn danh mục!";
+            $errors[] = "Vui lÃ²ng chá»n danh má»¥c!";
         } else {
             $category = $this->categoryModel->getCategoryById($data['categoryID']);
             if (!$category) {
@@ -196,7 +196,7 @@ class cProduct {
             ];
         }
         
-        // Cập nhật sản phẩm
+        // Cáº­p nháº­t sáº£n pháº©m
         $promotional_price = (!empty($data['promotional_price']) && $data['promotional_price'] > 0) ? $data['promotional_price'] : null;
         $result = $this->productModel->updateProduct(
             $id,

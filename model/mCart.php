@@ -9,7 +9,7 @@ class Cart {
         $this->conn = $db->moKetNoi();
     }
     
-    // Tạo giỏ hàng mới cho khách hàng
+    // Táº¡o giá» hÃ ng má»›i cho khÃ¡ch hÃ ng
     public function createCart($customerId) {
         $sql = "INSERT INTO cart (cartID, customerID) VALUES (?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -17,7 +17,7 @@ class Cart {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Kiểm tra giỏ hàng đã tồn tại
+    // Kiá»ƒm tra giá» hÃ ng Ä‘Ã£ tá»“n táº¡i
     public function cartExists($customerId) {
         $sql = "SELECT cartID FROM cart WHERE customerID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -27,14 +27,14 @@ class Cart {
         return mysqli_num_rows($result) > 0;
     }
     
-    // Thêm sản phẩm vào giỏ hàng
+    // ThÃªm sáº£n pháº©m vÃ o giá» hÃ ng
     public function addToCart($customerId, $productId, $quantity, $price) {
-        // Tạo giỏ hàng nếu chưa có
+        // Táº¡o giá» hÃ ng náº¿u chÆ°a cÃ³
         if (!$this->cartExists($customerId)) {
             $this->createCart($customerId);
         }
         
-        // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
+        // Kiá»ƒm tra sáº£n pháº©m Ä‘Ã£ cÃ³ trong giá» hÃ ng chÆ°a
         $sql = "SELECT quantity FROM cart_items WHERE cartID = ? AND productID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "ii", $customerId, $productId);
@@ -42,14 +42,14 @@ class Cart {
         $result = mysqli_stmt_get_result($stmt);
         
         if (mysqli_num_rows($result) > 0) {
-            // Cập nhật số lượng
+            // Cáº­p nháº­t sá»‘ lÆ°á»£ng
             $row = mysqli_fetch_assoc($result);
             $newQuantity = $row['quantity'] + $quantity;
             $sql = "UPDATE cart_items SET quantity = ?, price = ? WHERE cartID = ? AND productID = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "idii", $newQuantity, $price, $customerId, $productId);
         } else {
-            // Thêm mới
+            // ThÃªm má»›i
             $sql = "INSERT INTO cart_items (cartID, productID, quantity, price) VALUES (?, ?, ?, ?)";
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "iiid", $customerId, $productId, $quantity, $price);
@@ -58,7 +58,7 @@ class Cart {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Lấy danh sách sản phẩm trong giỏ hàng
+    // Láº¥y danh sÃ¡ch sáº£n pháº©m trong giá» hÃ ng
     public function getCartItems($customerId) {
         $sql = "SELECT ci.*, p.productName, p.image, p.stockQuantity 
                 FROM cart_items ci 
@@ -75,7 +75,7 @@ class Cart {
         return $items;
     }
     
-    // Cập nhật số lượng sản phẩm trong giỏ hàng
+    // Cáº­p nháº­t sá»‘ lÆ°á»£ng sáº£n pháº©m trong giá» hÃ ng
     public function updateCartItem($customerId, $productId, $quantity) {
         if ($quantity <= 0) {
             return $this->removeFromCart($customerId, $productId);
@@ -87,7 +87,7 @@ class Cart {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa sản phẩm khỏi giỏ hàng
+    // XÃ³a sáº£n pháº©m khá»i giá» hÃ ng
     public function removeFromCart($customerId, $productId) {
         $sql = "DELETE FROM cart_items WHERE cartID = ? AND productID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -95,7 +95,7 @@ class Cart {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa toàn bộ giỏ hàng
+    // XÃ³a toÃ n bá»™ giá» hÃ ng
     public function clearCart($customerId) {
         $sql = "DELETE FROM cart_items WHERE cartID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -103,7 +103,7 @@ class Cart {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Tính tổng giá trị giỏ hàng
+    // TÃ­nh tá»•ng giÃ¡ trá»‹ giá» hÃ ng
     public function getCartTotal($customerId) {
         $sql = "SELECT SUM(quantity * price) as total FROM cart_items WHERE cartID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -114,7 +114,7 @@ class Cart {
         return $row['total'] ?? 0;
     }
     
-    // Đếm số sản phẩm trong giỏ hàng
+    // Äáº¿m sá»‘ sáº£n pháº©m trong giá» hÃ ng
     public function getCartItemCount($customerId) {
         $sql = "SELECT SUM(quantity) as count FROM cart_items WHERE cartID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);

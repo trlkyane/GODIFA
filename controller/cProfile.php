@@ -19,7 +19,7 @@ class ProfileController {
     public function getCustomerInfo($customerID) {
         $conn = $this->db->connect();
         
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             SELECT 
                 c.customerID,
                 c.customerName,
@@ -36,9 +36,10 @@ class ProfileController {
             LEFT JOIN customer_group cg ON c.groupID = cg.groupID
             WHERE c.customerID = ?
         ");
-        $stmt->bind_param("i", $customerID);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        mysqli_stmt_bind_param($stmt, "i", $customerID);
+        mysqli_stmt_execute($stmt);
+        $resultProfile = mysqli_stmt_get_result($stmt);
+        $result = mysqli_fetch_assoc($resultProfile);
         
         return $result;
     }
@@ -49,7 +50,7 @@ class ProfileController {
     public function getOrderStats($customerID) {
         $conn = $this->db->connect();
         
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             SELECT 
                 COUNT(*) as totalOrders,
                 SUM(CASE WHEN paymentStatus = 'Đã thanh toán' THEN 1 ELSE 0 END) as paidOrders,
@@ -58,9 +59,10 @@ class ProfileController {
             FROM `order`
             WHERE customerID = ?
         ");
-        $stmt->bind_param("i", $customerID);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        mysqli_stmt_bind_param($stmt, "i", $customerID);
+        mysqli_stmt_execute($stmt);
+        $resultStats = mysqli_stmt_get_result($stmt);
+        $result = mysqli_fetch_assoc($resultStats);
         
         return $result;
     }
@@ -71,19 +73,19 @@ class ProfileController {
     public function updateCustomerBasicInfo($customerID, $data) {
         $conn = $this->db->connect();
         
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             UPDATE customer 
             SET customerName = ?, phone = ?
             WHERE customerID = ?
         ");
-        $stmt->bind_param(
+        mysqli_stmt_bind_param($stmt, 
             "ssi",
             $data['customerName'],
             $data['phone'],
             $customerID
         );
         
-        $success = $stmt->execute();
+        $success = mysqli_stmt_execute($stmt);
         
         if ($success) {
             // Cập nhật session
@@ -99,12 +101,12 @@ class ProfileController {
     public function updateCustomerInfo($customerID, $data) {
         $conn = $this->db->connect();
         
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             UPDATE customer 
             SET customerName = ?, phone = ?, email = ?
             WHERE customerID = ?
         ");
-        $stmt->bind_param(
+        mysqli_stmt_bind_param($stmt, 
             "sssi",
             $data['customerName'],
             $data['phone'],
@@ -112,7 +114,7 @@ class ProfileController {
             $customerID
         );
         
-        $success = $stmt->execute();
+        $success = mysqli_stmt_execute($stmt);
         
         if ($success) {
             // Cập nhật session

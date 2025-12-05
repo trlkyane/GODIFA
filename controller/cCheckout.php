@@ -17,19 +17,19 @@ require_once __DIR__ . '/cCartSync.php';
 // Kiểm tra đăng nhập
 if (!isset($_SESSION['customer_id']) || !isset($_SESSION['is_customer_logged_in'])) {
     $_SESSION['checkout_redirect'] = true;
-    header('Location: /GODIFA/view/auth/customer-login.php');
+    header('Location: ' . BASE_URL . 'view/auth/customer-login.php');
     exit;
 }
 
 // Check POST data
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /GODIFA/view/cart/checkout.php');
+    header('Location: ' . BASE_URL . 'view/cart/checkout.php');
     exit;
 }
 
 // Kiểm tra giỏ hàng
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
-    header('Location: /GODIFA/view/cart/viewcart.php');
+    header('Location: ' . BASE_URL . 'view/cart/viewcart.php');
     exit;
 }
 
@@ -64,7 +64,7 @@ if (empty($city)) $errors[] = "Vui lòng chọn tỉnh/thành phố";
 
 if (!empty($errors)) {
     $_SESSION['checkout_errors'] = $errors;
-    header('Location: /GODIFA/view/cart/checkout.php');
+    header('Location: ' . BASE_URL . 'view/cart/checkout.php');
     exit;
 }
 
@@ -125,15 +125,16 @@ try {
     
     // ✅ Kiểm tra và validate voucher (nếu có)
     if ($voucherID) {
-        $stmtVoucher = $conn->prepare("
+        $stmtVoucher = mysqli_prepare($conn, "
             SELECT voucherID, voucherName, value, quantity, status, startDate, endDate, minOrderValue 
             FROM voucher 
             WHERE voucherID = ? AND status = 1 AND quantity > 0 
             AND startDate <= CURDATE() AND endDate >= CURDATE()
         ");
-        $stmtVoucher->bind_param("i", $voucherID);
-        $stmtVoucher->execute();
-        $voucher = $stmtVoucher->get_result()->fetch_assoc();
+        mysqli_stmt_bind_param($stmtVoucher, "i", $voucherID);
+        mysqli_stmt_execute($stmtVoucher);
+        $resultVoucher = mysqli_stmt_get_result($stmtVoucher);
+        $voucher = mysqli_fetch_assoc($resultVoucher);
         
         if (!$voucher) {
             throw new Exception("Voucher không hợp lệ hoặc đã hết hạn");
@@ -151,9 +152,9 @@ try {
         }
         
         // Trừ số lượng voucher
-        $stmtUpdateVoucher = $conn->prepare("UPDATE voucher SET quantity = quantity - 1 WHERE voucherID = ?");
-        $stmtUpdateVoucher->bind_param("i", $voucherID);
-        $stmtUpdateVoucher->execute();
+        $stmtUpdateVoucher = mysqli_prepare($conn, "UPDATE voucher SET quantity = quantity - 1 WHERE voucherID = ?");
+        mysqli_stmt_bind_param($stmtUpdateVoucher, "i", $voucherID);
+        mysqli_stmt_execute($stmtUpdateVoucher);
     }
     
     // 1. Tạo đơn hàng (đã xóa 5 cột duplicate: recipientName, recipientEmail, recipientPhone, deliveryAddress, deliveryNotes)
@@ -161,12 +162,12 @@ try {
     
     // Build SQL dynamically based on whether voucherID exists
     if ($voucherID) {
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             INSERT INTO `order` 
             (orderDate, paymentStatus, totalAmount, paymentMethod, customerID, voucherID, deliveryStatus, shippingFee, note) 
             VALUES (NOW(), ?, ?, ?, ?, ?, 'Chờ xác nhận', ?, ?)
         ");
-        $stmt->bind_param("sdsiids", 
+        mysqli_stmt_bind_param($stmt, "sdsiids", 
             $paymentStatus,     // s = string
             $finalAmount,       // d = double/decimal
             $paymentMethod,     // s = string
@@ -176,12 +177,12 @@ try {
             $notes              // s = string
         );
     } else {
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             INSERT INTO `order` 
             (orderDate, paymentStatus, totalAmount, paymentMethod, customerID, deliveryStatus, shippingFee, note) 
             VALUES (NOW(), ?, ?, ?, ?, 'Chờ xác nhận', ?, ?)
         ");
-        $stmt->bind_param("sdsids", 
+        mysqli_stmt_bind_param($stmt, "sdsids", 
             $paymentStatus,     // s = string
             $finalAmount,       // d = double/decimal
             $paymentMethod,     // s = string
@@ -191,11 +192,11 @@ try {
         );
     }
     
-    $stmt->execute();
-    $orderID = $conn->insert_id;
+    mysqli_stmt_execute($stmt);
+    $orderID = mysqli_insert_id($conn);
     
     // ✅ 1.5. Thêm thông tin giao hàng vào bảng order_delivery
-    $stmtDelivery = $conn->prepare("
+    $stmtDelivery = mysqli_prepare($conn, "
         INSERT INTO order_delivery 
         (orderID, recipientName, recipientEmail, recipientPhone, 
          address, ward, district, city, 
@@ -203,7 +204,7 @@ try {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
-    $stmtDelivery->bind_param("isssssssiiis", 
+    mysqli_stmt_bind_param($stmtDelivery, "isssssssiiis", 
         $orderID,
         $fullName,
         $email,
@@ -217,7 +218,7 @@ try {
         $wardCode,
         $notes
     );
-    $stmtDelivery->execute();
+    mysqli_stmt_execute($stmtDelivery);
     
     // 2. Tạo mã giao dịch (GODIFA + YYYYMMDD + orderID với 4 chữ số)
     $transactionCode = 'GODIFA' . date('Ymd') . str_pad($orderID, 4, '0', STR_PAD_LEFT);
@@ -225,13 +226,13 @@ try {
     // 3. Xử lý theo phương thức thanh toán
     if ($paymentMethod === 'COD') {
         // ✅ COD: Không cần QR code, chỉ lưu transactionCode
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             UPDATE `order` 
             SET transactionCode = ? 
             WHERE orderID = ?
         ");
-        $stmt->bind_param("si", $transactionCode, $orderID);
-        $stmt->execute();
+        mysqli_stmt_bind_param($stmt, "si", $transactionCode, $orderID);
+        mysqli_stmt_execute($stmt);
         
     } else {
         // QR Payment: Tạo QR code
@@ -245,13 +246,13 @@ try {
         $qrUrl = "https://qr.sepay.vn/img?acc=$account&bank=$bank&amount=$finalAmount&des=" . urlencode($description);
         
         // 3.3. ✅ Update transactionCode, qrUrl và qrExpiredAt vào database
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             UPDATE `order` 
             SET transactionCode = ?, qrUrl = ?, qrExpiredAt = ?
             WHERE orderID = ?
         ");
-        $stmt->bind_param("sssi", $transactionCode, $qrUrl, $qrExpiredAt, $orderID);
-        $stmt->execute();
+        mysqli_stmt_bind_param($stmt, "sssi", $transactionCode, $qrUrl, $qrExpiredAt, $orderID);
+        mysqli_stmt_execute($stmt);
         
         // Store QR info in session for display (fallback)
         $_SESSION['qr_url'] = $qrUrl;
@@ -259,14 +260,29 @@ try {
     }
     
     // 4. Thêm chi tiết đơn hàng
-    $stmtDetail = $conn->prepare("
+    $stmtDetail = mysqli_prepare($conn, "
         INSERT INTO order_details (orderID, productID, quantity, price) 
         VALUES (?, ?, ?, ?)
     ");
     
     foreach ($_SESSION['cart'] as $item) {
-        $stmtDetail->bind_param("iiid", $orderID, $item['productID'], $item['quantity'], $item['price']);
-        $stmtDetail->execute();
+        mysqli_stmt_bind_param($stmtDetail, "iiid", $orderID, $item['productID'], $item['quantity'], $item['price']);
+        mysqli_stmt_execute($stmtDetail);
+    }
+    
+    // 4.5. ✅ TRỪ TỒN KHO NGAY - CHO CẢ COD VÀ QR
+    // Lý do: "Giữ chỗ" để không bị mua mất trong khi khách đang quét QR
+    // - COD: Trừ ngay, hoàn lại nếu hủy
+    // - QR: Trừ ngay, hoàn lại nếu hết hạn chưa thanh toán
+    $stmtUpdateStock = mysqli_prepare($conn, "
+        UPDATE product 
+        SET stockQuantity = stockQuantity - ? 
+        WHERE productID = ?
+    ");
+    
+    foreach ($_SESSION['cart'] as $item) {
+        mysqli_stmt_bind_param($stmtUpdateStock, "ii", $item['quantity'], $item['productID']);
+        mysqli_stmt_execute($stmtUpdateStock);
     }
     
     // 5. Commit transaction
@@ -282,10 +298,10 @@ try {
     // 7. Chuyển hướng theo phương thức thanh toán
     if ($paymentMethod === 'COD') {
         // COD: Chuyển thẳng sang trang thank you
-        header("Location: /GODIFA/view/payment/thankyou.php?orderID=$orderID&method=COD");
+        header("Location: " . BASE_URL . "view/payment/thankyou.php?orderID=$orderID&method=COD");
     } else {
         // QR: Chuyển sang trang QR payment
-        header("Location: /GODIFA/view/cart/checkout_qr.php?orderID=$orderID");
+        header("Location: " . BASE_URL . "view/cart/checkout_qr.php?orderID=$orderID");
     }
     exit;
     
@@ -296,7 +312,7 @@ try {
     
     echo "<script>
         alert('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!');
-        window.location.href = '/GODIFA/view/cart/viewcart.php';
+        window.location.href = '" . BASE_URL . "view/cart/viewcart.php';
     </script>";
     exit;
 }

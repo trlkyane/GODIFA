@@ -13,30 +13,30 @@ class cCustomerGroup {
         $this->groupModel = new CustomerGroup();
     }
     
-    // Lấy tất cả nhóm
+    // Láº¥y táº¥t cáº£ nhÃ³m
     public function getAllGroups() {
         return $this->groupModel->getAllGroups();
     }
     
-    // Lấy nhóm đang hoạt động
+    // Láº¥y nhÃ³m Ä‘ang hoáº¡t Ä‘á»™ng
     public function getActiveGroups() {
         return $this->groupModel->getActiveGroups();
     }
     
-    // Lấy nhóm theo ID
+    // Láº¥y nhÃ³m theo ID
     public function getGroupById($id) {
         return $this->groupModel->getGroupById($id);
     }
     
-    // ❌ XÓA CHỨC NĂNG THÊM NHÓM (CỐ ĐỊNH 5 HẠNG)
+    // âŒ XÃ“A CHá»¨C NÄ‚NG THÃŠM NHÃ“M (Cá» Äá»ŠNH 5 Háº NG)
     public function addGroup($data) {
         return [
             'success' => false, 
-            'errors' => ['❌ Không thể thêm nhóm mới! Hệ thống sử dụng 5 hạng cố định.']
+            'errors' => ['Hệ thống sử dụng 5 hạng cố định. Không thể thêm nhóm mới.']
         ];
     }
     
-    // ✅ CHỈ CHO SỬA TÊN, MÔ TẢ, MÀU - KHÔNG CHO SỬA minSpent/maxSpent/status
+    // âœ… CHá»ˆ CHO Sá»¬A TÃŠN, MÃ” Táº¢, MÃ€U - KHÃ”NG CHO Sá»¬A minSpent/maxSpent/status
     public function updateGroup($id, $data) {
         // Validate
         $errors = [];
@@ -53,8 +53,8 @@ class cCustomerGroup {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // ✅ CHỈ CẬP NHẬT: groupName, description, color
-        // ❌ KHÔNG CHO SỬA: minSpent, maxSpent, status (luôn = 1)
+        // âœ… CHá»ˆ Cáº¬P NHáº¬T: groupName, description, color
+        // âŒ KHÃ”NG CHO Sá»¬A: minSpent, maxSpent, status (luÃ´n = 1)
         $allowedData = [
             'groupName' => $data['groupName'],
             'description' => $data['description'] ?? '',
@@ -70,33 +70,33 @@ class cCustomerGroup {
         return ['success' => false, 'errors' => ['Lỗi khi cập nhật nhóm khách hàng!']];
     }
     
-    // ❌ XÓA CHỨC NĂNG XÓA NHÓM (CỐ ĐỊNH 5 HẠNG)
+    // âŒ XÃ“A CHá»¨C NÄ‚NG XÃ“A NHÃ“M (Cá» Äá»ŠNH 5 Háº NG)
     public function deleteGroup($id) {
         return [
             'success' => false,
-            'errors' => ['❌ Không thể xóa nhóm! Hệ thống sử dụng 5 hạng cố định.']
+            'errors' => ['Không thể xóa nhóm! Hệ thống sử dụng 5 hạng cố định.']
         ];
     }
     
-    // ❌ XÓA CHỨC NĂNG TOGGLE STATUS (CỐ ĐỊNH LUÔN HOẠT ĐỘNG)
+    // âŒ XÃ“A CHá»¨C NÄ‚NG TOGGLE STATUS (Cá» Äá»ŠNH LUÃ”N HOáº T Äá»˜NG)
     public function toggleStatus($id) {
         return [
             'success' => false, 
-            'message' => '❌ Không thể thay đổi trạng thái! Tất cả nhóm luôn hoạt động.'
+            'message' => 'Không thể thay đổi trạng thái! Tất cả nhóm luôn hoạt động.'
         ];
     }
     
-    // Lấy thống kê nhóm
+    // Láº¥y thá»‘ng kÃª nhÃ³m
     public function getGroupStats($groupID) {
         return $this->groupModel->getGroupStats($groupID);
     }
     
-    // Lấy thống kê tất cả nhóm
+    // Láº¥y thá»‘ng kÃª táº¥t cáº£ nhÃ³m
     public function getAllGroupStats() {
         return $this->groupModel->getAllGroupStats();
     }
     
-    // Tìm kiếm nhóm
+    // TÃ¬m kiáº¿m nhÃ³m
     public function searchGroups($keyword) {
         if (empty($keyword)) {
             return $this->getAllGroups();
@@ -104,12 +104,12 @@ class cCustomerGroup {
         return $this->groupModel->searchGroups($keyword);
     }
     
-    // Đếm tổng số nhóm
+    // Äáº¿m tá»•ng sá»‘ nhÃ³m
     public function countGroups() {
         return $this->groupModel->countGroups();
     }
     
-    // Đếm khách hàng trong nhóm
+    // Äáº¿m khÃ¡ch hÃ ng trong nhÃ³m
     public function countCustomersInGroup($groupID) {
         return $this->groupModel->countCustomersInGroup($groupID);
     }

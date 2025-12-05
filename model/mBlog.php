@@ -14,7 +14,7 @@ class Blog {
         $this->conn = $db->moKetNoi();
     }
     
-    // Lấy tất cả bài viết
+    // Láº¥y táº¥t cáº£ bÃ i viáº¿t
     public function getAllBlogs() {
         $sql = "SELECT * FROM blog ORDER BY date DESC";
         $result = mysqli_query($this->conn, $sql);
@@ -25,7 +25,7 @@ class Blog {
         return $blogs;
     }
     
-    // Lấy bài viết theo ID
+    // Láº¥y bÃ i viáº¿t theo ID
     public function getBlogById($id) {
         $sql = "SELECT * FROM blog WHERE blogID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -35,7 +35,7 @@ class Blog {
         return mysqli_fetch_assoc($result);
     }
     
-    // Thêm bài viết mới
+    // ThÃªm bÃ i viáº¿t má»›i
     public function addBlog($title, $content, $image = '') {
         $sql = "INSERT INTO blog (title, content, image, date) 
                 VALUES (?, ?, ?, NOW())";
@@ -44,15 +44,15 @@ class Blog {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Cập nhật bài viết
+    // Cáº­p nháº­t bÃ i viáº¿t
     public function updateBlog($id, $title, $content, $image = null) {
         if ($image !== null) {
-            // Cập nhật cả hình ảnh
+            // Cáº­p nháº­t cáº£ hÃ¬nh áº£nh
             $sql = "UPDATE blog SET title = ?, content = ?, image = ? WHERE blogID = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "sssi", $title, $content, $image, $id);
         } else {
-            // Không cập nhật hình ảnh
+            // KhÃ´ng cáº­p nháº­t hÃ¬nh áº£nh
             $sql = "UPDATE blog SET title = ?, content = ? WHERE blogID = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "ssi", $title, $content, $id);
@@ -60,7 +60,7 @@ class Blog {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa bài viết
+    // XÃ³a bÃ i viáº¿t
     public function deleteBlog($id) {
         $sql = "DELETE FROM blog WHERE blogID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -68,7 +68,7 @@ class Blog {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Toggle trạng thái (Khóa/Mở khóa)
+    // Toggle tráº¡ng thÃ¡i (KhÃ³a/Má»Ÿ khÃ³a)
     public function toggleStatus($id) {
         $sql = "UPDATE blog SET status = IF(status = 1, 0, 1) WHERE blogID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -76,7 +76,7 @@ class Blog {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đếm tổng số bài viết
+    // Äáº¿m tá»•ng sá»‘ bÃ i viáº¿t
     public function countBlogs() {
         $sql = "SELECT COUNT(*) as total FROM blog";
         $result = mysqli_query($this->conn, $sql);
@@ -84,7 +84,7 @@ class Blog {
         return $row['total'];
     }
     
-    // Tìm kiếm bài viết
+    // TÃ¬m kiáº¿m bÃ i viáº¿t
     public function searchBlogs($keyword) {
         $searchTerm = "%$keyword%";
         $sql = "SELECT * FROM blog 
@@ -101,7 +101,7 @@ class Blog {
         return $blogs;
     }
     
-    // Lấy bài viết mới nhất
+    // Láº¥y bÃ i viáº¿t má»›i nháº¥t
     public function getRecentBlogs($limit = 5) {
         $sql = "SELECT * FROM blog 
                 WHERE status = 1

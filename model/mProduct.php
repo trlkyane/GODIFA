@@ -9,7 +9,7 @@ class Product {
         $this->conn = $db->moKetNoi();
     }
     
-    // Lấy tất cả sản phẩm
+    // Láº¥y táº¥t cáº£ sáº£n pháº©m
     public function getAllProducts($limit = null, $offset = 0) {
         $sql = "SELECT p.*, c.categoryName 
                 FROM product p 
@@ -33,12 +33,16 @@ class Product {
         return $products;
     }
     
-    // Lấy sản phẩm đang hoạt động
+    // Láº¥y sáº£n pháº©m Ä‘ang hoáº¡t Ä‘á»™ng
     public function getActiveProducts($limit = null, $offset = 0) {
-        $sql = "SELECT p.*, c.categoryName 
+        $sql = "SELECT p.*, c.categoryName,
+                COALESCE(SUM(od.quantity), 0) as soldCount
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
+                LEFT JOIN order_details od ON p.productID = od.productID
+                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
                 WHERE p.status = 1 AND (c.status = 1 OR c.status IS NULL)
+                GROUP BY p.productID
                 ORDER BY p.productID DESC";
         
         if ($limit !== null) {
@@ -53,7 +57,7 @@ class Product {
         return $products;
     }
     
-    // Lấy sản phẩm theo ID
+    // Láº¥y sáº£n pháº©m theo ID
     public function getProductById($id) {
         $sql = "SELECT p.*, c.categoryName 
                 FROM product p 
@@ -66,12 +70,16 @@ class Product {
         return mysqli_fetch_assoc($result);
     }
     
-    // Lấy sản phẩm theo danh mục
+    // Láº¥y sáº£n pháº©m theo danh má»¥c
     public function getProductsByCategory($categoryId, $limit = null) {
-        $sql = "SELECT p.*, c.categoryName 
+        $sql = "SELECT p.*, c.categoryName,
+                COALESCE(SUM(od.quantity), 0) as soldCount
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
+                LEFT JOIN order_details od ON p.productID = od.productID
+                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
                 WHERE p.categoryID = ? AND p.status = 1 AND c.status = 1
+                GROUP BY p.productID
                 ORDER BY p.productID DESC";
         
         if ($limit) {
@@ -92,13 +100,59 @@ class Product {
     // Tìm kiếm sản phẩm
     public function searchProducts($keyword) {
         $keyword = "%$keyword%";
-        $sql = "SELECT p.*, c.categoryName 
+        $sql = "SELECT p.*, c.categoryName,
+                COALESCE(SUM(od.quantity), 0) as soldCount
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
+                LEFT JOIN order_details od ON p.productID = od.productID
+                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
                 WHERE (p.productName LIKE ? OR p.description LIKE ?) AND p.status = 1 AND (c.status = 1 OR c.status IS NULL)
+                GROUP BY p.productID
                 ORDER BY p.productID DESC";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "ss", $keyword, $keyword);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $products = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $products[] = $row;
+        }
+        return $products;
+    }
+    
+    // Tìm kiếm sản phẩm theo category và keyword
+    public function searchProductsByFilters($categoryId = null, $keyword = null) {
+        $sql = "SELECT p.*, c.categoryName,
+                COALESCE(SUM(od.quantity), 0) as soldCount
+                FROM product p 
+                LEFT JOIN category c ON p.categoryID = c.categoryID 
+                LEFT JOIN order_details od ON p.productID = od.productID
+                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
+                WHERE p.status = 1 AND (c.status = 1 OR c.status IS NULL)";
+        
+        $params = [];
+        $types = '';
+        
+        if ($categoryId) {
+            $sql .= " AND p.categoryID = ?";
+            $params[] = $categoryId;
+            $types .= 'i';
+        }
+        
+        if ($keyword) {
+            $keywordParam = "%$keyword%";
+            $sql .= " AND (p.productName LIKE ? OR p.description LIKE ?)";
+            $params[] = $keywordParam;
+            $params[] = $keywordParam;
+            $types .= 'ss';
+        }
+        
+        $sql .= " GROUP BY p.productID ORDER BY p.productID DESC";
+        
+        $stmt = mysqli_prepare($this->conn, $sql);
+        if (!empty($params)) {
+            mysqli_stmt_bind_param($stmt, $types, ...$params);
+        }
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $products = [];
@@ -189,7 +243,7 @@ class Product {
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
                 LEFT JOIN review r ON p.productID = r.productID
                 LEFT JOIN order_details od ON p.productID = od.productID
-                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
+                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('ÄÃ£ giao', 'HoÃ n thÃ nh')
                 GROUP BY p.productID
                 ORDER BY p.productID DESC";
         

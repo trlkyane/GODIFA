@@ -2,7 +2,7 @@
 /**
  * Payment Model
  * File: model/mPayment.php
- * Xử lý dữ liệu thanh toán (SePay)
+ * Xá»­ lÃ½ dá»¯ liá»‡u thanh toÃ¡n (SePay)
  */
 
 require_once __DIR__ . '/database.php';
@@ -16,7 +16,7 @@ class Payment {
     }
     
     /**
-     * Tạo payment record mới
+     * Táº¡o payment record má»›i
      */
     public function createPayment($data) {
         $sql = "INSERT INTO payment (
@@ -48,7 +48,7 @@ class Payment {
     }
     
     /**
-     * Lấy payment theo transaction code
+     * Láº¥y payment theo transaction code
      */
     public function getPaymentByTransactionCode($transactionCode) {
         $sql = "SELECT * FROM payment WHERE transactionCode = ?";
@@ -60,7 +60,7 @@ class Payment {
     }
     
     /**
-     * Lấy payment theo orderID
+     * Láº¥y payment theo orderID
      */
     public function getPaymentByOrderID($orderID) {
         $sql = "SELECT * FROM payment WHERE orderID = ? ORDER BY createdAt DESC LIMIT 1";
@@ -72,7 +72,7 @@ class Payment {
     }
     
     /**
-     * Cập nhật trạng thái thanh toán
+     * Cáº­p nháº­t tráº¡ng thÃ¡i thanh toÃ¡n
      */
     public function updatePaymentStatus($transactionCode, $status, $transactionID = null, $metadata = null) {
         $sql = "UPDATE payment 
@@ -100,7 +100,7 @@ class Payment {
     }
     
     /**
-     * Kiểm tra payment đã thanh toán chưa
+     * Kiá»ƒm tra payment Ä‘Ã£ thanh toÃ¡n chÆ°a
      */
     public function isPaymentPaid($orderID) {
         $sql = "SELECT status FROM payment WHERE orderID = ? AND status = 'paid' LIMIT 1";
@@ -112,14 +112,14 @@ class Payment {
     }
     
     /**
-     * Tạo mã giao dịch unique
+     * Táº¡o mÃ£ giao dá»‹ch unique
      */
     public function generateTransactionCode($orderID) {
         return "GODIFA" . str_pad($orderID, 6, '0', STR_PAD_LEFT);
     }
     
     /**
-     * Tạo QR code URL (VietQR)
+     * Táº¡o QR code URL (VietQR)
      */
     public function generateQRCodeURL($amount, $content, $bankCode, $accountNumber) {
         $config = include __DIR__ . '/../config/sepay.php';

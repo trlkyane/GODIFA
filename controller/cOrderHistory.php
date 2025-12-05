@@ -31,9 +31,11 @@ class OrderHistoryController {
                 o.paymentMethod,
                 od.recipientName,
                 od.recipientPhone,
-                od.fullAddress
+                od.fullAddress,
+                rr.status AS returnStatus
             FROM `order` o
             LEFT JOIN order_delivery od ON o.orderID = od.orderID
+            LEFT JOIN return_requests rr ON o.orderID = rr.orderID
             WHERE o.customerID = ?
             ORDER BY o.orderDate DESC
         ";
@@ -42,16 +44,17 @@ class OrderHistoryController {
             $sql .= " LIMIT ?";
         }
         
-        $stmt = $conn->prepare($sql);
+        $stmt = mysqli_prepare($conn, $sql);
         
         if ($limit) {
-            $stmt->bind_param("ii", $customerID, $limit);
+            mysqli_stmt_bind_param($stmt, "ii", $customerID, $limit);
         } else {
-            $stmt->bind_param("i", $customerID);
+            mysqli_stmt_bind_param($stmt, "i", $customerID);
         }
         
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        mysqli_stmt_execute($stmt);
+        $resultOrders = mysqli_stmt_get_result($stmt);
+        $result = mysqli_fetch_all($resultOrders, MYSQLI_ASSOC);
         
         return $result;
     }
@@ -63,7 +66,7 @@ class OrderHistoryController {
         $conn = $this->db->connect();
         
         // Get order info
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             SELECT 
                 o.*,
                 od.recipientName,
@@ -82,16 +85,17 @@ class OrderHistoryController {
             LEFT JOIN order_delivery od ON o.orderID = od.orderID
             WHERE o.orderID = ? AND o.customerID = ?
         ");
-        $stmt->bind_param("ii", $orderID, $customerID);
-        $stmt->execute();
-        $order = $stmt->get_result()->fetch_assoc();
+        mysqli_stmt_bind_param($stmt, "ii", $orderID, $customerID);
+        mysqli_stmt_execute($stmt);
+        $resultOrder = mysqli_stmt_get_result($stmt);
+        $order = mysqli_fetch_assoc($resultOrder);
         
         if (!$order) {
             return null;
         }
         
         // Get order items
-        $stmt = $conn->prepare("
+        $stmt = mysqli_prepare($conn, "
             SELECT 
                 oi.*,
                 p.productName,
@@ -100,9 +104,10 @@ class OrderHistoryController {
             LEFT JOIN product p ON oi.productID = p.productID
             WHERE oi.orderID = ?
         ");
-        $stmt->bind_param("i", $orderID);
-        $stmt->execute();
-        $order['items'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        mysqli_stmt_bind_param($stmt, "i", $orderID);
+        mysqli_stmt_execute($stmt);
+        $resultItems = mysqli_stmt_get_result($stmt);
+        $order['items'] = mysqli_fetch_all($resultItems, MYSQLI_ASSOC);
         
         return $order;
     }

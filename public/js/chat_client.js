@@ -1,7 +1,8 @@
-// FILE: GODIFA/public/js/chat_client.js - ĐÃ HOÀN CHỈNH VỚI CHỨC NĂNG TẢI LỊCH SỬ & FIX VỊ TRÍ TIN NHẮN
+﻿// FILE: GODIFA/public/js/chat_client.js - ĐÃ HOÀN CHỈNH VỚI CHỨC NĂNG TẢI LỊCH SỬ & FIX VỊ TRÍ TIN NHẮN
 
-const SOCKET_SERVER_PORT = 3000;
-const SOCKET_SERVER_URL = `http://localhost:${SOCKET_SERVER_PORT}`; 
+// Lấy Socket Server URL từ metadata (tự động điều chỉnh theo môi trường)
+const metadata = document.getElementById('customer-metadata');
+const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('data-socket-url') : 'http://localhost:3000'; 
 
 // Khởi tạo kết nối Socket.IO
 const socket = io(SOCKET_SERVER_URL); 
@@ -83,7 +84,7 @@ function loadChatHistory(convID, currentUserID) {
 
     // Vui lòng kiểm tra lại đường dẫn API này nếu vẫn gặp lỗi 404
     // Thử dùng: const apiUrl = `/controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
-    const apiUrl = `/GODIFA/controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
+    const apiUrl = `/controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
     
     fetch(apiUrl)
         .then(response => {

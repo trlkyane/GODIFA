@@ -1,7 +1,7 @@
 <?php
 /**
  * Controller: cOrder (Admin version)
- * Xử lý logic nghiệp vụ và validation cho quản lý đơn hàng (Admin)
+ * Xá»­ lÃ½ logic nghiá»‡p vá»¥ vÃ  validation cho quáº£n lÃ½ Ä‘Æ¡n hÃ ng (Admin)
  */
 
 require_once __DIR__ . '/../../model/mOrder.php';
@@ -14,32 +14,32 @@ class cOrder {
     }
     
     /**
-     * Lấy tất cả đơn hàng (Admin)
+     * Láº¥y táº¥t cáº£ Ä‘Æ¡n hÃ ng (Admin)
      */
     public function getAllOrders() {
         return $this->orderModel->getAllOrders();
     }
     
     /**
-     * Lấy đơn hàng theo ID (Admin)
+     * Láº¥y Ä‘Æ¡n hÃ ng theo ID (Admin)
      */
     public function getOrderById($id) {
         return $this->orderModel->getOrderById($id);
     }
     
     /**
-     * Lấy chi tiết đơn hàng (Admin)
+     * Láº¥y chi tiáº¿t Ä‘Æ¡n hÃ ng (Admin)
      */
     public function getOrderDetails($orderID) {
         return $this->orderModel->getOrderDetails($orderID);
     }
     
     /**
-     * Cập nhật trạng thái đơn hàng (Admin)
-     * @param int $id - ID đơn hàng
+     * Cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng (Admin)
+     * @param int $id - ID Ä‘Æ¡n hÃ ng
      * @param array $data - ['paymentStatus' => string, 'deliveryStatus' => string]
-     * @param int $currentUserID - ID nhân viên hiện tại
-     * @param int $currentRoleID - Vai trò hiện tại (1=Chủ DN, 2=NVQT, 3=NVBH, 4=NVCSKH)
+     * @param int $currentUserID - ID nhÃ¢n viÃªn hiá»‡n táº¡i
+     * @param int $currentRoleID - Vai trÃ² hiá»‡n táº¡i (1=Chá»§ DN, 2=NVQT, 3=NVBH, 4=NVCSKH)
      * @return array ['success' => bool, 'message' => string]
      */
     public function updateOrderStatus($id, $data, $currentUserID = null, $currentRoleID = null) {
@@ -118,7 +118,7 @@ class cOrder {
     }
     
     /**
-     * Đếm đơn hàng theo trạng thái (Admin)
+     * Äáº¿m Ä‘Æ¡n hÃ ng theo tráº¡ng thÃ¡i (Admin)
      */
     public function countByStatus($status) {
         return $this->orderModel->countByStatus($status);

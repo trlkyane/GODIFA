@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../model/database.php';
 $orderID = isset($_GET['orderID']) ? intval($_GET['orderID']) : 0;
 
 if (!$orderID) {
-    header('Location: /GODIFA');
+    header('Location: ' . BASE_URL);
     exit;
 }
 
@@ -14,7 +14,7 @@ if (!$orderID) {
 $db = Database::getInstance();
 $conn = $db->connect();
 
-$stmt = $conn->prepare("
+$stmt = mysqli_prepare($conn, "
     SELECT o.orderID, o.orderDate, o.totalAmount, o.paymentStatus, o.paymentMethod, 
            o.deliveryStatus, o.transactionCode,
            d.recipientName, d.recipientPhone, d.recipientEmail, d.fullAddress, d.deliveryNotes
@@ -22,25 +22,26 @@ $stmt = $conn->prepare("
     LEFT JOIN order_delivery d ON o.orderID = d.orderID
     WHERE o.orderID = ?
 ");
-$stmt->bind_param("i", $orderID);
-$stmt->execute();
-$result = $stmt->get_result();
-$order = $result->fetch_assoc();
+mysqli_stmt_bind_param($stmt, "i", $orderID);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$order = mysqli_fetch_assoc($result);
 
 if (!$order) {
     die("Không tìm thấy đơn hàng!");
 }
 
 // Lấy chi tiết sản phẩm trong đơn hàng
-$stmt = $conn->prepare("
+$stmt = mysqli_prepare($conn, "
     SELECT od.productID, od.quantity, od.price, p.productName, p.image
     FROM order_details od
     JOIN product p ON od.productID = p.productID
     WHERE od.orderID = ?
 ");
-$stmt->bind_param("i", $orderID);
-$stmt->execute();
-$orderDetails = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+mysqli_stmt_bind_param($stmt, "i", $orderID);
+mysqli_stmt_execute($stmt);
+$resultDetails = mysqli_stmt_get_result($stmt);
+$orderDetails = mysqli_fetch_all($resultDetails, MYSQLI_ASSOC);
 
 // Xóa giỏ hàng nếu thanh toán thành công
 if ($order['paymentStatus'] === 'Đã thanh toán' && isset($_SESSION['cart'])) {
@@ -172,7 +173,7 @@ if ($order['paymentStatus'] === 'Đã thanh toán' && isset($_SESSION['cart'])) 
                 <div class="space-y-3">
                     <?php foreach ($orderDetails as $item): ?>
                     <div class="flex items-center bg-gray-50 p-3 rounded-lg">
-                        <img src="/GODIFA/image/<?= htmlspecialchars($item['image']) ?>" 
+                        <img src="<?php echo BASE_URL; ?>image/<?= htmlspecialchars($item['image']) ?>" 
                              alt="<?= htmlspecialchars($item['productName']) ?>"
                              class="w-16 h-16 object-cover rounded-lg mr-4">
                         <div class="flex-1">
@@ -191,7 +192,7 @@ if ($order['paymentStatus'] === 'Đã thanh toán' && isset($_SESSION['cart'])) 
 
             <!-- Actions -->
             <div class="p-6 bg-gray-50 border-t text-center">
-                <a href="/GODIFA" 
+                <a href="<?php echo BASE_URL; ?>" 
                    class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-lg transition duration-300 shadow-lg">
                     <i class="fas fa-home mr-2"></i> Về trang chủ
                 </a>

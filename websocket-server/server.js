@@ -224,7 +224,8 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 3000;
+// Đọc PORT từ biến môi trường để tương thích VPS
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Node.js Socket.IO Server đang lắng nghe ở Port ${PORT}`);
 }).on('error', (err) => {

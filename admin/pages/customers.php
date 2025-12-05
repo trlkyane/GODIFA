@@ -86,7 +86,7 @@ if (isset($_POST['change_password']) && hasPermission('manage_customers')) {
 
 // Xử lý THAY ĐỔI TRẠNG THÁI khách hàng
 if (isset($_POST['update_status'])) {
-    // Lấy đúng key session
+    // Láº¥y Ä‘Ãºng key session
     $currentRoleID = $_SESSION['role_id'] ?? null;
     $hasManageCustomers = hasPermission('manage_customers');
     
@@ -130,14 +130,14 @@ if ($searchKeyword) {
 if (isset($_GET['action']) && $_GET['action'] === 'get_customer_detail' && isset($_GET['id'])) {
     $customerID = intval($_GET['id']);
     
-    // Lấy dữ liệu từ Controller
+    // Láº¥y dá»¯ liá»‡u tá»« Controller
     $customer = $customerController->getCustomerById($customerID);
     
     if (!$customer) {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'message' => 'Không tìm thấy khách hàng!'
+            'message' => 'KhÃ´ng tÃ¬m tháº¥y khÃ¡ch hÃ ng!'
         ]);
         exit;
     }
@@ -145,7 +145,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_customer_detail' && isset
     $stats = $customerController->getCustomerStats($customerID);
     $orders = $customerController->getOrderHistory($customerID);
     
-    // Format dữ liệu đơn hàng với thông tin đầy đủ
+    // Format dá»¯ liá»‡u Ä‘Æ¡n hÃ ng vá»›i thÃ´ng tin Ä‘áº§y Ä‘á»§
     $formattedOrders = [];
     foreach ($orders as $order) {
         $formattedOrders[] = [
@@ -159,7 +159,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_customer_detail' && isset
         ];
     }
     
-    // Trả về JSON với dữ liệu được format
+    // Tráº£ vá» JSON vá»›i dá»¯ liá»‡u Ä‘Æ°á»£c format
     header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
@@ -360,32 +360,22 @@ include __DIR__ . '/../includes/header.php';
                                                 <i class="fas fa-edit text-lg"></i>
                                             </button>
                                             
-                                            <!-- Đổi MK -->
-                                            <button onclick='openPasswordModal(<?php echo $customerID; ?>, "<?php echo htmlspecialchars($customerName); ?>")' 
-                                                    class="text-orange-600 hover:text-orange-800 w-8 h-8 flex items-center justify-center" title="Đổi mật khẩu">
-                                                <i class="fas fa-key text-lg"></i>
-                                            </button>
                                             
                                             <?php if (hasPermission('manage_customers')): ?>
                                             <!-- Toggle Status -->
                                             <?php if ($status == 1): ?>
-                                            <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
+                                            <!-- <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
                                                     class="text-yellow-600 hover:text-yellow-800 w-8 h-8 flex items-center justify-center" title="Khóa tài khoản">
                                                 <i class="fas fa-lock text-lg"></i>
-                                            </button>
+                                            </button> -->
                                             <?php else: ?>
-                                            <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
+                                            <!-- <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
                                                     class="text-green-600 hover:text-green-800 w-8 h-8 flex items-center justify-center" title="Mở khóa tài khoản">
                                                 <i class="fas fa-lock-open text-lg"></i>
-                                            </button>
+                                            </button> -->
                                             <?php endif; ?>
                                             <?php endif; ?>
                                             
-                                            <!-- Xóa -->
-                                            <button onclick="deleteCustomer(<?php echo $customerID; ?>, '<?php echo htmlspecialchars($customerName); ?>')" 
-                                                    class="text-red-600 hover:text-red-800 w-8 h-8 flex items-center justify-center" title="Xóa">
-                                                <i class="fas fa-trash text-lg"></i>
-                                            </button>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -436,8 +426,12 @@ include __DIR__ . '/../includes/header.php';
                     Số điện thoại <span class="text-red-500">*</span>
                 </label>
                 <input type="tel" name="phone" id="phone" required
+                       pattern="0[0-9]{9,10}"
+                       maxlength="11"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                       title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                       placeholder="Nhập số điện thoại">
+                       placeholder="0987654321">
             </div>
             
             <div class="mb-4">
@@ -445,8 +439,10 @@ include __DIR__ . '/../includes/header.php';
                     Email <span class="text-red-500">*</span>
                 </label>
                 <input type="email" name="email" id="email" required
+                       pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                       title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                       placeholder="Nhập email">
+                       placeholder="example@gmail.com">
             </div>
             
             <div class="mb-4">
@@ -501,6 +497,11 @@ include __DIR__ . '/../includes/header.php';
                     Số điện thoại <span class="text-red-500">*</span>
                 </label>
                 <input type="tel" name="phone" id="edit_phone" required
+                       pattern="0[0-9]{9,10}"
+                       maxlength="11"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                       title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
+                       placeholder="0987654321"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
             </div>
             
@@ -509,6 +510,8 @@ include __DIR__ . '/../includes/header.php';
                     Email <span class="text-red-500">*</span>
                 </label>
                 <input type="email" name="email" id="edit_email" required
+                       pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                       title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
             </div>
             <div class="mb-4">
@@ -696,7 +699,7 @@ function closeHistoryModal() {
 function viewCustomerDetail(customerID) {
     document.getElementById('detailModal').classList.remove('hidden');
     
-    // Hiển thị loading
+    // Hiá»ƒn thá»‹ loading
     document.getElementById('detailContent').innerHTML = `
         <div class="flex items-center justify-center py-8">
             <i class="fas fa-spinner fa-spin text-4xl text-purple-500"></i>
@@ -704,7 +707,7 @@ function viewCustomerDetail(customerID) {
         </div>
     `;
     
-    // Lấy dữ liệu qua AJAX
+    // Láº¥y dá»¯ liá»‡u qua AJAX
     fetch(`?page=customers&action=get_customer_detail&id=${customerID}`)
         .then(response => response.json())
         .then(data => {
@@ -714,7 +717,7 @@ function viewCustomerDetail(customerID) {
             
             // Format số tiền
             const formatMoney = (amount) => {
-                return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
+                return new Intl.NumberFormat('vi-VN').format(amount) + 'â‚«';
             };
             
             // Format ngày
@@ -731,18 +734,18 @@ function viewCustomerDetail(customerID) {
             
             // Badge trạng thái
             const getStatusBadge = (paymentStatus, deliveryStatus) => {
-                if (paymentStatus === 'Đã hủy' || deliveryStatus === 'Đã hủy') {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle"></i> Đã hủy</span>';
-                } else if (deliveryStatus === 'Hoàn thành') {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle"></i> Hoàn thành</span>';
-                } else if (deliveryStatus === 'Đang giao') {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"><i class="fas fa-shipping-fast"></i> Đang giao</span>';
+                if (paymentStatus === 'ÄÃ£ há»§y' || deliveryStatus === 'ÄÃ£ há»§y') {
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle"></i> ÄÃ£ há»§y</span>';
+                } else if (deliveryStatus === 'HoÃ n thÃ nh') {
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle"></i> HoÃ n thÃ nh</span>';
+                } else if (deliveryStatus === 'Äang giao') {
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"><i class="fas fa-shipping-fast"></i> Äang giao</span>';
                 } else {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-clock"></i> Chờ xử lý</span>';
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-clock"></i> Chá» xá»­ lÃ½</span>';
                 }
             };
             
-            // Tạo HTML hiển thị
+            // Táº¡o HTML hiá»ƒn thá»‹
             let html = `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Thông tin khách hàng -->

@@ -8,6 +8,7 @@
 
 ob_start();
 include_once(__DIR__ . "/../../model/mUser.php");
+require_once(__DIR__ . "/../../config/constants.php");
 
 class cAdminLogin {
     
@@ -23,14 +24,14 @@ class cAdminLogin {
             // Kiểm tra role - Chỉ cho phép Admin/Staff (roleID 1-4)
             if ($user["roleID"] < 1 || $user["roleID"] > 4) {
                 echo "<script>alert('Bạn không có quyền truy cập Admin Panel!');</script>";
-                header("refresh:0;url=/GODIFA/admin/login.php");
+                header("refresh:0;url=" . ADMIN_BASE_URL . "login.php");
                 exit();
             }
             
             // Kiểm tra trạng thái tài khoản
             if ($user["status"] != '1') {
                 echo "<script>alert('Tài khoản của bạn đã bị vô hiệu hóa!');</script>";
-                header("refresh:0;url=/GODIFA/admin/login.php");
+                header("refresh:0;url=" . ADMIN_BASE_URL . "login.php");
                 exit();
             }
             
@@ -45,11 +46,11 @@ class cAdminLogin {
             // Hiển thị thông báo theo role
             $roleDisplay = $user["roleName"] ?? "Staff";
             echo "<script>alert('Đăng nhập thành công! Chào mừng " . htmlspecialchars($roleDisplay) . " - " . htmlspecialchars($user["userName"]) . "');</script>";
-            header("refresh:0;url=/GODIFA/admin/index.php");
+            header("refresh:0;url=" . ADMIN_BASE_URL . "index.php");
             exit();
         } else {
             echo "<script>alert('Email hoặc mật khẩu không đúng!');</script>";
-            header("refresh:0;url=/GODIFA/admin/login.php");
+            header("refresh:0;url=" . ADMIN_BASE_URL . "login.php");
             exit();
         }
     }

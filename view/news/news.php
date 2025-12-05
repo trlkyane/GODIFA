@@ -26,7 +26,7 @@ include_once __DIR__ . '/../layout/header.php';
         <article class="group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-md transition">
           <a href="detail.php?id=<?php echo $blog['blogID']; ?>">
             <div class="aspect-video overflow-hidden bg-gray-100">
-              <img src="/GODIFA/<?php echo $imagePath; ?>" 
+              <img src="<?php echo BASE_URL . $imagePath; ?>" 
                    alt="<?php echo htmlspecialchars($blog['title']); ?>"
                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
             </div>

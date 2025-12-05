@@ -14,7 +14,7 @@ if (!hasPermission('view_reviews') && !hasPermission('manage_reviews')) {
 }
 
 // Load Controller (Admin version)
-// Đường dẫn này được giả định là chính xác: /GODIFA/controller/admin/cReview.php
+// Đường dẫn này được giả định là chính xác: /controller/admin/cReview.php
 require_once __DIR__ . '/../../controller/admin/cReview.php'; 
 $reviewController = new cReview();
 
@@ -325,8 +325,8 @@ function closeConfirmModal() {
 
 function executeAction() {
     if (currentReviewId && currentAction) {
-        // Đường dẫn API Gateway: /GODIFA/api/review_action.php
-        const apiUrl = '/GODIFA/api/review_action.php'; 
+        // Đường dẫn API Gateway: /api/review_action.php
+        const apiUrl = '/api/review_action.php'; 
         
         let postData = {
             reviewID: currentReviewId,

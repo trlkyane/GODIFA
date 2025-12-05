@@ -33,7 +33,7 @@ include_once __DIR__ . '/../layout/header.php';
 
     <!-- Ảnh bìa -->
     <div class="mb-6 overflow-hidden rounded-xl">
-      <img src="/GODIFA/<?php echo $imagePath; ?>" 
+      <img src="<?php echo BASE_URL . $imagePath; ?>" 
            alt="<?php echo htmlspecialchars($blog['title']); ?>" 
            class="w-full h-[400px] object-cover">
     </div>
@@ -76,7 +76,7 @@ include_once __DIR__ . '/../layout/header.php';
         ?>
         <article class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden group">
           <div class="overflow-hidden">
-            <img src="/GODIFA/<?php echo $imagePath; ?>" 
+            <img src="<?php echo BASE_URL . $imagePath; ?>" 
                  alt="<?php echo htmlspecialchars($related['title']); ?>"
                  class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
           </div>

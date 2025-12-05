@@ -4,7 +4,7 @@
  * URL: /api/ghn/provinces.php
  */
 
-// Tắt error display để không làm hỏng JSON
+// Táº¯t error display Ä‘á»ƒ khÃ´ng lÃ m há»ng JSON
 error_reporting(0);
 ini_set('display_errors', 0);
 
@@ -20,7 +20,7 @@ try {
         // Filter out test data from GHN dev environment
         $filteredData = array_filter($result['data'], function($province) {
             $name = strtolower($province['ProvinceName'] ?? '');
-            // Remove provinces with "test", "demo", or numbered variations like "Hà Nội 02"
+            // Remove provinces with "test", "demo", or numbered variations like "HÃ  Ná»™i 02"
             return !preg_match('/(test|demo|\s\d{2}$)/i', $name);
         });
         

@@ -4,16 +4,16 @@
  * File: GODIFA/api/chat_ajax.php
  */
 
-// Đảm bảo đường dẫn này trỏ đến ChatController.php đúng. 
-// Giả sử 'api' và 'controller' nằm cùng cấp trong thư mục GODIFA
+// Äáº£m báº£o Ä‘Æ°á»ng dáº«n nÃ y trá» Ä‘áº¿n ChatController.php Ä‘Ãºng. 
+// Giáº£ sá»­ 'api' vÃ  'controller' náº±m cÃ¹ng cáº¥p trong thÆ° má»¥c GODIFA
 require_once __DIR__ . '/../controller/ChatController.php'; 
-// Bảo mật: Đảm bảo người dùng đã đăng nhập (Staff)
+// Báº£o máº­t: Äáº£m báº£o ngÆ°á»i dÃ¹ng Ä‘Ã£ Ä‘Äƒng nháº­p (Staff)
 // require_once __DIR__ . '/../middleware/auth.php';
 // requireStaff(); 
 
 header('Content-Type: application/json');
 
-// Khởi tạo Controller MỚI
+// Khá»Ÿi táº¡o Controller Má»šI
 $chatController = new ChatController();
 
 $action = $_GET['action'] ?? '';
@@ -23,7 +23,7 @@ switch ($action) {
     case 'load_messages_by_conv':
         $convID = intval($_GET['convID'] ?? 0);
         if ($convID > 0) {
-            // Gọi hàm từ Controller
+            // Gá»i hÃ m tá»« Controller
             $messages = $chatController->getMessagesByConversationID($convID); 
             $response = ['success' => true, 'messages' => $messages];
         } else {
@@ -36,17 +36,17 @@ switch ($action) {
             $data = json_decode(file_get_contents('php://input'), true);
             $convID = intval($data['convID'] ?? 0);
             
-            // Lấy viewerType từ Client (là 'user' trong Admin Client)
+            // Láº¥y viewerType tá»« Client (lÃ  'user' trong Admin Client)
             $viewerType = $data['viewerType'] ?? 'user'; 
             
-            // Xử lý bảo mật: Đảm bảo chỉ staff mới được dùng viewerType='user'
+            // Xá»­ lÃ½ báº£o máº­t: Äáº£m báº£o chá»‰ staff má»›i Ä‘Æ°á»£c dÃ¹ng viewerType='user'
             if ($viewerType !== 'user') {
                  $response['message'] = 'Unauthorized viewer type.';
                  break;
             }
 
             if ($convID > 0) {
-                // Truyền viewerType='user' vào hàm Model
+                // Truyá»n viewerType='user' vÃ o hÃ m Model
                 if ($chatController->markConversationAsRead($convID, $viewerType)) { 
                     $response = ['success' => true, 'message' => 'Conversation marked as read.'];
                 } else {
@@ -61,7 +61,7 @@ switch ($action) {
     case 'search_conversations':
         $keyword = $_GET['keyword'] ?? '';
         if (!empty($keyword)) {
-            // Thêm hàm searchConversations vào ChatController.php nếu cần
+            // ThÃªm hÃ m searchConversations vÃ o ChatController.php náº¿u cáº§n
             $conversations = $chatController->searchConversations($keyword);
             $response = ['success' => true, 'conversations' => $conversations];
         } else {

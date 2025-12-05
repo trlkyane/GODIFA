@@ -4,14 +4,14 @@
  * File: view/profile.php
  */
 
-// Kiểm tra đăng nhập
+// Ki?m tra dang nh?p
 if (session_status() === PHP_SESSION_NONE) {
     session_name('GODIFA_USER_SESSION');
     session_start();
 }
 
 if (!isset($_SESSION['customer_id'])) {
-    header('Location: /GODIFA/view/auth/customer-login.php');
+    header('Location: ' . BASE_URL . 'view/auth/customer-login.php');
     exit;
 }
 
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 $customer = $profileController->getCustomerInfo($customerID);
 
 if (!$customer) {
-    header('Location: /GODIFA/view/auth/logout.php');
+    header('Location: ' . BASE_URL . 'view/auth/logout.php');
     exit;
 }
 
@@ -152,15 +152,15 @@ $stats = $profileController->getOrderStats($customerID);
                         <i class="fas fa-link mr-2 text-indigo-600"></i>Liên Kết Nhanh
                     </h3>
                     <div class="space-y-2">
-                        <a href="/GODIFA/view/account/order_history.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                        <a href="<?php echo BASE_URL; ?>view/account/order_history.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
                             <i class="fas fa-history text-indigo-600 mr-3"></i>
                             <span class="font-semibold text-gray-700">Lịch Sử Đơn Hàng</span>
                         </a>
-                        <a href="/GODIFA/view/cart/viewcart.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                        <a href="<?php echo BASE_URL; ?>view/cart/viewcart.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
                             <i class="fas fa-shopping-cart text-indigo-600 mr-3"></i>
                             <span class="font-semibold text-gray-700">Giỏ Hàng</span>
                         </a>
-                        <a href="/GODIFA/view/product/list.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                        <a href="<?php echo BASE_URL; ?>view/product/list.php" class="flex items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
                             <i class="fas fa-store text-indigo-600 mr-3"></i>
                             <span class="font-semibold text-gray-700">Mua Sắm</span>
                         </a>
@@ -192,12 +192,15 @@ $stats = $profileController->getOrderStats($customerID);
                                     <i class="fas fa-phone mr-2 text-gray-500"></i>Số Điện Thoại <span class="text-red-500">*</span>
                                 </label>
                                 <input type="tel" name="phone" value="<?= htmlspecialchars($customer['phone']) ?>"
-                                       pattern="[0-9]{10,11}"
-                                       placeholder="10-11 chữ số"
+                                       pattern="0[0-9]{9,10}"
+                                       maxlength="11"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                       title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
+                                       placeholder="0987654321"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                        required>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    <i class="fas fa-info-circle"></i> Nhập 10-11 chữ số
+                                    <i class="fas fa-info-circle"></i> Phải bắt đầu bằng số 0 và có 10-11 chữ số
                                 </p>
                             </div>
                         </div>

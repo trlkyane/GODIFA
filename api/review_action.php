@@ -1,13 +1,13 @@
 <?php
-// Tệp: GODIFA/api/review_action.php
+// Tá»‡p: GODIFA/api/review_action.php
 
-// 🌟 ĐÃ SỬA: Đường dẫn relative từ 'api' ra 'GODIFA/' rồi vào 'controller/admin/' 🌟
+// ðŸŒŸ ÄÃƒ Sá»¬A: ÄÆ°á»ng dáº«n relative tá»« 'api' ra 'GODIFA/' rá»“i vÃ o 'controller/admin/' ðŸŒŸ
 require_once __DIR__ . '/../controller/admin/cReview.php'; 
 
-// Thiết lập header để trả về JSON
+// Thiáº¿t láº­p header Ä‘á»ƒ tráº£ vá» JSON
 header('Content-Type: application/json');
 
-// Chỉ chấp nhận yêu cầu POST
+// Chá»‰ cháº¥p nháº­n yÃªu cáº§u POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405); // Method Not Allowed
     echo json_encode(['success' => false, 'message' => 'Lỗi: Phương thức yêu cầu không hợp lệ.']);

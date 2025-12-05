@@ -71,15 +71,15 @@ try {
     $conn = $db->connect();
     
     // Tìm order theo transactionCode
-    $stmt = $conn->prepare("
+    $stmt = mysqli_prepare($conn, "
         SELECT orderID, totalAmount, paymentStatus 
         FROM `order` 
         WHERE transactionCode = ?
     ");
-    $stmt->bind_param("s", $transactionCode);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $order = $result->fetch_assoc();
+    mysqli_stmt_bind_param($stmt, "s", $transactionCode);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $order = mysqli_fetch_assoc($result);
     
     if (!$order) {
         logWebhook("ERROR: Order not found - $transactionCode");
@@ -102,40 +102,56 @@ try {
     }
     
     // ===== 4. CẬP NHẬT ORDER =====
-    // Lấy thời gian thanh toán từ webhook (nếu có) hoặc dùng thời gian hiện tại
-    $paymentDate = date('Y-m-d H:i:s');
-    if (!empty($data['transaction_date'])) {
-        $paymentDate = date('Y-m-d H:i:s', strtotime($data['transaction_date']));
-    } elseif (!empty($data['when'])) {
-        $paymentDate = date('Y-m-d H:i:s', strtotime($data['when']));
-    }
+    // Sử dụng MySQL NOW() để đảm bảo cùng timezone với orderDate
+    // Không dùng PHP date() vì có thể khác timezone với MySQL
+    $nowResult = mysqli_query($conn, "SELECT NOW() as currentTime");
+    $nowRow = mysqli_fetch_assoc($nowResult);
+    $paymentDate = $nowRow['currentTime'];
     
-    // Kiểm tra xem cột paymentDate có tồn tại không
-    $checkColumn = $conn->query("SHOW COLUMNS FROM `order` LIKE 'paymentDate'");
-    $hasPaymentDate = ($checkColumn && $checkColumn->num_rows > 0);
+    logWebhook("Payment timestamp: $paymentDate (from MySQL NOW())");
+    
+    // Kiểm tra xem các cột có tồn tại không
+    $checkPaymentDate = mysqli_query($conn, "SHOW COLUMNS FROM `order` LIKE 'paymentDate'");
+    $hasPaymentDate = ($checkPaymentDate && mysqli_num_rows($checkPaymentDate) > 0);
+    
+    $checkViewedByAdmin = mysqli_query($conn, "SHOW COLUMNS FROM `order` LIKE 'viewedByAdmin'");
+    $hasViewedByAdmin = ($checkViewedByAdmin && mysqli_num_rows($checkViewedByAdmin) > 0);
+    
+    // Build UPDATE query dựa trên các cột có sẵn
+    // ⚠️ CHỈ CẬP NHẬT PAYMENT STATUS - KHÔNG TỰ ĐỘNG XÁC NHẬN VẬN CHUYỂN
+    // Admin sẽ xác nhận vận chuyển thủ công sau khi kiểm tra đơn hàng
+    $updateFields = [
+        "paymentStatus = 'Đã thanh toán'"
+        // KHÔNG cập nhật deliveryStatus - để admin xác nhận
+    ];
+    $params = [];
+    $types = "";
     
     if ($hasPaymentDate) {
-        // Nếu có cột paymentDate, update cả paymentDate
-        $stmt = $conn->prepare("
-            UPDATE `order` 
-            SET paymentStatus = 'Đã thanh toán',
-                paymentDate = ?,
-                deliveryStatus = 'Đang xử lý'
-            WHERE orderID = ?
-        ");
-        $stmt->bind_param("si", $paymentDate, $order['orderID']);
-    } else {
-        // Nếu chưa có cột paymentDate, chỉ update paymentStatus
-        $stmt = $conn->prepare("
-            UPDATE `order` 
-            SET paymentStatus = 'Đã thanh toán',
-                deliveryStatus = 'Đang xử lý'
-            WHERE orderID = ?
-        ");
-        $stmt->bind_param("i", $order['orderID']);
+        $updateFields[] = "paymentDate = ?";
+        $params[] = $paymentDate;
+        $types .= "s";
     }
     
-    if ($stmt->execute()) {
+    if ($hasViewedByAdmin) {
+        $updateFields[] = "viewedByAdmin = 0";  // Đánh dấu là chưa xem để hiện badge
+    }
+    
+    $updateQuery = "UPDATE `order` SET " . implode(", ", $updateFields) . " WHERE orderID = ?";
+    $params[] = $order['orderID'];
+    $types .= "i";
+    
+    $stmt = mysqli_prepare($conn, $updateQuery);
+    
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    
+    if (mysqli_stmt_execute($stmt)) {
+        // ✅ KHÔNG CẦN TRỪ STOCK Ở ĐÂY
+        // Stock đã được trừ ngay khi khách đặt hàng (trong cCheckout.php)
+        // Webhook chỉ cập nhật trạng thái thanh toán
+        
         logWebhook("SUCCESS: Order #{$order['orderID']} paid successfully at $paymentDate");
         http_response_code(200);
         echo json_encode([

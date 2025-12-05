@@ -21,16 +21,16 @@ if ($isLoggedIn) {
     $db = Database::getInstance();
     $conn = $db->connect();
     
-    $stmtCustomer = $conn->prepare("
+    $stmtCustomer = mysqli_prepare($conn, "
         SELECT c.customerName, cg.groupName 
         FROM customer c 
         LEFT JOIN customer_group cg ON c.groupID = cg.groupID 
         WHERE c.customerID = ?
     ");
-    $stmtCustomer->bind_param("i", $customerID);
-    $stmtCustomer->execute();
-    $result = $stmtCustomer->get_result();
-    $customerData = $result->fetch_assoc();
+    mysqli_stmt_bind_param($stmtCustomer, "i", $customerID);
+    mysqli_stmt_execute($stmtCustomer);
+    $result = mysqli_stmt_get_result($stmtCustomer);
+    $customerData = mysqli_fetch_assoc($result);
     
     if ($customerData && isset($customerData['groupName'])) {
         $customerGroupName = $customerData['groupName'];
@@ -149,7 +149,7 @@ if ($isLoggedIn) {
     function loadVouchers() {
         const container = document.getElementById('voucher-container');
         
-        fetch('/GODIFA/api/get_vouchers.php')
+        fetch('<?php echo BASE_URL; ?>api/get_vouchers.php')
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.vouchers && data.vouchers.length > 0) {
@@ -264,7 +264,7 @@ if ($isLoggedIn) {
                     </div>
                     
                     <!-- CTA Button -->
-                    <a href="/GODIFA/view/cart/checkout.php" 
+                    <a href="<?php echo BASE_URL; ?>view/cart/checkout.php" 
                        class="block mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-center py-3 rounded-lg font-semibold transition">
                         <i class="fas fa-shopping-cart mr-2"></i>Sử dụng ngay
                     </a>

@@ -1,7 +1,7 @@
 <?php
 /**
- * Trang danh sách sản phẩm
- * MVC Flow: Entry → Controller → View
+ * Trang danh sï¿½ch s?n ph?m
+ * MVC Flow: Entry ? Controller ? View
  */
 
 // Middleware: Chỉ cho phép khách hàng truy cập
@@ -71,7 +71,7 @@ include '../layout/header.php';
             </button>
             
             <?php if($categoryId || $keyword): ?>
-                <a href="/GODIFA/view/product/list.php" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition">
+                <a href="<?php echo BASE_URL; ?>view/product/list.php" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition">
                     Xóa bộ lọc
                 </a>
             <?php endif; ?>
@@ -82,7 +82,7 @@ include '../layout/header.php';
     <?php if(empty($products)): ?>
         <div class="text-center py-20">
             <p class="text-gray-500 text-lg mb-4">Không tìm thấy sản phẩm nào</p>
-            <a href="/GODIFA/view/product/list.php" class="text-sm text-black border-b border-black hover:text-gray-600 transition">
+            <a href="<?php echo BASE_URL; ?>view/product/list.php" class="text-sm text-black border-b border-black hover:text-gray-600 transition">
                 Xem tất cả sản phẩm
             </a>
         </div>
@@ -91,7 +91,7 @@ include '../layout/header.php';
             <?php foreach ($products as $product): ?>
                 <div class="group relative">
                     <div class="aspect-square w-full overflow-hidden rounded-sm bg-gray-100 relative">
-                        <img src="/GODIFA/image/<?php echo $product['image']; ?>" 
+                        <img src="<?php echo BASE_URL; ?>image/<?php echo $product['image']; ?>" 
                              alt="<?php echo htmlspecialchars($product['productName']); ?>" 
                              class="h-full w-full object-cover object-center group-hover:scale-110 transition duration-500">
                         
@@ -111,7 +111,7 @@ include '../layout/header.php';
 
                     <div class="mt-2">
                         <h3 class="text-xs text-gray-900 line-clamp-2 min-h-[2rem] leading-tight">
-                            <a href="/GODIFA/controller/cProduct.php?action=detail&id=<?php echo $product['productID']; ?>">
+                            <a href="<?php echo BASE_URL; ?>controller/cProduct.php?action=detail&id=<?php echo $product['productID']; ?>">
                                 <span aria-hidden="true" class="absolute inset-0"></span>
                                 <?php echo htmlspecialchars($product['productName']); ?>
                             </a>
@@ -142,15 +142,15 @@ include '../layout/header.php';
                         <div class="mt-1">
                             <?php if (!empty($product['promotional_price']) && $product['promotional_price'] > 0): ?>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs text-gray-400 line-through"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</span>
-                                    <span class="text-sm font-bold text-red-600"><?php echo number_format($product['promotional_price'], 0, ',', '.'); ?>₫</span>
+                                    <span class="text-xs text-gray-400 line-through"><?php echo number_format($product['price'], 0, ',', '.'); ?>đ</span>
+                                    <span class="text-sm font-bold text-red-600"><?php echo number_format($product['promotional_price'], 0, ',', '.'); ?>đ</span>
                                 </div>
                                 <span class="inline-block mt-0.5 px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] font-semibold rounded">
                                     -<?php echo round((($product['price'] - $product['promotional_price']) / $product['price']) * 100); ?>%
                                 </span>
                             <?php else: ?>
                                 <p class="text-sm font-bold text-red-600">
-                                    <?php echo number_format($product['price'], 0, ',', '.'); ?>₫
+                                    <?php echo number_format($product['price'], 0, ',', '.'); ?>?
                                 </p>
                             <?php endif; ?>
                         </div>
@@ -185,7 +185,7 @@ function addToCart(productId) {
         return;
     }
     
-    fetch('/GODIFA/controller/cCart.php?action=add', {
+    fetch('<?php echo BASE_URL; ?>controller/cCart.php?action=add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -201,12 +201,12 @@ function addToCart(productId) {
                 updateCartCount(data.cartCount);
             }
         } else {
-            alert('❌ ' + (data.message || 'Có lỗi xảy ra!'));
+            alert('? ' + (data.message || 'Có lỗi xảy ra!'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('❌ Không thể thêm vào giỏ hàng!');
+        alert('? Không thể thêm vào giỏ hàng!');
     });
 }
 

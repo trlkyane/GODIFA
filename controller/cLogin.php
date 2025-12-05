@@ -1,6 +1,7 @@
 <?php
     ob_start();
     include_once(__DIR__ . "/../model/mUser.php");
+    require_once(__DIR__ . "/../config/constants.php");
     
     class cLogin{
         // Đăng nhập cho admin/user (bảng user)
@@ -10,7 +11,7 @@
             if ($user) {
                 if ($user["status"] != '1') {
                     echo "<script>alert('Tài khoản của bạn đã bị vô hiệu hóa!');</script>";
-                    header("refresh:0;url=/GODIFA/view/auth/login.php");
+                    header("refresh:0;url=" . BASE_URL . "view/auth/login.php");
                     exit();
                 }
                 
@@ -26,16 +27,16 @@
                 if ($user["roleID"] >= 1 && $user["roleID"] <= 4) {
                     // Nhân viên/Admin -> redirect vào admin panel
                     echo "<script>alert('Đăng nhập thành công! Chào mừng đến Admin Panel');</script>";
-                    header("refresh:0;url=/GODIFA/admin/index.php");
+                    header("refresh:0;url=" . ADMIN_BASE_URL . "index.php");
                 } else {
                     // Khách hàng -> redirect về trang chủ
                     echo "<script>alert('Đăng nhập thành công!');</script>";
-                    header("refresh:0;url=/GODIFA/index.php");
+                    header("refresh:0;url=" . BASE_URL . "index.php");
                 }
                 exit();
             } else {
                 echo "<script>alert('Email hoặc mật khẩu không đúng!');</script>";
-                header("refresh:0;url=/GODIFA/view/auth/login.php");
+                header("refresh:0;url=" . BASE_URL . "view/auth/login.php");
                 exit();
             }
         }

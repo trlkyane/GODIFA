@@ -1,8 +1,8 @@
 <?php
 /**
- * Giao Hàng Nhanh (GHN) Model
+ * Giao HÃ ng Nhanh (GHN) Model
  * File: model/mGHN.php
- * Xử lý tích hợp API GHN
+ * Xá»­ lÃ½ tÃ­ch há»£p API GHN
  */
 
 class GHN {
@@ -19,7 +19,7 @@ class GHN {
     }
     
     /**
-     * Gọi API GHN
+     * Gá»i API GHN
      */
     private function callAPI($endpoint, $method = 'POST', $data = []) {
         $url = $this->apiUrl . $endpoint;
@@ -34,7 +34,7 @@ class GHN {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Bỏ qua SSL verify cho localhost
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Bá» qua SSL verify cho localhost
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
         if ($method === 'POST') {
@@ -66,14 +66,14 @@ class GHN {
     }
     
     /**
-     * Lấy danh sách tỉnh/thành phố
+     * Láº¥y danh sÃ¡ch tá»‰nh/thÃ nh phá»‘
      */
     public function getProvinces() {
         return $this->callAPI('/master-data/province', 'GET');
     }
     
     /**
-     * Lấy danh sách quận/huyện theo tỉnh
+     * Láº¥y danh sÃ¡ch quáº­n/huyá»‡n theo tá»‰nh
      */
     public function getDistricts($provinceId) {
         return $this->callAPI('/master-data/district', 'POST', [
@@ -82,7 +82,7 @@ class GHN {
     }
     
     /**
-     * Lấy danh sách phường/xã theo quận
+     * Láº¥y danh sÃ¡ch phÆ°á»ng/xÃ£ theo quáº­n
      */
     public function getWards($districtId) {
         return $this->callAPI('/master-data/ward', 'POST', [
@@ -91,7 +91,7 @@ class GHN {
     }
     
     /**
-     * Tính phí vận chuyển
+     * TÃ­nh phÃ­ váº­n chuyá»ƒn
      */
     public function calculateFee($toDistrictId, $toWardCode, $weight = null, $insurance = 0, $serviceTypeId = null) {
         $weight = $weight ?? $this->config['default_weight'];
@@ -111,7 +111,7 @@ class GHN {
     }
     
     /**
-     * Tính thời gian giao hàng dự kiến
+     * TÃ­nh thá»i gian giao hÃ ng dá»± kiáº¿n
      */
     public function getLeadTime($toDistrictId, $toWardCode) {
         return $this->callAPI('/v2/shipping-order/leadtime', 'POST', [

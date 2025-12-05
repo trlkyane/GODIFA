@@ -9,7 +9,7 @@ class Category {
         $this->conn = $db->moKetNoi();
     }
     
-    // Lấy tất cả danh mục
+    // Láº¥y táº¥t cáº£ danh má»¥c
     public function getAllCategories() {
         $sql = "SELECT * FROM category ORDER BY categoryName";
         $result = mysqli_query($this->conn, $sql);
@@ -20,7 +20,7 @@ class Category {
         return $categories;
     }
     
-    // Lấy danh mục đang hoạt động (Frontend)
+    // Láº¥y danh má»¥c Ä‘ang hoáº¡t Ä‘á»™ng (Frontend)
     public function getActiveCategories() {
         $sql = "SELECT * FROM category WHERE status = 1 ORDER BY categoryName";
         $result = mysqli_query($this->conn, $sql);
@@ -31,7 +31,7 @@ class Category {
         return $categories;
     }
     
-    // Lấy danh mục theo ID
+    // Láº¥y danh má»¥c theo ID
     public function getCategoryById($id) {
         $sql = "SELECT * FROM category WHERE categoryID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -41,7 +41,7 @@ class Category {
         return mysqli_fetch_assoc($result);
     }
     
-    // Thêm danh mục mới
+    // ThÃªm danh má»¥c má»›i
     public function addCategory($categoryName) {
         $sql = "INSERT INTO category (categoryName) VALUES (?)";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -49,15 +49,15 @@ class Category {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Kiểm tra tên danh mục đã tồn tại chưa (dùng trước khi thêm)
+    // Kiá»ƒm tra tÃªn danh má»¥c Ä‘Ã£ tá»“n táº¡i chÆ°a (dÃ¹ng trÆ°á»›c khi thÃªm)
     public function categoryNameExists($categoryName, $excludeId = null) {
         if ($excludeId) {
-            // Khi update - bỏ qua danh mục hiện tại
+            // Khi update - bá» qua danh má»¥c hiá»‡n táº¡i
             $sql = "SELECT COUNT(*) as count FROM category WHERE categoryName = ? AND categoryID != ?";
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "si", $categoryName, $excludeId);
         } else {
-            // Khi thêm mới
+            // Khi thÃªm má»›i
             $sql = "SELECT COUNT(*) as count FROM category WHERE categoryName = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "s", $categoryName);
@@ -69,7 +69,7 @@ class Category {
         return $row['count'] > 0;
     }
     
-    // Cập nhật danh mục
+    // Cáº­p nháº­t danh má»¥c
     public function updateCategory($id, $categoryName) {
         $sql = "UPDATE category SET categoryName = ? WHERE categoryID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -77,9 +77,9 @@ class Category {
         return mysqli_stmt_execute($stmt);
     }
     
-    // REMOVED: deleteCategory() - Chỉ dùng khóa (toggleStatus), không xóa
+    // REMOVED: deleteCategory() - Chá»‰ dÃ¹ng khÃ³a (toggleStatus), khÃ´ng xÃ³a
     
-    // Chuyển đổi trạng thái (Khóa/Mở khóa)
+    // Chuyá»ƒn Ä‘á»•i tráº¡ng thÃ¡i (KhÃ³a/Má»Ÿ khÃ³a)
     public function toggleStatus($id) {
         $sql = "UPDATE category SET status = 1 - status WHERE categoryID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -87,7 +87,7 @@ class Category {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đếm số sản phẩm trong danh mục
+    // Äáº¿m sá»‘ sáº£n pháº©m trong danh má»¥c
     public function countProductsInCategory($id) {
         $sql = "SELECT COUNT(*) as total FROM product WHERE categoryID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -98,7 +98,7 @@ class Category {
         return $row['total'];
     }
     
-    // Kiểm tra danh mục có sản phẩm không
+    // Kiá»ƒm tra danh má»¥c cÃ³ sáº£n pháº©m khÃ´ng
     public function hasProducts($id) {
         return $this->countProductsInCategory($id) > 0;
     }

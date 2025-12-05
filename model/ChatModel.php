@@ -6,7 +6,23 @@ class ChatModel {
 
     public function __construct() {
         try {
-            $this->db = new PDO('mysql:host=localhost;dbname=godifa1', 'root', '');
+            // Sử dụng Database class chung để tương thích VPS
+            require_once __DIR__ . '/database.php';
+            $dbInstance = Database::getInstance();
+            
+            // Lấy thông tin kết nối từ Database class
+            $reflection = new ReflectionClass('Database');
+            $dbHost = $reflection->getConstant('DB_HOST') ?: 'localhost';
+            $dbName = $reflection->getConstant('DB_NAME') ?: 'godifa1';
+            $dbUser = $reflection->getConstant('DB_USER') ?: 'root';
+            $dbPass = $reflection->getConstant('DB_PASS') ?: '';
+            
+            $this->db = new PDO(
+                "mysql:host={$dbHost};dbname={$dbName}",
+                $dbUser,
+                $dbPass
+            );
+            
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->db->exec("set names utf8"); 
         } catch (\PDOException $e) {
@@ -15,7 +31,7 @@ class ChatModel {
     }
     
     /**
-     * Lấy danh sách hội thoại (Đảm bảo hàm này tồn tại để Controller gọi)
+     * Láº¥y danh sÃ¡ch há»™i thoáº¡i (Äáº£m báº£o hÃ m nÃ y tá»“n táº¡i Ä‘á»ƒ Controller gá»i)
      */
     public function getConversations($userID, $userType) {
         $params = [];

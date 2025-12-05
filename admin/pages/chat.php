@@ -257,7 +257,8 @@ include __DIR__ . '/../includes/header.php';
     data-user-id="<?php echo $currentUserID; ?>"
     data-user-type="user"
     data-init-conv-id="<?php echo $currentConversationID; ?>"
-    data-init-customer-id="<?php echo $currentCustomerID; ?>">
+    data-init-customer-id="<?php echo $currentCustomerID; ?>"
+    data-socket-url="<?php echo SOCKET_SERVER_URL; ?>">
 </div>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -287,7 +288,7 @@ include __DIR__ . '/../includes/header.php';
         }
     }
 </script>
-<script src="/GODIFA/public/js/admin_chat_client.js"></script> 
+<script src="<?php echo BASE_URL; ?>public/js/admin_chat_client.js"></script> 
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 

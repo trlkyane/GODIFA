@@ -3,7 +3,7 @@
  * Middleware: Owner Only Access
  * File: admin/middleware/owner_only.php
  * 
- * Chỉ cho phép Chủ Doanh Nghiệp (roleID = 1) truy cập
+ * Ch? cho phép Ch? Doanh Nghi?p (roleID = 1) truy c?p
  */
 
 // Load constants
@@ -14,15 +14,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Kiểm tra đã đăng nhập chưa (Sử dụng user_id như trong auth.php)
+// Ki?m tra dã dang nh?p chua (S? d?ng user_id nhu trong auth.php)
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /GODIFA/admin/login.php?error=unauthorized');
+    header('Location: ' . ADMIN_BASE_URL . 'login.php?error=unauthorized');
     exit;
 }
 
-// Kiểm tra có phải Chủ Doanh Nghiệp không (Sử dụng role_id như trong login controller)
+// Ki?m tra có ph?i Ch? Doanh Nghi?p không (S? d?ng role_id nhu trong login controller)
 if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] != ROLE_OWNER) {
-    // Ghi log truy cập trái phép
+    // Ghi log truy c?p trái phép
     error_log(sprintf(
         "[SECURITY] User #%d (%s) tried to access owner-only page: %s",
         $_SESSION['user_id'],
@@ -30,8 +30,8 @@ if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] != ROLE_OWNER) {
         $_SERVER['REQUEST_URI']
     ));
     
-    // Chuyển hướng về trang chủ admin với thông báo lỗi
-    header('Location: /GODIFA/admin/index.php?error=permission_denied');
+    // Chuy?n hu?ng v? trang ch? admin v?i thông báo l?i
+    header('Location: ' . ADMIN_BASE_URL . 'index.php?error=permission_denied');
     exit;
 }
 

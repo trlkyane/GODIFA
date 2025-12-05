@@ -4,11 +4,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Đường dẫn động tùy context (frontend/admin)
+// Đường dẫn đúng tùy context (frontend/admin)
 $basePath = file_exists(__DIR__ . '/../model/mProduct.php') ? __DIR__ . '/..' : __DIR__ . '/..';
 require_once $basePath . '/model/mProduct.php';
 require_once $basePath . '/model/mCategory.php';
 require_once $basePath . '/model/mReview.php';
+require_once $basePath . '/config/constants.php';
 
 class ProductController {
     protected $productModel;
@@ -21,24 +22,23 @@ class ProductController {
         $this->reviewModel = new Review();
     }
     
-    // Hiển thị danh sách sản phẩm
+    // Hi?n th? danh sách s?n ph?m
     public function index() {
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $limit = 12;
         $offset = ($page - 1) * $limit;
         
-        $categoryId = isset($_GET['category']) ? (int)$_GET['category'] : null;
-        $keyword = isset($_GET['search']) ? trim($_GET['search']) : null;
+        $categoryId = isset($_GET['category']) && $_GET['category'] !== '' ? (int)$_GET['category'] : null;
+        $keyword = isset($_GET['search']) && trim($_GET['search']) !== '' ? trim($_GET['search']) : null;
         
-        if ($categoryId) {
-            $products = $this->productModel->getProductsByCategory($categoryId);
-        } elseif ($keyword) {
-            $products = $this->productModel->searchProducts($keyword);
+        // S? d?ng method m?i h? tr? c? category và keyword
+        if ($categoryId || $keyword) {
+            $products = $this->productModel->searchProductsByFilters($categoryId, $keyword);
         } else {
             $products = $this->productModel->getActiveProducts($limit, $offset);
         }
         
-        // Lấy rating và review count cho từng sản phẩm
+        // L?y rating và review count cho t?ng s?n ph?m
         foreach ($products as &$product) {
             $ratingData = $this->reviewModel->getAverageRating($product['productID']);
             $product['avgRating'] = $ratingData['avgRating'] ?? 0;
@@ -58,7 +58,7 @@ class ProductController {
         ];
     }
     
-    // Hiển thị chi tiết sản phẩm
+    // Hi?n th? chi ti?t s?n ph?m
     public function detail($productId) {
         $product = $this->productModel->getProductById($productId);
         
@@ -66,7 +66,7 @@ class ProductController {
             return null;
         }
         
-        // Kiểm tra nếu sản phẩm bị khóa thì không cho khách hàng xem
+        // Ki?m tra n?u s?n ph?m b? khóa thì không cho khách hàng xem
         if ($product['status'] == 0) {
             return null;
         }
@@ -83,11 +83,11 @@ class ProductController {
         ];
     }
     
-    // Thêm đánh giá
+    // Thêm dánh giá
     public function addReview() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!isset($_SESSION['customer_id'])) {
-                return ['success' => false, 'message' => 'Vui lòng đăng nhập để đánh giá'];
+                return ['success' => false, 'message' => 'Vui lòng dang nh?p d? dánh giá'];
             }
             
             $productId = (int)$_POST['product_id'];
@@ -96,11 +96,11 @@ class ProductController {
             $comment = trim($_POST['comment']);
             
             if ($this->reviewModel->hasReviewed($productId, $customerId)) {
-                return ['success' => false, 'message' => 'Bạn đã đánh giá sản phẩm này rồi'];
+                return ['success' => false, 'message' => 'B?n dã dánh giá s?n ph?m này r?i'];
             }
             
             if ($this->reviewModel->addReview($productId, $customerId, $rating, $comment)) {
-                return ['success' => true, 'message' => 'Đánh giá thành công'];
+                return ['success' => true, 'message' => 'Ðánh giá thành công'];
             }
             
             return ['success' => false, 'message' => 'Đánh giá thất bại'];
@@ -141,15 +141,15 @@ if (!defined('CONTROLLER_INCLUDED')) {
                 if ($data) {
                     extract($data);
                     include '../view/product/detail.php';
-                    exit(); // Dừng lại sau khi include view
+                    exit(); // D?ng l?i sau khi include view
                 } else {
                     error_log("cProduct.php - Product not found, redirect to 404");
-                    header('Location: /GODIFA/view/404.php');
+                    header('Location: ' . BASE_URL . 'view/404.php');
                     exit();
                 }
             } else {
                 error_log("cProduct.php - No ID provided, redirect to home");
-                header('Location: /GODIFA/index.php');
+                header('Location: ' . BASE_URL . 'index.php');
                 exit();
             }
             break;
@@ -162,13 +162,13 @@ if (!defined('CONTROLLER_INCLUDED')) {
             
         default:
             // Không có action hợp lệ, redirect về trang chủ
-            header('Location: /GODIFA/index.php');
+            header('Location: ' . BASE_URL . 'index.php');
             exit();
     }
     }
     // Nếu truy cập trực tiếp không có action, redirect về trang chủ
     else {
-        header('Location: /GODIFA/index.php');
+        header('Location: ' . BASE_URL . 'index.php');
         exit();
     }
 }

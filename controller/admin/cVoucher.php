@@ -13,7 +13,7 @@ class cVoucher {
         $this->voucherModel = new Voucher();
     }
     
-    // Lấy tất cả vouchers với filter
+    // Láº¥y táº¥t cáº£ vouchers vá»›i filter
     public function getAllVouchers($filterStatus = 'all') {
         $vouchers = $this->voucherModel->getAllVouchers();
         
@@ -24,7 +24,7 @@ class cVoucher {
         return $this->filterVouchersByStatus($vouchers, $filterStatus);
     }
     
-    // Tìm kiếm vouchers
+    // TÃ¬m kiáº¿m vouchers
     public function searchVouchers($keyword, $filterStatus = 'all') {
         $vouchers = $this->voucherModel->searchVouchers($keyword);
         
@@ -45,7 +45,7 @@ class cVoucher {
             
             switch ($status) {
                 case 'active':
-                    // Đang hoạt động: trong thời hạn, còn số lượng, không bị khóa
+                    // Äang hoáº¡t Ä‘á»™ng: trong thá»i háº¡n, cÃ²n sá»‘ lÆ°á»£ng, khÃ´ng bá»‹ khÃ³a
                     $match = ($voucher['status'] == 1) &&
                              ($voucher['startDate'] <= $today) &&
                              ($voucher['endDate'] >= $today) &&
@@ -53,17 +53,17 @@ class cVoucher {
                     break;
                     
                 case 'expired':
-                    // Hết hạn
+                    // Háº¿t háº¡n
                     $match = ($voucher['endDate'] < $today);
                     break;
                     
                 case 'out_of_stock':
-                    // Hết số lượng
+                    // Háº¿t sá»‘ lÆ°á»£ng
                     $match = ($voucher['quantity'] <= 0);
                     break;
                     
                 case 'locked':
-                    // Bị khóa
+                    // Bá»‹ khÃ³a
                     $match = ($voucher['status'] == 0);
                     break;
             }
@@ -76,17 +76,17 @@ class cVoucher {
         return $filtered;
     }
     
-    // Lấy vouchers đang hoạt động
+    // Láº¥y vouchers Ä‘ang hoáº¡t Ä‘á»™ng
     public function getActiveVouchers() {
         return $this->voucherModel->getActiveVouchers();
     }
     
-    // Lấy voucher theo ID
+    // Láº¥y voucher theo ID
     public function getVoucherById($id) {
         return $this->voucherModel->getVoucherById($id);
     }
     
-    // Thêm voucher
+    // ThÃªm voucher
     public function addVoucher($data) {
         // Validate
         $errors = [];

@@ -13,17 +13,17 @@ class cCustomer {
         $this->customerModel = new Customer();
     }
     
-    // Lấy tất cả khách hàng
+    // Láº¥y táº¥t cáº£ khÃ¡ch hÃ ng
     public function getAllCustomers() {
         return $this->customerModel->getAllCustomers();
     }
     
-    // Lấy khách hàng theo ID
+    // Láº¥y khÃ¡ch hÃ ng theo ID
     public function getCustomerById($id) {
         return $this->customerModel->getCustomerById($id);
     }
     
-    // Thêm khách hàng mới (Admin tạo)
+    // ThÃªm khÃ¡ch hÃ ng má»›i (Admin táº¡o)
     public function addCustomer($data) {
         // Validate
         $errors = [];
@@ -54,7 +54,7 @@ class cCustomer {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Thêm khách hàng
+        // ThÃªm khÃ¡ch hÃ ng
         $result = $this->customerModel->register(
             $data['customerName'],
             $data['phone'],
@@ -69,7 +69,7 @@ class cCustomer {
         return ['success' => false, 'errors' => ['Lỗi khi thêm khách hàng!']];
     }
     
-    // Cập nhật thông tin khách hàng
+    // Cáº­p nháº­t thÃ´ng tin khÃ¡ch hÃ ng
     public function updateCustomer($id, $data, $currentRoleID = null) {
         // Validate
         $errors = [];
@@ -83,7 +83,7 @@ class cCustomer {
         } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $errors[] = "Email không hợp lệ!";
         } else {
-            // Kiểm tra email trùng với khách hàng khác
+            // Kiá»ƒm tra email trÃ¹ng vá»›i khÃ¡ch hÃ ng khÃ¡c
             $existingCustomer = $this->customerModel->getCustomerById($id);
             if ($existingCustomer && $existingCustomer['email'] != $data['email']) {
                 if ($this->customerModel->emailExists($data['email'])) {
@@ -100,15 +100,15 @@ class cCustomer {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Xác định có update status không
+        // XÃ¡c Ä'á»‹nh cÃ³ update status khÃ´ng
         $status = null;
         
-        // Chỉ Chủ DN và NVQT được thay đổi trạng thái
+        // Chá»‰ Chá»§ DN vÃ  NVQT Ä'Æ°á»£c thay Ä'á»•i tráº¡ng thÃ¡i
         if (isset($data['status']) && ($currentRoleID == 1 || $currentRoleID == 2)) {
             $status = intval($data['status']);
         }
         
-            // Cập nhật khách hàng
+            // Cáº­p nháº­t khÃ¡ch hÃ ng
             $result = $this->customerModel->updateCustomer($id, $data);
         
         if ($result) {
@@ -118,9 +118,9 @@ class cCustomer {
         return ['success' => false, 'errors' => ['Lỗi khi cập nhật thông tin!']];
     }
     
-    // Cập nhật trạng thái khách hàng (Hoạt động/Đã khóa)
+    // Cáº­p nháº­t tráº¡ng thÃ¡i khÃ¡ch hÃ ng (Hoáº¡t Ä'á»™ng/ÄÃ£ khÃ³a)
     public function updateStatus($id, $status, $currentRoleID = null) {
-        // PHÂN QUYỀN: Chỉ Chủ DN và NVQT được thay đổi trạng thái
+        // PHÃ‚N QUYá»€N: Chá»‰ Chá»§ DN vÃ  NVQT Ä'Æ°á»£c thay Ä'á»•i tráº¡ng thÃ¡i
         if ($currentRoleID != 1 && $currentRoleID != 2) {
             return [
                 'success' => false,
@@ -152,7 +152,7 @@ class cCustomer {
         ];
     }
     
-    // Đổi mật khẩu
+    // Äá»•i máº­t kháº©u
     public function changePassword($id, $data) {
         // Validate
         $errors = [];
@@ -173,7 +173,7 @@ class cCustomer {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Đổi mật khẩu
+        // Äá»•i máº­t kháº©u
         $result = $this->customerModel->changePassword($id, $data['newPassword']);
         
         if ($result) {
@@ -183,7 +183,7 @@ class cCustomer {
         return ['success' => false, 'errors' => ['Lỗi khi đổi mật khẩu!']];
     }
     
-    // Xóa khách hàng
+    // XÃ³a khÃ¡ch hÃ ng
     public function deleteCustomer($id) {
         $result = $this->customerModel->deleteCustomer($id);
         
@@ -194,17 +194,17 @@ class cCustomer {
         return ['success' => false, 'errors' => ['Lỗi khi xóa khách hàng!']];
     }
     
-    // Lấy lịch sử mua hàng
+    // Láº¥y lá»‹ch sá»­ mua hÃ ng
     public function getOrderHistory($customerID) {
         return $this->customerModel->getOrderHistory($customerID);
     }
     
-    // Thống kê khách hàng
+    // Thá»'ng kÃª khÃ¡ch hÃ ng
     public function getCustomerStats($customerID) {
         return $this->customerModel->getCustomerStats($customerID);
     }
     
-    // Tìm kiếm khách hàng
+    // TÃ¬m kiáº¿m khÃ¡ch hÃ ng
     public function searchCustomers($keyword) {
         if (empty($keyword)) {
             return $this->getAllCustomers();
@@ -212,7 +212,7 @@ class cCustomer {
         return $this->customerModel->searchCustomers($keyword);
     }
     
-    // Đếm tổng số khách hàng
+    // Äáº¿m tá»•ng sá»' khÃ¡ch hÃ ng
     public function countCustomers() {
         return $this->customerModel->countCustomers();
     }
