@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 04, 2025 at 07:28 PM
+-- Generation Time: Dec 05, 2025 at 10:24 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -404,11 +404,11 @@ CREATE TABLE IF NOT EXISTS `customer_group` (
 --
 
 INSERT INTO `customer_group` (`groupID`, `groupName`, `description`, `minSpent`, `maxSpent`, `color`, `createdAt`) VALUES
-(1, 'Broze', 'Chi tieu 0-5tr', NULL, NULL, '#412f1b', '2025-10-30 05:13:38'),
+(1, 'Broze', 'Chi tieu 0-5tr', NULL, NULL, '#907c64', '2025-10-30 05:13:38'),
 (2, 'Sliver', 'Chi tieu 5-15tr', 5000000, 14999999, '#99a6b8', '2025-10-29 10:21:19'),
 (3, 'Gold', 'Chi tieu 15-30tr', 15000000, 29999999, '#fbbf24', '2025-10-29 10:21:19'),
 (4, 'Platinum', 'Chi tieu 30-50tr', 30000000, 49999999, '#42e9ff', '2025-10-29 10:21:19'),
-(5, 'Diamon', 'Chi tieu hon 50tr', 50000000, NULL, '#2042ee', '2025-10-29 10:21:19');
+(5, 'Diamond', 'Chi tieu hon 50tr', 50000000, NULL, '#2042ee', '2025-10-29 10:21:19');
 
 -- --------------------------------------------------------
 
@@ -443,7 +443,7 @@ CREATE TABLE IF NOT EXISTS `order` (
   KEY `idx_qr_expired` (`qrExpiredAt`,`paymentStatus`),
   KEY `idx_payment_date` (`paymentDate`),
   KEY `idx_cancelled` (`cancelledAt`,`cancelledBy`)
-) ENGINE=MyISAM AUTO_INCREMENT=195 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=206 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `order`
@@ -480,7 +480,18 @@ INSERT INTO `order` (`orderID`, `orderDate`, `paymentDate`, `paymentStatus`, `to
 (191, '2025-12-05 01:41:31', '2025-12-05 01:43:48', 'Đã hoàn tiền', 80500, 'QR', 2, '12', 24, 'Đã hoàn tiền', 'GHN', 20500.00, 'aa', '2025-12-05 01:44:07', 'customer', 'GODIFA202512040191', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=80500&des=SEVQR+TKP155+GODIFA202512040191', '2025-12-04 18:56:31'),
 (192, '2025-12-05 01:50:57', '2025-12-05 01:51:21', 'Đã hoàn tiền', 45800, 'QR', 2, '12', 24, '', 'GHN', 45800.00, 'a', '2025-12-05 01:51:39', 'customer', 'GODIFA202512040192', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=45800&des=SEVQR+TKP155+GODIFA202512040192', '2025-12-04 19:05:57'),
 (193, '2025-12-05 01:58:06', '2025-12-05 01:58:24', 'Đã hoàn tiền', 20500, 'QR', 2, '', 24, '', 'GHN', 20500.00, 'aaaa', '2025-12-05 01:58:45', 'customer', 'GODIFA202512040193', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=20500&des=SEVQR+TKP155+GODIFA202512040193', '2025-12-04 19:13:06'),
-(194, '2025-12-05 02:12:13', '2025-12-05 02:12:36', 'Đã hoàn tiền', 20500, 'QR', 2, '12', 24, 'Đã hoàn tiền', 'GHN', 20500.00, 'a', '2025-12-05 02:12:50', 'customer', 'GODIFA202512040194', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=20500&des=SEVQR+TKP155+GODIFA202512040194', '2025-12-04 19:27:13');
+(194, '2025-12-05 02:12:13', '2025-12-05 02:12:36', 'Đã hoàn tiền', 20500, 'QR', 2, '12', 24, 'Đã hoàn tiền', 'GHN', 20500.00, 'a', '2025-12-05 02:12:50', 'customer', 'GODIFA202512040194', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=20500&des=SEVQR+TKP155+GODIFA202512040194', '2025-12-04 19:27:13'),
+(195, '2025-12-05 02:31:11', '2025-12-05 02:31:18', 'Đã thanh toán', 44900, 'COD', 2, '1', NULL, 'Hoàn thành', 'GHN', 24900.00, NULL, NULL, NULL, 'GODIFA202512040195', NULL, NULL),
+(196, '2025-12-05 02:47:28', '2025-12-05 02:47:37', 'Đã thanh toán', 65800, 'COD', 2, '1', NULL, 'Hoàn thành', 'GHN', 45800.00, NULL, NULL, NULL, 'GODIFA202512040196', NULL, NULL),
+(197, '2025-12-05 03:13:41', '2025-12-05 03:13:54', 'Đã hoàn tiền', 575800, 'COD', 2, '1', NULL, 'Hoàn thành', 'GHN', 45800.00, NULL, NULL, NULL, 'GODIFA202512040197', NULL, NULL),
+(198, '2025-12-05 03:19:37', '2025-12-05 03:19:46', 'Đã thanh toán', 100800, 'COD', 2, 'a', NULL, 'Hoàn thành', 'GHN', 45800.00, NULL, NULL, NULL, 'GODIFA202512040198', NULL, NULL),
+(199, '2025-12-05 03:32:10', '2025-12-05 03:32:16', 'Đã thanh toán', 90500, 'COD', 2, 'aa', NULL, 'Hoàn thành', 'GHN', 20500.00, NULL, NULL, NULL, 'GODIFA202512040199', NULL, NULL),
+(200, '2025-12-05 03:46:08', '2025-12-05 03:46:20', 'Đã thanh toán', 139900, 'COD', 2, 'q12', NULL, 'Hoàn thành', 'GHN', 24900.00, NULL, NULL, NULL, 'GODIFA202512040200', NULL, NULL),
+(201, '2025-12-05 03:56:06', '2025-12-05 03:56:13', 'Đã hoàn tiền', 140800, 'COD', 2, 'ádasdasd', NULL, 'Hoàn thành', 'GHN', 45800.00, NULL, NULL, NULL, 'GODIFA202512040201', NULL, NULL),
+(202, '2025-12-05 12:42:21', '2025-12-05 12:43:23', 'Đã hoàn tiền', 520500, 'COD', 2, 'test', NULL, 'Hoàn thành', 'GHN', 20500.00, NULL, NULL, NULL, 'GODIFA202512050202', NULL, NULL),
+(203, '2025-12-05 12:57:54', '2025-12-05 12:58:18', 'Đã hoàn tiền', 196500, 'COD', 2, 'Test lần cuối', NULL, '', 'GHN', 20500.00, NULL, NULL, NULL, 'GODIFA202512050203', NULL, NULL),
+(204, '2025-12-05 13:02:45', '2025-12-05 13:02:56', 'Đã hoàn tiền', 89900, 'COD', 2, '1', NULL, '', 'GHN', 24900.00, NULL, NULL, NULL, 'GODIFA202512050204', NULL, NULL),
+(205, '2025-12-05 15:05:13', '2025-12-05 15:05:49', 'Đã thanh toán', 40500, 'QR', 2, 'aa', NULL, 'Chờ xử lý hoàn tiền', 'GHN', 20500.00, 'aaaaaaaa', '2025-12-05 15:33:39', 'customer', 'GODIFA202512050205', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=40500&des=SEVQR+TKP155+GODIFA202512050205', '2025-12-05 08:20:13');
 
 --
 -- Triggers `order`
@@ -561,7 +572,7 @@ CREATE TABLE IF NOT EXISTS `order_delivery` (
   KEY `idx_orderID` (`orderID`),
   KEY `idx_province_district` (`provinceId`,`districtId`),
   KEY `idx_ward` (`wardCode`)
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `order_delivery`
@@ -647,7 +658,18 @@ INSERT INTO `order_delivery` (`deliveryID`, `orderID`, `recipientName`, `recipie
 (77, 191, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'aaaaaa', '610204', '1782', '252', 252, 1782, '610204', '12', '2025-12-04 18:41:31'),
 (78, 192, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'aaaaaa', '910056', '1643', '248', 248, 1643, '910056', '12', '2025-12-04 18:50:57'),
 (79, 193, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '640704', '1823', '250', 250, 1823, '640704', '', '2025-12-04 18:58:06'),
-(80, 194, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '640101', '1653', '250', 250, 1653, '640101', '12', '2025-12-04 19:12:13');
+(80, 194, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '640101', '1653', '250', 250, 1653, '640101', '12', '2025-12-04 19:12:13'),
+(81, 195, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'aaaaaa', '190307', '1728', '249', 249, 1728, '190307', '1', '2025-12-04 19:31:11'),
+(82, 196, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'aaa', '910054', '1643', '248', 248, 1643, '910054', '1', '2025-12-04 19:47:28'),
+(83, 197, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '910052', '1643', '248', 248, 1643, '910052', '1', '2025-12-04 20:13:41'),
+(84, 198, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '190107', '1644', '249', 249, 1644, '190107', 'a', '2025-12-04 20:19:37'),
+(85, 199, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'Tân Phú', '640402', '1824', '250', 250, 1824, '640402', 'aa', '2025-12-04 20:32:10'),
+(86, 200, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '190306', '1728', '249', 249, 1728, '190306', 'q12', '2025-12-04 20:46:08'),
+(87, 201, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '190107', '1644', '249', 249, 1644, '190107', '1', '2025-12-04 20:56:06'),
+(88, 202, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'aaaaaa', '600508', '1998', '253', 253, 1998, '600508', 'test', '2025-12-05 05:42:21'),
+(89, 203, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '640402', '1824', '250', 250, 1824, '640402', 'Test lần cuối', '2025-12-05 05:57:54'),
+(90, 204, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'â', '190307', '1728', '249', 249, 1728, '190307', '1', '2025-12-05 06:02:45'),
+(91, 205, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'Tân Phú', '470901', '2116', '258', 258, 2116, '470901', 'aa', '2025-12-05 08:05:13');
 
 -- --------------------------------------------------------
 
@@ -758,7 +780,19 @@ INSERT INTO `order_details` (`orderID`, `productID`, `quantity`, `price`) VALUES
 (191, 30, 1, 80000),
 (192, 31, 1, 20000),
 (193, 31, 1, 20000),
-(194, 31, 1, 20000);
+(194, 31, 1, 20000),
+(195, 31, 1, 20000),
+(196, 31, 1, 20000),
+(197, 30, 1, 80000),
+(197, 24, 2, 225000),
+(198, 23, 1, 55000),
+(199, 29, 1, 70000),
+(200, 22, 1, 115000),
+(201, 28, 1, 95000),
+(202, 1, 1, 500000),
+(203, 27, 1, 176000),
+(204, 21, 1, 65000),
+(205, 31, 1, 20000);
 
 -- --------------------------------------------------------
 
@@ -787,7 +821,7 @@ CREATE TABLE IF NOT EXISTS `product` (
 --
 
 INSERT INTO `product` (`productID`, `productName`, `SKU_MRK`, `stockQuantity`, `price`, `promotional_price`, `description`, `image`, `categoryID`, `status`) VALUES
-(1, 'Viên Uống Bổ Gan Shijimi Orihiro 70 Viên - Nhật Bản\r\n', '4571157257624', 5, 700000, 500000, 'Viên uống bổ gan Orihiro đã được nghiên cứu kỹ lưỡng, thành phần chính có trong viên này là chiết xuất gan lợn, bột hàu, bột ngao và tinh chất nghệ. ...', '4571157257624.jpg', 1, 1),
+(1, 'Viên Uống Bổ Gan Shijimi Orihiro 70 Viên - Nhật Bản\r\n', '4571157257624', 4, 700000, 500000, 'Viên uống bổ gan Orihiro đã được nghiên cứu kỹ lưỡng, thành phần chính có trong viên này là chiết xuất gan lợn, bột hàu, bột ngao và tinh chất nghệ. ...', '4571157257624.jpg', 1, 1),
 (2, 'Viên uống bổ não Orihiro Ginkgo Biloba 240 viên\r\n', '4971493101597', 8, 440000, NULL, 'Viên Uống Bổ Não Orihiro Ginkgo Biloba chiết xuất lá cây bạch quả chứa hơn 20 loại Flavonoid cùng một số vi chất giúp hoạt huyết, dưỡng não, tăng cường trí nhớ, giảm nguy cơ sa sút trí tuệ, lú lẫn, stress, suy nhược thần kinh,....', '4971493101597.jpg', 1, 1),
 (3, 'Viên uống tinh bột nghệ mùa thu Orihiro 520 viên\r\n', '4971493102426', 15, 570000, NULL, 'Tinh bột nghệ – Curcumin được chứng minh có các công dụng tốt cho chức năng của lá gan:\r\nNghệ giúp hỗ trợ điều trị bệnh gan nhiễm mỡ. Trong một phân tích của tác giả Goodrarzi và các cộng sự (2019), thử nghiệm cho bệnh nhân gan nhiễm mỡ không do rượu dùng Curcumin trong vòng 8 tuần đã giảm được các chỉ số men gan (ALT, AST) tốt hơn nhóm bệnh nhân không sử dụng.\r\nNghệ giúp hỗ trợ điều trị virus viêm gan. Trong một mô hình thí nghiệm cho thấy Curcumin ức chế sự nhân lên của virus viêm gan B (HBV) ', '4971493102426.jpg', 1, 1),
 (4, 'Viên uống giảm cân Minami Diet Deruderu giảm 15kg +25% mỡ thừa 540 viên\r\n', '4945904018965', 3, 750000, NULL, 'Thông tin sản phẩm: Viên uống giảm 15kg và 25% mỡ bụng Minami \r\nSản phẩm \"Giảm cân 15kg 540 viên\" là một giải pháp giảm cân được thiết kế để hỗ trợ quá trình giảm cân một cách hiệu quả và an toàn.\r\nThành Phần:\r\nChiết xuất lưới Salacia, bột trái cây lên men (từ quả táo, dâu, berry), thành phần Enzyme, Acid Lactic, muồng trâu, bột cacao, Galactooligosacarit (GOS), Chiết xuất cây Gymnema Sylvestre, Canxi từ vỏ trứng, Hàm lượng vitamin B1, B2, B6, E, D.', '4945904018965.jpg', 1, 1),
@@ -807,17 +841,17 @@ INSERT INTO `product` (`productID`, `productName`, `SKU_MRK`, `stockQuantity`, `
 (18, 'Mặt nạ Keana chiết xuất từ gạo dưỡng ẩm se khít lỗ chân lông 10 miếng\r\n', '4992440034713', 25, 270000, NULL, 'Chiết xuất 100% từ gạo quốc sản Nhật Bản, cung cấp độ ẩm cho da mịn màng\r\nKết hợp cùng ceramide tạo lớp màng bảo vệ độ ẩm, duy trì làn da mềm mại dài lâu\r\nGiàu vitamin E dưỡng da căng mịn, se khít lỗ chân lông, da sáng mịn, trong suốt tự nhiên', '4992440034713.jpg', 3, 1),
 (19, 'Miếng rửa mặt Seiwapro Loven sillicon\r\n', '4982790188631', 30, 45000, NULL, 'Làm sạch là bước đầu tiên và quan trọng nhất trong quá trình chăm sóc da. Chỉ rửa mặt bằng tay cùng sữa rửa mặt thôi là chưa đủ bởi nhiều nghiên cứu chỉ ra rằng, rửa mặt bằng tay không thể làm sạch hoàn toàn da mặt. Đừng quá lo lắng vì Miếng Rửa Mặt Silicon Seiwapro Loven Make Cleansing Pad đến từ Nhật Bản sẽ giúp bạn giải quyết vấn đề này.', '4982790188631.jpg', 3, 1),
 (20, 'Set 10 dao cạo cho nữ KAI\r\n', '4901331007439', 10, 85000, NULL, 'Bộ 10 Dao Cạo Lông Mày, Lông Mặt KAI là sản phẩm dao cạo đến từ thương hiệu KAI của Nhật Bản. Sản phẩm có thiết kế nhỏ gọn và tiện lợi, với lưỡi dao làm từ thép không gỉ có độ bền cao, đảm bảo an toàn trong quá trình sử dụng và không gây ra đau rát hay tổn thương da.', '4901331007439.jpg', 3, 1),
-(21, 'Miếng thấm mồ hôi nách Kyowa 10 chiếc\r\n', '4969757106143', 10, 65000, NULL, 'Chất liệu thấm hút tốt giữ cho vùng nách áo luôn sạch sẽ, khô thoáng, không ố vàng\r\nBề mặt tiếp xúc êm, dễ chịu với da\r\nSản phẩm không mùi, không làm lấn át mùi nước hoa', '4969757106143.jpg', 3, 1),
-(22, 'Set 3 dao cạo lông mày Pretty KAI\r\n', '4901331012860', 100, 115000, NULL, '- Chất liệu:  Lưỡi dao được làm từ thép không gỉ, thân dao được làm từ nhựa dẻo cao cấp và được kháng khuẩn\r\n- Quy cách: gồm 3 cây dao cạo kèm lưỡi.\r\n- HDSD: Dao được thiết kế chuyên dụng dành cho phụ nữ giúp cạo lông mày. Phần tay cầm thiết kế dày dặn giúp cầm nắm dễ dàng. Không thay thế được lưỡi, bỏ đi sau khi lưỡi dao đã cùn.\r\n- Xuất xứ: Nhật Bản. Nhập khẩu trực tiếp từ Nhật', '4901331012860.jpg', 3, 1),
-(23, 'Set 5 dao cạo lông mày KAI\r\n', '4901331010781', 18, 55000, NULL, 'MÔ TẢ SẢN PHẨM\r\nCombo 5 dao cạo lông mày KAI Nhật Bản là phụ kiện hỗ trợ tốt cho việc làm đẹp chân mày. Với dao cạo lông mày KAI, bạn có thể thỏa thích tạo đường cong chân mày sắc nét và nổi bật.\r\nDao cạo lông mày KAI​​​ - Mày xinh, mặt càng thêm xinh\r\nThông tin sản phẩm:\r\n- Chất liệu: Thép không gỉ, nhựa cao cấp', '4901331010781.jpg', 3, 1),
-(24, 'Xịt Chống Muỗi Và Côn Trùng Cho Bé SKIN VAPE 200ml Nội Địa Nhật (Chai Màu Hồng - Hương Đào) Dùng Cho Bé Từ 6 Tháng Tuổi Trở Lên\r\n', '4902424433081', 20, 225000, NULL, 'Xịt chống muỗi Skin Vape hương mơ đào của Nhật Bản thích hợp cho cả người lớn lẫn trẻ nhỏ.\r\nDùng để xịt lên da vùng tay, chân và cổ, hiệu quả trong việc xua đuổi muỗi và nhiều loại côn trùng khác.', '4902424433081.jpg', 4, 1),
+(21, 'Miếng thấm mồ hôi nách Kyowa 10 chiếc\r\n', '4969757106143', 9, 65000, NULL, 'Chất liệu thấm hút tốt giữ cho vùng nách áo luôn sạch sẽ, khô thoáng, không ố vàng\r\nBề mặt tiếp xúc êm, dễ chịu với da\r\nSản phẩm không mùi, không làm lấn át mùi nước hoa', '4969757106143.jpg', 3, 1),
+(22, 'Set 3 dao cạo lông mày Pretty KAI\r\n', '4901331012860', 99, 115000, NULL, '- Chất liệu:  Lưỡi dao được làm từ thép không gỉ, thân dao được làm từ nhựa dẻo cao cấp và được kháng khuẩn\r\n- Quy cách: gồm 3 cây dao cạo kèm lưỡi.\r\n- HDSD: Dao được thiết kế chuyên dụng dành cho phụ nữ giúp cạo lông mày. Phần tay cầm thiết kế dày dặn giúp cầm nắm dễ dàng. Không thay thế được lưỡi, bỏ đi sau khi lưỡi dao đã cùn.\r\n- Xuất xứ: Nhật Bản. Nhập khẩu trực tiếp từ Nhật', '4901331012860.jpg', 3, 1),
+(23, 'Set 5 dao cạo lông mày KAI\r\n', '4901331010781', 17, 55000, NULL, 'MÔ TẢ SẢN PHẨM\r\nCombo 5 dao cạo lông mày KAI Nhật Bản là phụ kiện hỗ trợ tốt cho việc làm đẹp chân mày. Với dao cạo lông mày KAI, bạn có thể thỏa thích tạo đường cong chân mày sắc nét và nổi bật.\r\nDao cạo lông mày KAI​​​ - Mày xinh, mặt càng thêm xinh\r\nThông tin sản phẩm:\r\n- Chất liệu: Thép không gỉ, nhựa cao cấp', '4901331010781.jpg', 3, 1),
+(24, 'Xịt Chống Muỗi Và Côn Trùng Cho Bé SKIN VAPE 200ml Nội Địa Nhật (Chai Màu Hồng - Hương Đào) Dùng Cho Bé Từ 6 Tháng Tuổi Trở Lên\r\n', '4902424433081', 18, 225000, NULL, 'Xịt chống muỗi Skin Vape hương mơ đào của Nhật Bản thích hợp cho cả người lớn lẫn trẻ nhỏ.\r\nDùng để xịt lên da vùng tay, chân và cổ, hiệu quả trong việc xua đuổi muỗi và nhiều loại côn trùng khác.', '4902424433081.jpg', 4, 1),
 (25, 'Set 3 gói giấy ướt 80 tờ cho bé (100% tinh khiết)\n', '4589506153282', 15, 145000, NULL, 'Chứa đến 99% nước tinh khiết, dịu nhẹ và an toàn cho làn da bé nhỏ\r\nKết hợp thêm thành phần dưỡng ẩm từ collagen, hyaluronic acid giữ cho làn da bé luôn mềm mại, mịn màng\r\nKhăn giấy không chứa cồn, paraben, hương liệu', '4589506153282.jpg', 4, 1),
 (26, 'Kem Đánh Răng Cho Trẻ Em KAO KIDS Hương Dâu 70g Hàng Nội Địa Nhật Bản Cho Bé Từ 3 Tuổi\r\n', '4901301281623', 27, 78000, NULL, 'Kem đánh răng trẻ em KAO Clear Clean Kid\'s 70g là thương hiệu nổi tiếng của Nhật Bản, sản phẩm được thiết kế với hình dáng những con vật ngộ nghĩnh trên bao bì sản phẩm nhằm thu hút sự chú ý và tò mò của bé. Giúp chống sâu răng, tăng độ chắc khỏe cho răng, giúp men răng trắng sáng.', '4901301281623.jpg', 4, 1),
-(27, 'Lăn Bôi Trị Muỗi Và Côn Trùng Đốt MUHI 50ml  Nội Địa Nhật Chim Cánh Cụt Cho Bé Từ 6 Tháng Tuổi\r\n', '4987426002091', 35, 176000, NULL, 'Lăn trị muỗi đốt Muhi từ Nhật Bản giúp làm xẹp, làm dịu nhanh cơn ngứa, vết sưng tấy do muỗi, các loại côn trùng cắn tức thì và không để lại sẹo. Sản phẩm không chứa cồn hay bất kỳ chất phụ gia độc hại, an toàn cho da nhạy cảm, giúp chống hăm da, rôm sẩy, viêm da, đỏ da, nổi mề đay, chàm, phát ban nhiệt ở cả trẻ em và người lớn.', '4987426002091.jpg', 5, 1),
-(28, 'Hộp Đựng Thuốc 2 Ngăn Cao Cấp Inomata Nhật Bản\r\n', '4973228171516', 14, 95000, NULL, 'Mô tả sản phẩm Hộp đựng thuốc Inomata chia 2 ngăn Nhật Bản\r\n- Chất liệu: nhựa PP cao cấp\r\n- Kích thước: đường kính 7cm * độ dày 2cm\r\n- Công dụng: Chia 2 ngăn, dùng để đựng th. Thiết kế nhỏ gọn dễ dàng mang theo người. Kiểu dáng đẹp, sang trọng. \r\n- Hàng nhập khẩu từ Nhật, sản xuất tại Nhật Bản ', '4973228171516.jpg', 5, 1),
-(29, 'Kem Đánh Răng Muối SunStar tuýp 170g Hàng Nội Địa Nhật Bản\r\n', '4901616005266', 17, 70000, NULL, 'Kem Đánh Răng Muối SunStar là sản phẩm đến từ Nhật Bản, với khả năng chăm sóc răng miệng 1 cách toàn diện. Kem có chứa thành phần chính là muối kết hợp với canxi carbonate, vitamin E, tinh thể muối, sorbitol giúp đánh bật các mảng bám ố vàng trên răng và trong từng kẽ răng, đồng thời còn giúp ngăn chặn các bệnh về nha chu, sâu răng, chảy máu chân răng hiệu quả.', '4901616005266.jpg', 5, 1),
-(30, 'Hộp 180 bông ngoáy tai cao cấp cho người lớn', '4936613072331', 17, 90000, 80000, 'Xuất xứ: Hàng nội địa Nhật Bản, sản xuất tại Nhật Bản.\r\n- Chất liệu: tay cầm bằng nhựa, 2 đầu bằng bông.\r\n- Công dụng: vệ sinh, làm sạch tai. Đầu bông chất liệu cotton cao cấp, không gây đau rát, an toàn khi ngoáy tai.', '4936613072331.jpg', 5, 1),
-(31, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)', '4973430023672', 5, 60000, 20000, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)\r\n\r\nBàn chải chà gót chân bằng đá san hô dùng cọ gót chân giúp làm mềm, mịn gót chân, loại bỏ các vết chai sần, xơ cứng phần gót chân bạn.\r\nĐặc điểm\r\nChất liệu an toàn\r\nVới thành phần từ đá thiên nhiên nên bạn sẽ hoàn toàn yên tâm khi sử dụng để chăm sóc cho đôi chân của mình và gia đình\r\nSản phẩm với kích thước vừa tay cầm, dễ dàng cất gọn, giúp tiết kiệm không gian nhà tắm', '4973430023672.jpg', 5, 1),
+(27, 'Lăn Bôi Trị Muỗi Và Côn Trùng Đốt MUHI 50ml  Nội Địa Nhật Chim Cánh Cụt Cho Bé Từ 6 Tháng Tuổi\r\n', '4987426002091', 34, 176000, NULL, 'Lăn trị muỗi đốt Muhi từ Nhật Bản giúp làm xẹp, làm dịu nhanh cơn ngứa, vết sưng tấy do muỗi, các loại côn trùng cắn tức thì và không để lại sẹo. Sản phẩm không chứa cồn hay bất kỳ chất phụ gia độc hại, an toàn cho da nhạy cảm, giúp chống hăm da, rôm sẩy, viêm da, đỏ da, nổi mề đay, chàm, phát ban nhiệt ở cả trẻ em và người lớn.', '4987426002091.jpg', 5, 1),
+(28, 'Hộp Đựng Thuốc 2 Ngăn Cao Cấp Inomata Nhật Bản\r\n', '4973228171516', 13, 95000, NULL, 'Mô tả sản phẩm Hộp đựng thuốc Inomata chia 2 ngăn Nhật Bản\r\n- Chất liệu: nhựa PP cao cấp\r\n- Kích thước: đường kính 7cm * độ dày 2cm\r\n- Công dụng: Chia 2 ngăn, dùng để đựng th. Thiết kế nhỏ gọn dễ dàng mang theo người. Kiểu dáng đẹp, sang trọng. \r\n- Hàng nhập khẩu từ Nhật, sản xuất tại Nhật Bản ', '4973228171516.jpg', 5, 1),
+(29, 'Kem Đánh Răng Muối SunStar tuýp 170g Hàng Nội Địa Nhật Bản\r\n', '4901616005266', 16, 70000, NULL, 'Kem Đánh Răng Muối SunStar là sản phẩm đến từ Nhật Bản, với khả năng chăm sóc răng miệng 1 cách toàn diện. Kem có chứa thành phần chính là muối kết hợp với canxi carbonate, vitamin E, tinh thể muối, sorbitol giúp đánh bật các mảng bám ố vàng trên răng và trong từng kẽ răng, đồng thời còn giúp ngăn chặn các bệnh về nha chu, sâu răng, chảy máu chân răng hiệu quả.', '4901616005266.jpg', 5, 1),
+(30, 'Hộp 180 bông ngoáy tai cao cấp cho người lớn', '4936613072331', 16, 90000, 80000, 'Xuất xứ: Hàng nội địa Nhật Bản, sản xuất tại Nhật Bản.\r\n- Chất liệu: tay cầm bằng nhựa, 2 đầu bằng bông.\r\n- Công dụng: vệ sinh, làm sạch tai. Đầu bông chất liệu cotton cao cấp, không gây đau rát, an toàn khi ngoáy tai.', '4936613072331.jpg', 5, 1),
+(31, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)', '4973430023672', 3, 60000, 20000, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)\r\n\r\nBàn chải chà gót chân bằng đá san hô dùng cọ gót chân giúp làm mềm, mịn gót chân, loại bỏ các vết chai sần, xơ cứng phần gót chân bạn.\r\nĐặc điểm\r\nChất liệu an toàn\r\nVới thành phần từ đá thiên nhiên nên bạn sẽ hoàn toàn yên tâm khi sử dụng để chăm sóc cho đôi chân của mình và gia đình\r\nSản phẩm với kích thước vừa tay cầm, dễ dàng cất gọn, giúp tiết kiệm không gian nhà tắm', '4973430023672.jpg', 5, 1),
 (37, 'Bàn Chải Chà Gót Chân Sanada Seiko (Đá San Hô)', '', 0, 10000, 9000, '', '692c24dd0e2b9.jpg', 4, 1);
 
 -- --------------------------------------------------------
@@ -848,7 +882,7 @@ CREATE TABLE IF NOT EXISTS `refund_requests` (
   KEY `idx_customerID` (`customerID`),
   KEY `idx_status` (`status`),
   KEY `idx_created` (`createdAt`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bảng yêu cầu hoàn tiền khi hủy đơn';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bảng yêu cầu hoàn tiền khi hủy đơn';
 
 --
 -- Dumping data for table `refund_requests`
@@ -860,7 +894,56 @@ INSERT INTO `refund_requests` (`refundID`, `orderID`, `customerID`, `type`, `amo
 (3, 191, 2, 'cancel', 80500.00, NULL, '2123213213123', 'OCB', 'AAAAAA', 'image/refund_proofs/refund_proof_191_1764873847.jpg', 'Đã hoàn tiền', 'aaaaa', 1, '2025-12-05 01:44:51', '2025-12-05 01:44:07'),
 (4, 192, 2, 'cancel', 45800.00, NULL, '13123123', 'LienVietPostBank', '1111', 'image/refund_proofs/refund_proof_192_1764874299.jpg', 'Đã hoàn tiền', '', 1, '2025-12-05 01:51:52', '2025-12-05 01:51:39'),
 (5, 193, 2, 'cancel', 20500.00, NULL, '121212', 'OCB', '1111111111', 'image/refund_proofs/refund_proof_193_1764874725.jpg', 'Đã hoàn tiền', 'aaaaaaaaaaa', 1, '2025-12-05 01:58:55', '2025-12-05 01:58:45'),
-(6, 194, 2, 'cancel', 20500.00, NULL, '2123213213123', 'PVcomBank', 'ÁDASDASDAS', 'image/refund_proofs/refund_proof_194_1764875570.jpg', 'Đã hoàn tiền', '', 1, '2025-12-05 02:12:56', '2025-12-05 02:12:50');
+(6, 194, 2, 'cancel', 20500.00, NULL, '2123213213123', 'PVcomBank', 'ÁDASDASDAS', 'image/refund_proofs/refund_proof_194_1764875570.jpg', 'Đã hoàn tiền', '', 1, '2025-12-05 02:12:56', '2025-12-05 02:12:50'),
+(7, 205, 2, 'cancel', 40500.00, NULL, '2123213213123', 'Techcombank', 'ADSDAD', 'image/refund_proofs/refund_proof_205_1764923619.jpg', 'Từ chối', '', 1, '2025-12-05 15:33:53', '2025-12-05 15:33:39');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `return_requests`
+--
+
+DROP TABLE IF EXISTS `return_requests`;
+CREATE TABLE IF NOT EXISTS `return_requests` (
+  `returnID` int NOT NULL AUTO_INCREMENT,
+  `orderID` int NOT NULL,
+  `customerID` int NOT NULL,
+  `reason` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Lý do hoàn trả',
+  `images` text COLLATE utf8mb4_unicode_ci COMMENT 'JSON array chứa đường dẫn ảnh chứng minh (sản phẩm lỗi, hư hỏng)',
+  `accountHolder` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT 'Tên chủ tài khoản',
+  `bankAccount` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT 'Số tài khoản',
+  `bankName` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT 'Tên ngân hàng',
+  `status` enum('Chờ xử lý','Đã chấp nhận','Đã từ chối','Đã hoàn tiền') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Chờ xử lý',
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `processedAt` datetime DEFAULT NULL COMMENT 'Thời điểm admin xử lý',
+  `processedBy` int DEFAULT NULL COMMENT 'Admin ID người xử lý',
+  `adminNote` text COLLATE utf8mb4_unicode_ci COMMENT 'Ghi chú của admin',
+  PRIMARY KEY (`returnID`),
+  KEY `idx_order` (`orderID`),
+  KEY `idx_customer` (`customerID`),
+  KEY `idx_status` (`status`)
+) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Yêu cầu hoàn trả đơn hàng';
+
+--
+-- Dumping data for table `return_requests`
+--
+
+INSERT INTO `return_requests` (`returnID`, `orderID`, `customerID`, `reason`, `images`, `accountHolder`, `bankAccount`, `bankName`, `status`, `createdAt`, `processedAt`, `processedBy`, `adminNote`) VALUES
+(4, 197, 2, '1212312321', '[\"image\\/return_proofs\\/return_197_1764879244_0.jpg\"]', '', '', '', 'Đã hoàn tiền', '2025-12-05 03:14:04', '2025-12-05 12:38:02', 1, ''),
+(3, 196, 2, 'a', '[\"image\\/return_proofs\\/return_196_1764878656_0.jpg\"]', '', '', '', 'Đã từ chối', '2025-12-05 03:04:16', '2025-12-05 03:04:39', NULL, 'Ờm éo'),
+(5, 198, 2, 'a', '[\"image\\/return_proofs\\/return_198_1764879600_0.png\"]', '', '', '', 'Đã chấp nhận', '2025-12-05 03:20:00', '2025-12-05 03:24:35', 1, 'a'),
+(6, 199, 2, 'a', '[\"image\\/return_proofs\\/return_199_1764880772_0.jpg\"]', 'ÁDASDASDAS', '2123213213123', '12312321', 'Đã hoàn tiền', '2025-12-05 03:39:32', '2025-12-05 03:40:06', 1, 'aaa'),
+(7, 200, 2, 'a', '[\"image\\/return_proofs\\/return_200_1764881201_0.jpg\"]', 'ADSDAD', '1231321321231', '12312313', 'Đã chấp nhận', '2025-12-05 03:46:41', '2025-12-05 03:46:52', 1, 'adasdsad'),
+(8, 201, 2, 'Test từ debug script', '[]', 'NGUYEN VAN B', '9876543210', 'Vietcombank', 'Đã từ chối', '2025-12-05 03:57:28', '2025-12-05 04:04:59', 1, 'a'),
+(9, 201, 2, 'Test từ debug script', '[]', 'NGUYEN VAN B', '9876543210', 'Vietcombank', 'Đã từ chối', '2025-12-05 03:59:49', '2025-12-05 04:04:53', 1, ''),
+(10, 201, 2, 'Test từ debug script', '[]', 'NGUYEN VAN B', '9876543210', 'Vietcombank', 'Đã chấp nhận', '2025-12-05 03:59:52', '2025-12-05 04:04:45', 1, ''),
+(11, 201, 2, 'Test từ debug script', '[]', 'NGUYEN VAN B', '9876543210', 'Vietcombank', 'Đã hoàn tiền', '2025-12-05 03:59:55', '2025-12-05 12:37:33', 1, ''),
+(12, 201, 2, 'Test từ debug script', '[]', 'NGUYEN VAN B', '9876543210', 'Vietcombank', 'Đã từ chối', '2025-12-05 04:00:03', '2025-12-05 04:02:01', 1, ''),
+(13, 201, 2, 'Test từ debug script', '[]', 'NGUYEN VAN B', '9876543210', 'Vietcombank', 'Đã hoàn tiền', '2025-12-05 04:00:07', '2025-12-05 12:37:45', 1, ''),
+(14, 201, 2, 'Test từ debug script', '[]', 'NGUYEN VAN B', '9876543210', 'Vietcombank', 'Đã hoàn tiền', '2025-12-05 04:09:02', '2025-12-05 12:37:14', 1, ''),
+(15, 202, 2, 'ădasdasd', '[\"image\\/return_proofs\\/return_202_1764913438_0.jpg\"]', 'AAAAAAAA', '231321321321', 'aaaaaaaaaaa', 'Đã hoàn tiền', '2025-12-05 12:43:58', '2025-12-05 12:45:01', 1, 'Đã xác nhận hoàn tiền'),
+(16, 203, 2, 'a', '[\"image\\/return_proofs\\/return_203_1764914319_0.jpg\"]', 'AAAAAAA', '21321321321321', '12332131321', 'Đã hoàn tiền', '2025-12-05 12:58:39', '2025-12-05 12:59:09', 1, 'aa'),
+(17, 204, 2, 'a', '[]', 'ĐOàN VăN SáNG', '1321653413211', 'aaaaaaaaaaa', 'Đã hoàn tiền', '2025-12-05 13:04:01', '2025-12-05 13:04:27', 1, '');
 
 -- --------------------------------------------------------
 
