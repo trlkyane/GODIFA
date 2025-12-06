@@ -280,7 +280,7 @@ include __DIR__ . '/../layout/header.php';
                             </a>
                         </h3>
                         <p class="text-sm font-semibold text-gray-900">
-                            <?php echo number_format($r['price'], 0, ',', '.'); ?>?
+                            <?php echo number_format($r['price'], 0, ',', '.'); ?>đ
                         </p>
                     </div>
                 </div>

@@ -295,15 +295,19 @@ if ($user_type === 'customer' && $user_id !== 'guest') {
         </div>
     </div>
 
-    <div id="customer-metadata" 
+    <div id="chat-metadata" 
         data-user-id="<?php echo htmlspecialchars($user_id); ?>"
         data-user-type="<?php echo htmlspecialchars($user_type); ?>"
         data-conversation-id="<?php echo $currentConversationID; ?>"
-        data-socket-url="<?php echo SOCKET_SERVER_URL; ?>"
         style="display: none;">
     </div>
     
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <script>
+        // Truyền BASE_URL cho JavaScript
+        window.BASE_URL = '<?php echo BASE_URL; ?>';
+    </script>
     
     <script src="<?php echo BASE_URL; ?>public/js/chat_client.js"></script>
     

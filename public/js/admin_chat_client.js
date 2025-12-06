@@ -18,6 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lấy Socket Server URL từ metadata (tự động điều chỉnh theo môi trường)
     const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('data-socket-url') : 'http://localhost:3000'; 
+    
+    // Lấy BASE_URL từ window, đảm bảo có dấu / cuối
+    let BASE_URL = window.BASE_URL || (window.location.origin + '/');
+    if (!BASE_URL.endsWith('/')) {
+        BASE_URL += '/';
+    }
+    
+    console.log('Admin Chat - BASE_URL:', BASE_URL);
+    
     const socket = io(SOCKET_SERVER_URL);
     
     // ----------------------------------------------------------------
@@ -281,7 +290,9 @@ document.addEventListener('DOMContentLoaded', () => {
             messagesList.innerHTML = '<div class="w-full text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải lịch sử chat...</div>';
         }
 
-        const apiUrl = `/controller/ChatController.php?action=getMessages&conv_id=${currentConvID}`; 
+        const apiUrl = `${BASE_URL}controller/ChatController.php?action=getMessages&conv_id=${currentConvID}`; 
+        console.log('🔗 API URL:', apiUrl);
+        console.log('📍 BASE_URL:', BASE_URL);
         
         fetch(apiUrl)
             .then(response => {

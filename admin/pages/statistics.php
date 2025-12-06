@@ -137,10 +137,11 @@ echo $controller->formatCurrency($revenueStats['total']); ?></h3>
                     </div>
                 </div>
                 <?php
-$growth = $controller->formatGrowth($revenueStats['growth']); ?>
+$growth = $controller->formatGrowth($revenueStats['growth']); 
+$bgClass = strpos($growth['color'], 'green') !== false ? 'bg-green-500' : 'bg-red-500';
+?>
                 <div class="flex items-center text-xs">
-                    <span class="<?php
-echo str_replace('text-', 'text-white bg-', $growth['color']); ?> bg-opacity-30 px-2 py-1 rounded">
+                    <span class="text-white <?php echo $bgClass; ?> bg-opacity-30 px-2 py-1 rounded">
                         <?php
 echo $growth['icon'] . ' ' . $growth['text']; ?>
                     </span>

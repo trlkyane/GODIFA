@@ -267,6 +267,9 @@ include __DIR__ . '/../includes/header.php';
     const CURRENT_USER_ID = '<?php echo $currentUserID; ?>';
     const CURRENT_ROLE_ID = '<?php echo $currentRoleID; ?>';
     
+    // Truyền BASE_URL cho JavaScript
+    window.BASE_URL = '<?php echo BASE_URL; ?>';
+    
     /**
      * Tự động cuộn xuống dưới cùng của danh sách tin nhắn
      */

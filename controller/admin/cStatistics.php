@@ -95,7 +95,7 @@ class cStatistics {
     public function formatGrowth($growth) {
         $sign = $growth >= 0 ? '+' : '';
         $color = $growth >= 0 ? 'text-green-600' : 'text-red-600';
-        $icon = $growth >= 0 ? 'â†‘' : 'â†“';
+        $icon = $growth >= 0 ? '↑' : '↓';
         
         return [
             'text' => $sign . number_format($growth, 1) . '%',

@@ -239,8 +239,8 @@ function hasPermission($permission) {
  */
 function getRoleName($roleId) {
     $roles = [
-        ROLE_OWNER => 'Ch? Doanh Nghi?p',
-        ROLE_ADMIN => 'Qu?n Tr? Viên',
+        ROLE_OWNER => 'Chủ Doanh Nghiệp',
+        ROLE_ADMIN => 'Quản Trị Viên',
         ROLE_SALES => 'Nhân Viên Bán Hàng',
         ROLE_SUPPORT => 'Nhân Viên CSKH'
     ];

@@ -86,7 +86,7 @@ if (isset($_POST['change_password']) && hasPermission('manage_customers')) {
 
 // Xử lý THAY ĐỔI TRẠNG THÁI khách hàng
 if (isset($_POST['update_status'])) {
-    // Láº¥y Ä‘Ãºng key session
+    // Lấy đúng key session
     $currentRoleID = $_SESSION['role_id'] ?? null;
     $hasManageCustomers = hasPermission('manage_customers');
     
@@ -137,7 +137,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_customer_detail' && isset
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'message' => 'KhÃ´ng tÃ¬m tháº¥y khÃ¡ch hÃ ng!'
+            'message' => 'Không tìm thấy khách hàng!'
         ]);
         exit;
     }
@@ -145,7 +145,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_customer_detail' && isset
     $stats = $customerController->getCustomerStats($customerID);
     $orders = $customerController->getOrderHistory($customerID);
     
-    // Format dá»¯ liá»‡u Ä‘Æ¡n hÃ ng vá»›i thÃ´ng tin Ä‘áº§y Ä‘á»§
+    // Format dữ liệu đơn hàng với thông tin đầy đủ
     $formattedOrders = [];
     foreach ($orders as $order) {
         $formattedOrders[] = [
@@ -159,7 +159,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_customer_detail' && isset
         ];
     }
     
-    // Tráº£ vá» JSON vá»›i dá»¯ liá»‡u Ä‘Æ°á»£c format
+    // Tráº£ vá» JSON vá»›i dá»¯ liá»‡u Ä'Æ°á»£c format
     header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
@@ -168,11 +168,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_customer_detail' && isset
             'customerName' => $customer['customerName'],
             'phone' => $customer['phone'],
             'email' => $customer['email'],
+            'note' => $customer['note'] ?? '',
             'status' => $customer['status'] ?? 1
         ],
         'stats' => [
             'totalOrders' => $stats['totalOrders'] ?? 0,
-            'totalSpent' => $stats['totalSpent'] ?? 0
+            'totalSpent' => $stats['totalSpent'] ?? 0,
+            'completedOrders' => $stats['completedOrders'] ?? 0,
+            'cancelledOrders' => $stats['cancelledOrders'] ?? 0
         ],
         'orders' => $formattedOrders
     ], JSON_UNESCAPED_UNICODE);
@@ -263,14 +266,13 @@ include __DIR__ . '/../includes/header.php';
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">SĐT</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Email</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Trạng thái</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Thống kê</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Hành động</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             <?php if (empty($customers)): ?>
                             <tr>
-                                <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="7" class="px-4 py-8 text-center text-gray-500">
                                     <i class="fas fa-users text-4xl mb-2 text-gray-300"></i>
                                     <p>Không tìm thấy khách hàng nào</p>
                                 </td>
@@ -284,9 +286,9 @@ include __DIR__ . '/../includes/header.php';
                                 $phone = $customer['phone'] ?? '';
                                 $email = $customer['email'] ?? '';
                                 $status = $customer['status'] ?? 1; // Mặc định: Hoạt động
-                                $groupID = $customer['groupID'] ?? 1;
-                                $groupName = $customer['groupName'] ?? 'Khách hàng thường';
-                                $groupColor = $customer['groupColor'] ?? '#9ca3af';
+                                $groupID = $customer['groupID'] ?? 1; // Mặc định Broze
+                                $groupName = $customer['groupName'] ?? 'Broze';
+                                $groupColor = $customer['groupColor'] ?? '#907c64';
                                 
                                 // Lấy thống kê
                                 $stats = $customerController->getCustomerStats($customerID);
@@ -336,16 +338,6 @@ include __DIR__ . '/../includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        <div class="text-sm">
-                                            <div class="font-semibold text-purple-600">
-                                                <?php echo $totalOrders; ?> đơn hàng
-                                            </div>
-                                            <div class="text-xs text-gray-500 mt-1">
-                                                Chi tiêu: <strong class="text-green-600"><?php echo number_format($totalSpent, 0, ',', '.'); ?>₫</strong>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
                                         <div class="flex justify-center items-center space-x-2">
                                             <!-- Xem chi tiết -->
                                             <button onclick='viewCustomerDetail(<?php echo $customerID; ?>)' 
@@ -364,15 +356,15 @@ include __DIR__ . '/../includes/header.php';
                                             <?php if (hasPermission('manage_customers')): ?>
                                             <!-- Toggle Status -->
                                             <?php if ($status == 1): ?>
-                                            <!-- <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
+                                            <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
                                                     class="text-yellow-600 hover:text-yellow-800 w-8 h-8 flex items-center justify-center" title="Khóa tài khoản">
                                                 <i class="fas fa-lock text-lg"></i>
-                                            </button> -->
+                                            </button>
                                             <?php else: ?>
-                                            <!-- <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
+                                            <button onclick="toggleStatus(<?php echo $customerID; ?>, <?php echo $status; ?>)" 
                                                     class="text-green-600 hover:text-green-800 w-8 h-8 flex items-center justify-center" title="Mở khóa tài khoản">
                                                 <i class="fas fa-lock-open text-lg"></i>
-                                            </button> -->
+                                            </button>
                                             <?php endif; ?>
                                             <?php endif; ?>
                                             
@@ -468,13 +460,13 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal: Sửa khách hàng -->
+<!-- Modal: Sửa ghi chú khách hàng -->
 <div id="editModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-10 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white mb-10">
         <div class="flex justify-between items-center pb-3 border-b border-green-200">
             <h3 class="text-xl font-bold text-gray-800">
-                <i class="fas fa-edit text-green-500 mr-2"></i>
-                Sửa thông tin khách hàng
+                <i class="fas fa-sticky-note text-green-500 mr-2"></i>
+                Ghi chú khách hàng
             </h3>
             <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times text-xl"></i>
@@ -483,61 +475,36 @@ include __DIR__ . '/../includes/header.php';
         
         <form method="POST" class="mt-4">
             <input type="hidden" name="customerID" id="edit_customerID">
+            <input type="hidden" name="customerName" id="edit_customerName">
+            <input type="hidden" name="phone" id="edit_phone">
+            <input type="hidden" name="email" id="edit_email">
             
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_customerName">
-                    Tên khách hàng <span class="text-red-500">*</span>
-                </label>
-                <input type="text" name="customerName" id="edit_customerName" required
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+            <!-- Hiển thị thông tin khách hàng (không cho sửa) -->
+            <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="mb-2">
+                    <span class="text-sm font-semibold text-gray-600">Khách hàng:</span>
+                    <p class="text-gray-800 font-medium" id="display_customerName"></p>
+                </div>
+                <div class="mb-2">
+                    <span class="text-sm font-semibold text-gray-600">Số điện thoại:</span>
+                    <p class="text-gray-800" id="display_phone"></p>
+                </div>
+                <div>
+                    <span class="text-sm font-semibold text-gray-600">Email:</span>
+                    <p class="text-gray-800" id="display_email"></p>
+                </div>
             </div>
             
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_phone">
-                    Số điện thoại <span class="text-red-500">*</span>
-                </label>
-                <input type="tel" name="phone" id="edit_phone" required
-                       pattern="0[0-9]{9,10}"
-                       maxlength="11"
-                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                       title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
-                       placeholder="0987654321"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_email">
-                    Email <span class="text-red-500">*</span>
-                </label>
-                <input type="email" name="email" id="edit_email" required
-                       pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
-                       title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-            </div>
+            <!-- Trường note (cho phép sửa) -->
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_note">
-                    Ghi chú
+                    Ghi chú <span class="text-gray-500 text-xs font-normal">(Chỉ được sửa trường này)</span>
                 </label>
-                <textarea name="note" id="edit_note" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nhập ghi chú khách hàng"></textarea>
+                <textarea name="note" id="edit_note" rows="4" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" 
+                          placeholder="Nhập ghi chú về khách hàng..."></textarea>
             </div>
-            
-            <?php if (hasPermission('manage_customers')): ?>
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_status">
-                    Trạng thái <span class="text-red-500">*</span>
-                </label>
-                <select name="status" id="edit_status" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <option value="1">Hoạt động</option>
-                    <option value="0">Đã khóa</option>
-                </select>
-                <p class="text-xs text-gray-500 mt-1">
-                    <i class="fas fa-info-circle"></i> 
-                    Khách hàng bị khóa không thể đăng nhập và đặt hàng
-                </p>
-            </div>
-            <?php endif; ?>
-            
+
             <div class="flex justify-end space-x-2">
                 <button type="button" onclick="closeEditModal()"
                         class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
@@ -545,7 +512,7 @@ include __DIR__ . '/../includes/header.php';
                 </button>
                 <button type="submit" name="edit_customer"
                         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    <i class="fas fa-check mr-1"></i> Cập nhật
+                    <i class="fas fa-check mr-1"></i> Lưu ghi chú
                 </button>
             </div>
         </form>
@@ -639,19 +606,21 @@ function closeAddModal() {
     document.getElementById('addModal').classList.add('hidden');
 }
 
-// Edit modal
+// Edit modal - Chỉ cho phép sửa ghi chú
 function openEditModal(customer) {
+    // Set hidden fields
     document.getElementById('edit_customerID').value = customer.customerID;
     document.getElementById('edit_customerName').value = customer.customerName;
     document.getElementById('edit_phone').value = customer.phone;
     document.getElementById('edit_email').value = customer.email;
-    document.getElementById('edit_note').value = customer.note ? customer.note : '';
     
-    // Set status if field exists
-    const statusField = document.getElementById('edit_status');
-    if (statusField) {
-        statusField.value = customer.status || 1;
-    }
+    // Display info (read-only)
+    document.getElementById('display_customerName').textContent = customer.customerName;
+    document.getElementById('display_phone').textContent = customer.phone;
+    document.getElementById('display_email').textContent = customer.email;
+    
+    // Editable note field
+    document.getElementById('edit_note').value = customer.note ? customer.note : '';
     
     document.getElementById('editModal').classList.remove('hidden');
 }
@@ -711,13 +680,17 @@ function viewCustomerDetail(customerID) {
     fetch(`?page=customers&action=get_customer_detail&id=${customerID}`)
         .then(response => response.json())
         .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Không thể tải dữ liệu');
+            }
+            
             const customer = data.customer;
             const stats = data.stats;
             const orders = data.orders;
             
             // Format số tiền
             const formatMoney = (amount) => {
-                return new Intl.NumberFormat('vi-VN').format(amount) + 'â‚«';
+                return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
             };
             
             // Format ngày
@@ -732,20 +705,20 @@ function viewCustomerDetail(customerID) {
                 });
             };
             
-            // Badge trạng thái
+            // Badge trạng thái đơn hàng
             const getStatusBadge = (paymentStatus, deliveryStatus) => {
-                if (paymentStatus === 'ÄÃ£ há»§y' || deliveryStatus === 'ÄÃ£ há»§y') {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle"></i> ÄÃ£ há»§y</span>';
-                } else if (deliveryStatus === 'HoÃ n thÃ nh') {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle"></i> HoÃ n thÃ nh</span>';
-                } else if (deliveryStatus === 'Äang giao') {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"><i class="fas fa-shipping-fast"></i> Äang giao</span>';
+                if (paymentStatus === 'Đã hủy' || deliveryStatus === 'Đã hủy') {
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle"></i> Đã hủy</span>';
+                } else if (deliveryStatus === 'Hoàn thành') {
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle"></i> Hoàn thành</span>';
+                } else if (deliveryStatus === 'Đang giao') {
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"><i class="fas fa-shipping-fast"></i> Đang giao</span>';
                 } else {
-                    return '<span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-clock"></i> Chá» xá»­ lÃ½</span>';
+                    return '<span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-clock"></i> Chờ xử lý</span>';
                 }
             };
             
-            // Táº¡o HTML hiá»ƒn thá»‹
+            // Tạo HTML hiển thị
             let html = `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Thông tin khách hàng -->
@@ -761,20 +734,20 @@ function viewCustomerDetail(customerID) {
                                 <p class="text-purple-100 text-sm mb-4">Khách hàng #${customer.customerID}</p>
                                 
                                 <div class="w-full space-y-3 mt-4">
-                                    <div class="flex items-center bg-white bg-opacity-20 rounded-lg p-3">
-                                        <i class="fas fa-envelope w-6 text-center"></i>
-                                        <span class="ml-3 text-sm">${customer.email}</span>
+                                    <div class="flex items-start bg-white bg-opacity-20 rounded-lg p-3">
+                                        <i class="fas fa-envelope w-6 text-center mt-0.5"></i>
+                                        <span class="ml-3 text-sm break-all">${customer.email || 'Chưa có email'}</span>
                                     </div>
-                                    <div class="flex items-center bg-white bg-opacity-20 rounded-lg p-3">
-                                        <i class="fas fa-phone w-6 text-center"></i>
-                                        <span class="ml-3 text-sm">${customer.phone}</span>
+                                    <div class="flex items-start bg-white bg-opacity-20 rounded-lg p-3">
+                                        <i class="fas fa-phone w-6 text-center mt-0.5"></i>
+                                        <span class="ml-3 text-sm">${customer.phone || 'Chưa có SĐT'}</span>
                                     </div>
-                                    <div class="flex items-center bg-white bg-opacity-20 rounded-lg p-3">
-                                        <i class="fas fa-sticky-note w-6 text-center"></i>
-                                        <span class="ml-3 text-sm">${customer.note ? customer.note : 'Chưa có ghi chú'}</span>
+                                    <div class="flex items-start bg-white bg-opacity-20 rounded-lg p-3">
+                                        <i class="fas fa-sticky-note w-6 text-center mt-0.5"></i>
+                                        <span class="ml-3 text-sm whitespace-pre-wrap">${customer.note || 'Chưa có ghi chú'}</span>
                                     </div>
-                                    <div class="flex items-center bg-white bg-opacity-20 rounded-lg p-3">
-                                        <i class="fas ${customer.status == 1 ? 'fa-check-circle' : 'fa-lock'} w-6 text-center"></i>
+                                    <div class="flex items-start bg-white bg-opacity-20 rounded-lg p-3">
+                                        <i class="fas ${customer.status == 1 ? 'fa-check-circle' : 'fa-lock'} w-6 text-center mt-0.5"></i>
                                         <span class="ml-3 text-sm">${customer.status == 1 ? 'Đang hoạt động' : 'Đã bị khóa'}</span>
                                     </div>
                                 </div>
@@ -782,90 +755,58 @@ function viewCustomerDetail(customerID) {
                         </div>
                     </div>
                     
-                    <!-- Thống kê & Đơn hàng -->
+                    <!-- Thống kê & Lịch sử đơn hàng -->
                     <div class="lg:col-span-2">
                         <!-- Thống kê -->
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow-lg">
+                        <div class="mb-6">
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-blue-100 text-sm mb-1">Tổng đơn hàng</p>
-                                        <p class="text-3xl font-bold">${stats.totalOrders || 0}</p>
+                                        <p class="text-blue-100 text-sm mb-2">Tổng đơn hàng</p>
+                                        <p class="text-4xl font-bold">${stats.totalOrders || 0}</p>
                                     </div>
-                                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-shopping-cart text-3xl"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-5 text-white shadow-lg">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-green-100 text-sm mb-1">Tổng chi tiêu</p>
-                                        <p class="text-2xl font-bold">${formatMoney(stats.totalSpent || 0)}</p>
-                                    </div>
-                                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-money-bill-wave text-3xl"></i>
+                                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-shopping-cart text-4xl"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Danh sách đơn hàng -->
-                        <div class="bg-white rounded-xl shadow-lg">
-                            <div class="px-6 py-4 border-b border-gray-200">
-                                <h4 class="text-lg font-bold text-gray-800">
-                                    <i class="fas fa-list-alt text-purple-500 mr-2"></i>
-                                    Lịch sử đơn hàng (${orders.length})
-                                </h4>
-                            </div>
-                            <div class="p-4 max-h-96 overflow-y-auto">`;
-            
-            if (orders.length === 0) {
-                html += `
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-shopping-bag text-5xl mb-3 text-gray-300"></i>
-                        <p>Chưa có đơn hàng nào</p>
-                    </div>`;
-            } else {
-                orders.forEach(order => {
-                    html += `
-                        <div class="border border-gray-200 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h5 class="font-bold text-gray-800">
-                                        <i class="fas fa-receipt text-purple-500 mr-1"></i>
-                                        Đơn hàng #${order.orderID}
-                                    </h5>
-                                    <p class="text-sm text-gray-600 mt-1">
-                                        <i class="fas fa-clock text-gray-400 mr-1"></i>
-                                        ${formatDate(order.orderDate)}
-                                    </p>
+                        <!-- Lịch sử đơn hàng -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-history text-purple-500 mr-2"></i>
+                                Lịch sử đơn hàng
+                            </h4>
+                            ${orders && orders.length > 0 ? `
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead class="bg-gray-50 border-b">
+                                            <tr>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700">Mã đơn</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700">Ngày đặt</th>
+                                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-700">Tổng tiền</th>
+                                                <th class="px-4 py-2 text-center text-xs font-semibold text-gray-700">Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y">
+                                            ${orders.map(order => `
+                                                <tr class="hover:bg-gray-50">
+                                                    <td class="px-4 py-3 text-sm font-medium text-purple-600">#${order.orderID}</td>
+                                                    <td class="px-4 py-3 text-sm text-gray-600">${formatDate(order.orderDate)}</td>
+                                                    <td class="px-4 py-3 text-sm text-right font-semibold text-gray-800">${formatMoney(order.totalAmount)}</td>
+                                                    <td class="px-4 py-3 text-center">${getStatusBadge(order.paymentStatus, order.deliveryStatus)}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
                                 </div>
-                                ${getStatusBadge(order.paymentStatus, order.deliveryStatus)}
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
-                                <div class="flex items-center text-gray-600">
-                                    <i class="fas fa-credit-card w-5 text-purple-500"></i>
-                                    <span class="ml-2">${order.paymentMethod}</span>
+                            ` : `
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-shopping-bag text-4xl mb-3 text-gray-300"></i>
+                                    <p>Chưa có đơn hàng nào</p>
                                 </div>
-                                <div class="flex items-center text-gray-600">
-                                    <i class="fas fa-box w-5 text-blue-500"></i>
-                                    <span class="ml-2">${order.totalProducts || 0} sản phẩm</span>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center">
-                                <span class="text-sm text-gray-600">Tổng tiền:</span>
-                                <span class="text-lg font-bold text-green-600">${formatMoney(order.totalAmount)}</span>
-                            </div>
-                        </div>`;
-                });
-            }
-            
-            html += `
-                            </div>
+                            `}
                         </div>
                     </div>
                 </div>

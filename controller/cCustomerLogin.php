@@ -21,6 +21,14 @@ class cCustomerLogin {
         $customer = $customerModel->login($email, $password);
         
         if ($customer) {
+            // Kiểm tra trạng thái tài khoản (status = 0 nghĩa là đã bị khóa)
+            if (isset($customer['status']) && $customer['status'] == 0) {
+                echo "<script>alert('Tài khoản của bạn đã bị khóa! Vui lòng liên hệ admin.');</script>";
+                require_once __DIR__ . '/../config/constants.php';
+                header("refresh:0;url=" . BASE_URL . "view/auth/customer-login.php");
+                exit();
+            }
+            
             // Lưu thông tin customer vào session
             $_SESSION["customer_id"] = $customer["customerID"];
             $_SESSION["customer_name"] = $customer["customerName"];

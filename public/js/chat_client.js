@@ -1,8 +1,16 @@
 ﻿// FILE: GODIFA/public/js/chat_client.js - ĐÃ HOÀN CHỈNH VỚI CHỨC NĂNG TẢI LỊCH SỬ & FIX VỊ TRÍ TIN NHẮN
 
-// Lấy Socket Server URL từ metadata (tự động điều chỉnh theo môi trường)
-const metadata = document.getElementById('customer-metadata');
-const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('data-socket-url') : 'http://localhost:3000'; 
+// Khai báo SOCKET_SERVER_URL ở đầu (sẽ lấy từ metadata sau)
+const SOCKET_SERVER_PORT = 3000;
+const SOCKET_SERVER_URL = `http://localhost:${SOCKET_SERVER_PORT}`; 
+
+// Lấy BASE_URL từ window, đảm bảo có dấu / cuối
+let BASE_URL = window.BASE_URL || (window.location.origin + '/');
+if (!BASE_URL.endsWith('/')) {
+    BASE_URL += '/';
+}
+
+console.log('Customer Chat - BASE_URL:', BASE_URL);
 
 // Khởi tạo kết nối Socket.IO
 const socket = io(SOCKET_SERVER_URL); 
@@ -82,9 +90,8 @@ function loadChatHistory(convID, currentUserID) {
         messagesDisplay.innerHTML = '<div class="text-center text-gray-500 py-4">Đang tải lịch sử chat...</div>';
     }
 
-    // Vui lòng kiểm tra lại đường dẫn API này nếu vẫn gặp lỗi 404
-    // Thử dùng: const apiUrl = `/controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
-    const apiUrl = `/controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
+    // Sử dụng BASE_URL để tương thích VPS
+    const apiUrl = `${BASE_URL}controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
     
     fetch(apiUrl)
         .then(response => {

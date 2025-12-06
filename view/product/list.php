@@ -150,7 +150,7 @@ include '../layout/header.php';
                                 </span>
                             <?php else: ?>
                                 <p class="text-sm font-bold text-red-600">
-                                    <?php echo number_format($product['price'], 0, ',', '.'); ?>?
+                                    <?php echo number_format($product['price'], 0, ',', '.'); ?>đ
                                 </p>
                             <?php endif; ?>
                         </div>

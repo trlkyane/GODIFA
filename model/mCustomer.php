@@ -37,14 +37,17 @@ public function updateCustomer($id, $data) {
         $this->conn = $db->moKetNoi();
     }
     
-    // ÄÄƒng kÃ½ khÃ¡ch hÃ ng má»›i
+    // ÄÄƒng kÃ½ khÃ¡ch hÃ ng má»›i
     public function register($customerName, $phone, $email, $password) {
         // Hash password báº±ng MD5 (nhÆ° trong database máº«u)
         $hashedPassword = md5($password);
         
-        $sql = "INSERT INTO customer (customerName, phone, email, password) VALUES (?, ?, ?, ?)";
+        // Máº§c Ä'á»‹nh gáº£n nhÃ³m Broze (groupID = 1) cho khÃ¡ch hÃ ng má»›i
+        $defaultGroupID = 1; // Broze - Chi tiÃªu 0-5tr
+        
+        $sql = "INSERT INTO customer (customerName, phone, email, password, groupID) VALUES (?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssss", $customerName, $phone, $email, $hashedPassword);
+        mysqli_stmt_bind_param($stmt, "ssssi", $customerName, $phone, $email, $hashedPassword, $defaultGroupID);
         return mysqli_stmt_execute($stmt);
     }
     
@@ -199,11 +202,13 @@ public function updateCustomer($id, $data) {
         return $orders;
     }
     
-    // Thá»‘ng kÃª khÃ¡ch hÃ ng
+    // Thá»'ng kÃª khÃ¡ch hÃ ng
     public function getCustomerStats($customerID) {
         $sql = "SELECT 
                     COUNT(o.orderID) as totalOrders,
-                    COALESCE(SUM(CASE WHEN o.paymentStatus = 'ÄÃ£ thanh toÃ¡n' THEN o.totalAmount ELSE 0 END), 0) as totalSpent,
+                    COALESCE(SUM(CASE WHEN o.paymentStatus = 'ÄÃ£ thanh toÃ¡n' THEN o.totalAmount ELSE 0 END), 0) as totalSpent,
+                    COUNT(CASE WHEN o.deliveryStatus = 'HoÃ n thÃ nh' THEN 1 END) as completedOrders,
+                    COUNT(CASE WHEN o.deliveryStatus = 'ÄÃ£ há»§y' OR o.paymentStatus = 'ÄÃ£ há»§y' THEN 1 END) as cancelledOrders,
                     MAX(o.orderDate) as lastOrderDate
                 FROM `order` o
                 WHERE o.customerID = ?";

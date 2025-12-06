@@ -433,15 +433,23 @@ include __DIR__ . '/../includes/header.php';
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Vai trò <span class="text-red-500">*</span></label>
-                    <select name="roleID" id="edit_roleID" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select name="roleID" id="edit_roleID" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" 
+                            <?php echo isset($editUser) && $editUser['roleID'] == ROLE_OWNER ? 'disabled' : ''; ?>>
                         <?php foreach ($roles as $role): ?>
                             <?php if ($role['roleID'] != ROLE_OWNER): // Bỏ Chủ Doanh Nghiệp ?>
-                            <option value="<?php echo $role['roleID']; ?>">
+                            <option value="<?php echo $role['roleID']; ?>" 
+                                    <?php echo isset($editUser) && $editUser['roleID'] == $role['roleID'] ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($role['roleName']); ?>
                             </option>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
+                    <?php if (isset($editUser) && $editUser['roleID'] == ROLE_OWNER): ?>
+                    <input type="hidden" name="roleID" value="<?php echo $editUser['roleID']; ?>">
+                    <p class="text-xs text-amber-600 mt-1">
+                        <i class="fas fa-lock mr-1"></i>Không thể thay đổi vai trò của Chủ Doanh Nghiệp
+                    </p>
+                    <?php endif; ?>
                 </div>
             </div>
             
@@ -519,6 +527,14 @@ function openEditModal(user) {
     document.getElementById('edit_email').value = user.email;
     document.getElementById('edit_phone').value = user.phone || '';
     document.getElementById('edit_roleID').value = user.roleID;
+    
+    // Disable role select nếu là Chủ Doanh Nghiệp (roleID = 1)
+    const roleSelect = document.getElementById('edit_roleID');
+    if (user.roleID === 1) {
+        roleSelect.disabled = true;
+    } else {
+        roleSelect.disabled = false;
+    }
     
     document.getElementById('editModal').classList.remove('hidden');
 }
