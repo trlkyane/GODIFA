@@ -7,6 +7,12 @@
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
 
+// Chỉ Nhân viên CSKH (role_id = 4) được truy cập
+$currentRoleID = $_SESSION['role_id'] ?? 0;
+if ($currentRoleID != 4) {
+    die('<div class="container mx-auto p-8"><div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"><strong class="font-bold">Không có quyền!</strong><span class="block sm:inline"> Chỉ nhân viên chăm sóc khách hàng mới có quyền truy cập trang Chat.</span></div></div>');
+}
+
 // Check permission
 if (!hasPermission('view_chat')) {
     die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">Bạn không có quyền truy cập Chat!</div></div>');
@@ -18,13 +24,12 @@ $chatController = new ChatController();
 
 $success = '';
 $error = '';
-$currentUserID = $_SESSION['user_id'] ?? 0;
-$currentRoleID = $_SESSION['role_id'] ?? 0; 
+$currentUserID = $_SESSION['user_id'] ?? 0; 
 
 // --- Xử lý DELETE MESSAGE / DELETE CONVERSATION (giữ nguyên) ---
 
-// Xử lý XÓA TIN NHẮN (Chỉ Chủ DN và NVCSKH)
-if (isset($_GET['delete_message']) && ($currentRoleID == 1 || $currentRoleID == 4)) {
+// Xử lý XÓA TIN NHẮN (Chỉ NVCSKH)
+if (isset($_GET['delete_message']) && $currentRoleID == 4) {
     $chatID = intval($_GET['delete_message']);
     // Hàm này phải được định nghĩa trong ChatController.php của bạn
     $result = $chatController->deleteMessage($chatID, $currentRoleID); 
@@ -36,8 +41,8 @@ if (isset($_GET['delete_message']) && ($currentRoleID == 1 || $currentRoleID == 
     }
 }
 
-// Xử lý XÓA HỘI THOẠI (Chỉ Chủ DN và NVCSKH)
-if (isset($_GET['delete_conversation']) && ($currentRoleID == 1 || $currentRoleID == 4)) {
+// Xử lý XÓA HỘI THOẠI (Chỉ NVCSKH)
+if (isset($_GET['delete_conversation']) && $currentRoleID == 4) {
     $customerID = intval($_GET['delete_conversation']);
     // Hàm này phải được định nghĩa trong ChatController.php của bạn (Ví dụ: deleteConversationByCustomerID)
     $result = $chatController->deleteConversation($customerID, $currentRoleID); 
@@ -308,7 +313,8 @@ include __DIR__ . '/../includes/header.php';
     
     overflow-y: auto; /* Kích hoạt thanh cuộn (Đã có) */ 
     
-    align-items: stretch; 
+    /* FIX: Thay đổi từ stretch → flex-start để message không bị kéo dài */
+    align-items: flex-start; 
 }
 
 /* 2. ĐỊNH DẠNG CHUNG CHO MỖI TIN NHẮN (ROW) */

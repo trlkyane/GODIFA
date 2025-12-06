@@ -152,8 +152,8 @@ if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
         <?php endif; ?>
 
         <?php 
-        // Chỉ Chủ doanh nghiệp (role_id=1) và Nhân viên CSKH (role_id=4) được xem Chat
-        if (isset($_SESSION['role_id']) && ($_SESSION['role_id'] == 1 || $_SESSION['role_id'] == 4)): 
+        // Chỉ Nhân viên CSKH (role_id=4) được xem Chat
+        if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 4): 
         ?>
         <a href="?page=chat" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
             <i class="fas fa-comments w-5"></i>

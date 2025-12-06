@@ -62,7 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         
         // Logic: Tin Staff/Admin ('user') căn phải. Tin Khách/Bot căn trái.
-        const isSentByStaff = (senderType === 'user' && String(message.senderID) === currentUserID);
+        // FIX: So sánh số với số (parse cả 2 về Number)
+        const isSentByStaff = (
+            senderType === 'user' && 
+            parseInt(message.senderID) === parseInt(currentUserID)
+        );
         
         let messageClass = isSentByStaff ? 'sent' : 'received';
         let iconHtml = ''; 
@@ -190,7 +194,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (String(msg.conversationID) === currentConvID) { 
             
             // Nếu tin nhắn đến là từ chính Staff đang xem (đã tự appendMessage ở hàm gửi) thì bỏ qua
-            const isSentByMe = (String(msg.senderType) === 'user' && String(msg.senderID) === currentUserID);
+            // FIX: So sánh số với số
+            const isSentByMe = (
+                String(msg.senderType) === 'user' && 
+                parseInt(msg.senderID) === parseInt(currentUserID)
+            );
             if (isSentByMe) {
                 return;
             }
