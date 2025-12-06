@@ -25,11 +25,11 @@ try {
     $conn = $db->connect();
     
     // Lấy thông tin đơn hàng
-    $stmt = $conn->prepare("SELECT orderID, totalAmount, paymentStatus, transactionCode FROM `order` WHERE orderID = ?");
-    $stmt->bind_param("i", $orderID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $order = $result->fetch_assoc();
+    $stmt = mysqli_prepare($conn, "SELECT orderID, totalAmount, paymentStatus, transactionCode FROM `order` WHERE orderID = ?");
+    mysqli_stmt_bind_param($stmt, "i", $orderID);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $order = mysqli_fetch_assoc($result);
     
     if (!$order) {
         http_response_code(404);
@@ -74,10 +74,10 @@ try {
     $qrUrl = "https://qr.sepay.vn/img?acc=$account&bank=$bank&amount=$amount&des=" . urlencode($description);
     
     // Update vào database
-    $stmt = $conn->prepare("UPDATE `order` SET qrExpiredAt = ?, qrUrl = ? WHERE orderID = ?");
-    $stmt->bind_param("ssi", $newExpiredAt, $qrUrl, $orderID);
+    $stmt = mysqli_prepare($conn, "UPDATE `order` SET qrExpiredAt = ?, qrUrl = ? WHERE orderID = ?");
+    mysqli_stmt_bind_param($stmt, "ssi", $newExpiredAt, $qrUrl, $orderID);
     
-    if (!$stmt->execute()) {
+    if (!mysqli_stmt_execute($stmt)) {
         throw new Exception("Failed to update order");
     }
     

@@ -2,7 +2,7 @@
 /**
  * Customer Group Model
  * File: model/mCustomerGroup.php
- * Xử lý dữ liệu nhóm khách hàng
+ * Xá»­ lÃ½ dá»¯ liá»‡u nhÃ³m khÃ¡ch hÃ ng
  */
 
 require_once __DIR__ . '/database.php';
@@ -15,7 +15,7 @@ class CustomerGroup {
         $this->conn = $db->moKetNoi();
     }
     
-    // Lấy tất cả nhóm khách hàng
+    // Láº¥y táº¥t cáº£ nhÃ³m khÃ¡ch hÃ ng
     public function getAllGroups() {
         $sql = "SELECT * FROM customer_group ORDER BY minSpent ASC, groupID ASC";
         $result = mysqli_query($this->conn, $sql);
@@ -26,7 +26,7 @@ class CustomerGroup {
         return $groups;
     }
     
-    // Lấy tất cả nhóm
+    // Láº¥y táº¥t cáº£ nhÃ³m
     public function getActiveGroups() {
         $sql = "SELECT * FROM customer_group ORDER BY minSpent ASC, groupID ASC";
         $result = mysqli_query($this->conn, $sql);
@@ -37,7 +37,7 @@ class CustomerGroup {
         return $groups;
     }
     
-    // Lấy nhóm theo ID
+    // Láº¥y nhÃ³m theo ID
     public function getGroupById($id) {
         $sql = "SELECT * FROM customer_group WHERE groupID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -47,7 +47,7 @@ class CustomerGroup {
         return mysqli_fetch_assoc($result);
     }
     
-    // Thêm nhóm mới
+    // ThÃªm nhÃ³m má»›i
     public function addGroup($data) {
         $sql = "INSERT INTO customer_group (groupName, description, minSpent, maxSpent, color) 
                 VALUES (?, ?, ?, ?, ?)";
@@ -62,7 +62,7 @@ class CustomerGroup {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Cập nhật nhóm
+    // Cáº­p nháº­t nhÃ³m
     public function updateGroup($id, $data) {
         $sql = "UPDATE customer_group 
                 SET groupName = ?, description = ?, minSpent = ?, maxSpent = ?, color = ?
@@ -79,9 +79,9 @@ class CustomerGroup {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa nhóm
+    // XÃ³a nhÃ³m
     public function deleteGroup($id) {
-        // Kiểm tra xem có khách hàng nào trong nhóm không
+        // Kiá»ƒm tra xem cÃ³ khÃ¡ch hÃ ng nÃ o trong nhÃ³m khÃ´ng
         $sql = "SELECT COUNT(*) as count FROM customer WHERE groupID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
@@ -90,7 +90,7 @@ class CustomerGroup {
         $row = mysqli_fetch_assoc($result);
         
         if ($row['count'] > 0) {
-            return false; // Không thể xóa nhóm đang có khách hàng
+            return false; // KhÃ´ng thá»ƒ xÃ³a nhÃ³m Ä‘ang cÃ³ khÃ¡ch hÃ ng
         }
         
         $sql = "DELETE FROM customer_group WHERE groupID = ?";
@@ -99,7 +99,7 @@ class CustomerGroup {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đếm số khách hàng trong nhóm
+    // Äáº¿m sá»‘ khÃ¡ch hÃ ng trong nhÃ³m
     public function countCustomersInGroup($groupID) {
         $sql = "SELECT COUNT(*) as total FROM customer WHERE groupID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -110,7 +110,7 @@ class CustomerGroup {
         return $row['total'];
     }
     
-    // Thống kê theo nhóm
+    // Thá»‘ng kÃª theo nhÃ³m
     public function getGroupStats($groupID) {
         $sql = "SELECT 
                     COUNT(DISTINCT c.customerID) as totalCustomers,
@@ -118,7 +118,7 @@ class CustomerGroup {
                     COALESCE(SUM(o.totalAmount), 0) as totalRevenue,
                     COALESCE(AVG(o.totalAmount), 0) as avgOrderValue
                 FROM customer c
-                LEFT JOIN `order` o ON c.customerID = o.customerID AND o.paymentStatus != 'Đã hủy'
+                LEFT JOIN `order` o ON c.customerID = o.customerID AND o.paymentStatus != 'ÄÃ£ há»§y'
                 WHERE c.groupID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $groupID);
@@ -127,7 +127,7 @@ class CustomerGroup {
         return mysqli_fetch_assoc($result);
     }
     
-    // Lấy thống kê tất cả nhóm
+    // Láº¥y thá»‘ng kÃª táº¥t cáº£ nhÃ³m
     public function getAllGroupStats() {
         $sql = "SELECT 
                     cg.groupID,
@@ -142,7 +142,7 @@ class CustomerGroup {
                     COALESCE(AVG(o.totalAmount), 0) as avgOrderValue
                 FROM customer_group cg
                 LEFT JOIN customer c ON cg.groupID = c.groupID
-                LEFT JOIN `order` o ON c.customerID = o.customerID AND o.paymentStatus != 'Đã hủy'
+                LEFT JOIN `order` o ON c.customerID = o.customerID AND o.paymentStatus != 'ÄÃ£ há»§y'
                 GROUP BY cg.groupID, cg.groupName, cg.description, cg.minSpent, cg.maxSpent, cg.color
                 ORDER BY cg.minSpent ASC, cg.groupID ASC";
         $result = mysqli_query($this->conn, $sql);
@@ -153,7 +153,7 @@ class CustomerGroup {
         return $stats;
     }
     
-    // Tìm kiếm nhóm
+    // TÃ¬m kiáº¿m nhÃ³m
     public function searchGroups($keyword) {
         $searchTerm = "%$keyword%";
         $sql = "SELECT * FROM customer_group 
@@ -170,7 +170,7 @@ class CustomerGroup {
         return $groups;
     }
     
-    // Đếm tổng số nhóm
+    // Äáº¿m tá»•ng sá»‘ nhÃ³m
     public function countGroups() {
         $sql = "SELECT COUNT(*) as total FROM customer_group";
         $result = mysqli_query($this->conn, $sql);
@@ -178,13 +178,13 @@ class CustomerGroup {
         return $row['total'];
     }
     
-    // Chạy stored procedure phân nhóm tự động
+    // Cháº¡y stored procedure phÃ¢n nhÃ³m tá»± Ä‘á»™ng
     public function runAutoAssign() {
         $sql = "CALL auto_assign_customer_groups_by_spending()";
         return mysqli_query($this->conn, $sql);
     }
     
-    // Lấy thống kê khách hàng chưa phân nhóm
+    // Láº¥y thá»‘ng kÃª khÃ¡ch hÃ ng chÆ°a phÃ¢n nhÃ³m
     public function getUnassignedCount() {
         $sql = "SELECT COUNT(*) as count FROM customer WHERE groupID IS NULL OR groupID = 0";
         $result = mysqli_query($this->conn, $sql);
@@ -193,7 +193,7 @@ class CustomerGroup {
     }
     
     // ============================================
-    // XÓA HẾT VALIDATION GAP (KHÔNG CẦN NỮA - DÙNG FIXED TIERS)
+    // XÃ“A Háº¾T VALIDATION GAP (KHÃ”NG Cáº¦N Ná»®A - DÃ™NG FIXED TIERS)
     // ============================================
     
     public function __destruct() {

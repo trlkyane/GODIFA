@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Quản lý Nhân viên
  * File: admin/pages/users.php
@@ -315,7 +315,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal THÊM nhân viên -->
+<!-- Modal THÃŠM nhÃ¢n viÃªn -->
 <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
@@ -338,12 +338,20 @@ include __DIR__ . '/../includes/header.php';
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
                     <input type="email" name="email" required
+                           pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                           title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
+                           placeholder="example@gmail.com"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Điện thoại</label>
-                    <input type="text" name="phone"
+                    <input type="tel" name="phone"
+                           pattern="0[0-9]{9,10}"
+                           maxlength="11"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
+                           placeholder="0987654321"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 
@@ -371,7 +379,7 @@ include __DIR__ . '/../includes/header.php';
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" onclick="closeAddModal()" 
                         class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg">
-                    Hủy
+                    Há»§y
                 </button>
                 <button type="submit" name="add_user" 
                         class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
@@ -382,7 +390,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal SỬA nhân viên -->
+<!-- Modal Sá»¬A nhÃ¢n viÃªn -->
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
@@ -407,26 +415,41 @@ include __DIR__ . '/../includes/header.php';
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
                     <input type="email" name="email" id="edit_email" required
+                           pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                           title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Điện thoại</label>
-                    <input type="text" name="phone" id="edit_phone"
+                    <input type="tel" name="phone" id="edit_phone"
+                           pattern="0[0-9]{9,10}"
+                           maxlength="11"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
+                           placeholder="0987654321"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Vai trò <span class="text-red-500">*</span></label>
-                    <select name="roleID" id="edit_roleID" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select name="roleID" id="edit_roleID" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" 
+                            <?php echo isset($editUser) && $editUser['roleID'] == ROLE_OWNER ? 'disabled' : ''; ?>>
                         <?php foreach ($roles as $role): ?>
                             <?php if ($role['roleID'] != ROLE_OWNER): // Bỏ Chủ Doanh Nghiệp ?>
-                            <option value="<?php echo $role['roleID']; ?>">
+                            <option value="<?php echo $role['roleID']; ?>" 
+                                    <?php echo isset($editUser) && $editUser['roleID'] == $role['roleID'] ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($role['roleName']); ?>
                             </option>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
+                    <?php if (isset($editUser) && $editUser['roleID'] == ROLE_OWNER): ?>
+                    <input type="hidden" name="roleID" value="<?php echo $editUser['roleID']; ?>">
+                    <p class="text-xs text-amber-600 mt-1">
+                        <i class="fas fa-lock mr-1"></i>Không thể thay đổi vai trò của Chủ Doanh Nghiệp
+                    </p>
+                    <?php endif; ?>
                 </div>
             </div>
             
@@ -451,7 +474,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal ĐỔI MẬT KHẨU -->
+<!-- Modal Äá»”I Máº¬T KHáº¨U -->
 <div id="passwordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-md w-full">
         <div class="bg-purple-500 text-white px-6 py-4 rounded-t-lg">
@@ -477,7 +500,7 @@ include __DIR__ . '/../includes/header.php';
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closePasswordModal()" 
                         class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg">
-                    Hủy
+                    Há»§y
                 </button>
                 <button type="submit" name="change_password" 
                         class="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg">
@@ -504,6 +527,14 @@ function openEditModal(user) {
     document.getElementById('edit_email').value = user.email;
     document.getElementById('edit_phone').value = user.phone || '';
     document.getElementById('edit_roleID').value = user.roleID;
+    
+    // Disable role select nếu là Chủ Doanh Nghiệp (roleID = 1)
+    const roleSelect = document.getElementById('edit_roleID');
+    if (user.roleID === 1) {
+        roleSelect.disabled = true;
+    } else {
+        roleSelect.disabled = false;
+    }
     
     document.getElementById('editModal').classList.remove('hidden');
 }

@@ -51,7 +51,9 @@ if (isset($_REQUEST['btn_login'])) {
                     </label>
                     <input type="email" 
                            name="email" 
-                           placeholder="example@email.com"
+                           placeholder="example@gmail.com"
+                           pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                           title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                            required>
                 </div>
@@ -85,14 +87,14 @@ if (isset($_REQUEST['btn_login'])) {
 
                 <!-- Register Button -->
                 <button type="button" 
-                        onclick="window.location.href='/GODIFA/view/auth/register.php'"
+                        onclick="window.location.href='<?php echo BASE_URL; ?>view/auth/register.php'"
                         class="w-full bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-3 rounded-lg transition duration-300">
                     <i class="fas fa-user-plus mr-2"></i>Đăng ký tài khoản
                 </button>
 
                 <!-- Back to Home -->
                 <div class="text-center pt-4">
-                    <a href="/GODIFA/index.php" 
+                    <a href="<?php echo BASE_URL; ?>index.php" 
                        class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 transition">
                         <i class="fas fa-home"></i>
                         <span>Quay về trang chủ</span>

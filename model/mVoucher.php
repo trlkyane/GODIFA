@@ -9,7 +9,7 @@ class Voucher {
         $this->conn = $db->moKetNoi();
     }
     
-    // Lấy tất cả vouchers
+    // Láº¥y táº¥t cáº£ vouchers
     public function getAllVouchers() {
         $sql = "SELECT * FROM voucher ORDER BY voucherID DESC";
         $result = mysqli_query($this->conn, $sql);
@@ -20,7 +20,7 @@ class Voucher {
         return $vouchers;
     }
     
-    // Tìm kiếm vouchers theo tên
+    // TÃ¬m kiáº¿m vouchers theo tÃªn
     public function searchVouchers($keyword) {
         $keyword = "%{$keyword}%";
         $sql = "SELECT * FROM voucher 
@@ -37,7 +37,7 @@ class Voucher {
         return $vouchers;
     }
     
-    // Lấy vouchers đang hoạt động (trong thời hạn và còn số lượng)
+    // Láº¥y vouchers Ä‘ang hoáº¡t Ä‘á»™ng (trong thá»i háº¡n vÃ  cÃ²n sá»‘ lÆ°á»£ng)
     public function getActiveVouchers() {
         $today = date('Y-m-d');
         $sql = "SELECT * FROM voucher 
@@ -54,7 +54,7 @@ class Voucher {
         return $vouchers;
     }
     
-    // Lấy voucher theo ID
+    // Láº¥y voucher theo ID
     public function getVoucherById($id) {
         $sql = "SELECT * FROM voucher WHERE voucherID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -64,11 +64,11 @@ class Voucher {
         return mysqli_fetch_assoc($result);
     }
     
-    // Thêm voucher mới
+    // ThÃªm voucher má»›i
     public function addVoucher($voucherName, $value, $quantity, $startDate, $endDate, $minOrderValue, $requirement) {
-        // Đảm bảo minOrderValue không âm
+        // Äáº£m báº£o minOrderValue khÃ´ng Ã¢m
         if ($minOrderValue < 0) { $minOrderValue = 0; }
-        // Một số môi trường chưa có cột minOrderValue -> fallback
+        // Má»™t sá»‘ mÃ´i trÆ°á»ng chÆ°a cÃ³ cá»™t minOrderValue -> fallback
         $hasMinOrderColumn = $this->hasMinOrderValueColumn();
         if ($hasMinOrderColumn) {
             $sql = "INSERT INTO voucher (voucherName, value, quantity, startDate, endDate, minOrderValue, requirement) 
@@ -76,7 +76,7 @@ class Voucher {
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "sdissis", $voucherName, $value, $quantity, $startDate, $endDate, $minOrderValue, $requirement);
         } else {
-            // Fallback nếu chưa chạy migration
+            // Fallback náº¿u chÆ°a cháº¡y migration
             $sql = "INSERT INTO voucher (voucherName, value, quantity, startDate, endDate, requirement) 
                     VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = mysqli_prepare($this->conn, $sql);
@@ -85,7 +85,7 @@ class Voucher {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Cập nhật voucher
+    // Cáº­p nháº­t voucher
     public function updateVoucher($id, $voucherName, $value, $quantity, $startDate, $endDate, $minOrderValue, $requirement) {
         if ($minOrderValue < 0) { $minOrderValue = 0; }
         $hasMinOrderColumn = $this->hasMinOrderValueColumn();
@@ -105,7 +105,7 @@ class Voucher {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa voucher
+    // XÃ³a voucher
     public function deleteVoucher($id) {
         $sql = "DELETE FROM voucher WHERE voucherID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -113,7 +113,7 @@ class Voucher {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Toggle trạng thái voucher (khóa/mở khóa)
+    // Toggle tráº¡ng thÃ¡i voucher (khÃ³a/má»Ÿ khÃ³a)
     public function toggleStatus($id) {
         $sql = "UPDATE voucher SET status = IF(status = 1, 0, 1) WHERE voucherID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -121,7 +121,7 @@ class Voucher {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đếm tổng số vouchers
+    // Äáº¿m tá»•ng sá»‘ vouchers
     public function countVouchers() {
         $sql = "SELECT COUNT(*) as total FROM voucher";
         $result = mysqli_query($this->conn, $sql);
@@ -129,7 +129,7 @@ class Voucher {
         return $row['total'];
     }
     
-    // Kiểm tra voucher còn hiệu lực không
+    // Kiá»ƒm tra voucher cÃ²n hiá»‡u lá»±c khÃ´ng
     public function isVoucherValid($id) {
         $today = date('Y-m-d');
         $sql = "SELECT * FROM voucher 
@@ -141,7 +141,7 @@ class Voucher {
         return mysqli_num_rows($result) > 0;
     }
 
-    // Helper: kiểm tra cột minOrderValue đã tồn tại chưa
+    // Helper: kiá»ƒm tra cá»™t minOrderValue Ä‘Ã£ tá»“n táº¡i chÆ°a
     private function hasMinOrderValueColumn() {
         static $cached = null;
         if ($cached !== null) return $cached;
@@ -150,7 +150,7 @@ class Voucher {
         return $cached;
     }
     
-    // Giảm số lượng voucher khi sử dụng
+    // Giáº£m sá»‘ lÆ°á»£ng voucher khi sá»­ dá»¥ng
     public function useVoucher($id) {
         $sql = "UPDATE voucher SET quantity = quantity - 1 WHERE voucherID = ? AND quantity > 0";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -158,7 +158,7 @@ class Voucher {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Lấy connection để dùng mysqli_insert_id
+    // Láº¥y connection Ä‘á»ƒ dÃ¹ng mysqli_insert_id
     public function getConnection() {
         return $this->conn;
     }

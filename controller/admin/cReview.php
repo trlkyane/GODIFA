@@ -1,46 +1,46 @@
 <?php
 // File: controller/admin/cReview.php
 
-// 🌟 Đảm bảo đường dẫn Model chính xác: Lùi 2 cấp từ controller/admin/ đến model/
+// ðŸŒŸ Äáº£m báº£o Ä‘Æ°á»ng dáº«n Model chÃ­nh xÃ¡c: LÃ¹i 2 cáº¥p tá»« controller/admin/ Ä‘áº¿n model/
 require_once __DIR__ . '/../../model/mReview.php'; 
-// KHÔNG cần include mCustomer và mProduct ở đây vì logic JOIN đã nằm trong Model
+// KHÃ”NG cáº§n include mCustomer vÃ  mProduct á»Ÿ Ä‘Ã¢y vÃ¬ logic JOIN Ä‘Ã£ náº±m trong Model
 
-// Giả định class này có tên là cReview
+// Giáº£ Ä‘á»‹nh class nÃ y cÃ³ tÃªn lÃ  cReview
 class cReview { 
     protected $reviewModel;
 
     public function __construct() {
-        // Đảm bảo tên class Model là Review (đúng như bạn đã cung cấp)
+        // Äáº£m báº£o tÃªn class Model lÃ  Review (Ä‘Ãºng nhÆ° báº¡n Ä‘Ã£ cung cáº¥p)
         $this->reviewModel = new Review();
     }
 
     /**
-     * Lấy danh sách đánh giá có lọc, tìm kiếm và join (Dùng cho Admin View)
-     * Đây là hàm chính để hiển thị bảng đánh giá.
+     * Láº¥y danh sÃ¡ch Ä‘Ã¡nh giÃ¡ cÃ³ lá»c, tÃ¬m kiáº¿m vÃ  join (DÃ¹ng cho Admin View)
+     * ÄÃ¢y lÃ  hÃ m chÃ­nh Ä‘á»ƒ hiá»ƒn thá»‹ báº£ng Ä‘Ã¡nh giÃ¡.
      */
     public function getReviews($search = '', $status = -1) {
-        // Gọi hàm getFilteredReviews đã được thêm vào Model
+        // Gá»i hÃ m getFilteredReviews Ä‘Ã£ Ä‘Æ°á»£c thÃªm vÃ o Model
         return $this->reviewModel->getFilteredReviews($search, $status);
     }
     
     /**
-     * Đếm tổng số đánh giá (Dùng cho thống kê)
+     * Äáº¿m tá»•ng sá»‘ Ä‘Ã¡nh giÃ¡ (DÃ¹ng cho thá»‘ng kÃª)
      */
     public function countTotalReviews() {
-        // Gọi hàm countReviews đã được thêm vào Model
+        // Gá»i hÃ m countReviews Ä‘Ã£ Ä‘Æ°á»£c thÃªm vÃ o Model
         return $this->reviewModel->countReviews();
     }
     
     /**
-     * Đếm số lượng đánh giá theo trạng thái (Dùng để hiển thị badge "Chờ duyệt")
+     * Äáº¿m sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ theo tráº¡ng thÃ¡i (DÃ¹ng Ä‘á»ƒ hiá»ƒn thá»‹ badge "Chá» duyá»‡t")
      */
     public function countReviewsByStatus($status) {
-        // Gọi hàm countByStatus đã có trong Model
+        // Gá»i hÃ m countByStatus Ä‘Ã£ cÃ³ trong Model
         return $this->reviewModel->countByStatus($status);
     }
 
     /**
-     * Toggle ẩn/hiện đánh giá (Admin Action)
+     * Toggle áº©n/hiá»‡n Ä‘Ã¡nh giÃ¡ (Admin Action)
      */
     public function toggleVisibility($reviewID) {
         if ($this->reviewModel->toggleVisibility($reviewID)) {

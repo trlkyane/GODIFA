@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json');
 if (session_status() === PHP_SESSION_NONE) {
     session_name('GODIFA_USER_SESSION');
     session_start();
@@ -155,7 +156,7 @@ class CartController {
             if (isset($_SESSION['cart'][$productId])) {
                 unset($_SESSION['cart'][$productId]);
                 
-                // ✅ Lưu vào database nếu đã đăng nhập
+                // âœ… LÆ°u vÃ o database náº¿u Ä‘Ã£ Ä‘Äƒng nháº­p
                 $this->syncToDatabase();
                 
                 $cartCount = count($_SESSION['cart']);
@@ -219,7 +220,7 @@ if (isset($_GET['action'])) {
             break;
             
         default:
-            header('Location: ../view/product/list.php');
+            header('Location: ' . BASE_URL . 'view/product/list.php');
     }
 }
 ?>

@@ -1,22 +1,28 @@
 <?php
-// Load số đơn hàng pending cho badge
+// Load s? don hàng pending cho badge
 require_once __DIR__ . '/../../model/mOrder.php';
 $orderModel = new Order();
 $pendingOrdersCount = $orderModel->countByStatus('Chờ thanh toán');
 
-// 🌟 START: LOAD SỐ LƯỢNG ĐÁNH GIÁ CHỜ DUYỆT 🌟
+// Load s? don m?i thanh toán trong 30 phút g?n dây
+$newPaidOrdersCount = 0;
+if (hasPermission('view_orders')) {
+    $newPaidOrdersCount = $orderModel->countNewPaidOrders(30); // 30 phút
+}
+
+// ?? START: LOAD S? LU?NG ÐÁNH GIÁ CH? DUY?T ??
 $pendingReviewsCount = 0;
-// Kiểm tra quyền (Giả định quyền là 'manage_reviews' hoặc 'view_reviews')
+// Ki?m tra quy?n (Gi? d?nh quy?n là 'manage_reviews' ho?c 'view_reviews')
 if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
     require_once __DIR__ . '/../../model/mReview.php'; // Load Review Model
     $reviewModel = new Review();
-    // Giả định trạng thái 'Chờ duyệt' là 1
-    $pendingReviewsCount = $reviewModel->countByStatus(0); // Cần thêm phương thức countByStatus(status) vào mReview.php
+    // Gi? d?nh tr?ng thái 'Ch? duy?t' là 1
+    $pendingReviewsCount = $reviewModel->countByStatus(0); // C?n thêm phuong th?c countByStatus(status) vào mReview.php
 }
-// 🌟 END: LOAD SỐ LƯỢNG ĐÁNH GIÁ CHỜ DUYỆT 🌟
+// ?? END: LOAD S? LU?NG ÐÁNH GIÁ CH? DUY?T ??
 
 
-// // Load số tin nhắn chưa đọc cho badge
+// // Load s? tin nh?n chua d?c cho badge
 // $unreadMessagesCount = 0;
 // if (hasPermission('view_chat') || hasPermission('manage_chat')) {
 //     require_once __DIR__ . '/../../model/mChat.php';
@@ -57,7 +63,7 @@ if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
         <?php if (hasPermission('view_statistics') || hasPermission('view_dashboard')): ?>
         <a href="?page=statistics" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
             <i class="fas fa-tachometer-alt w-5"></i>
-            <span>Tổng quan</span>
+            <span>Thống kê</span>
         </a>
         <?php endif; ?>
 
@@ -79,9 +85,46 @@ if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
         <a href="?page=orders" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
             <i class="fas fa-shopping-cart w-5"></i>
             <span>Đơn hàng</span>
-            <?php if ($pendingOrdersCount > 0): ?>
-            <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                <?php echo $pendingOrdersCount; ?>
+        </a>
+        <?php endif; ?>
+
+        <?php if (hasPermission('view_orders') || hasPermission('manage_orders')): ?>
+        <?php
+        // Đếm số yêu cầu hoàn tiền chờ xử lý
+        $pendingRefundsCount = 0;
+        $db = Database::getInstance();
+        $conn = $db->connect();
+        $result = mysqli_query($conn, "SELECT COUNT(*) as count FROM refund_requests WHERE status = 'Chờ xử lý'");
+        if ($result) {
+            $row = mysqli_fetch_assoc($result);
+            $pendingRefundsCount = $row['count'];
+        }
+        ?>
+        <a href="?page=refund_requests" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
+            <i class="fas fa-undo w-5"></i>
+            <span>Hoàn tiền</span>
+            <?php if ($pendingRefundsCount > 0): ?>
+            <span class="ml-auto bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold" title="Yêu cầu hoàn tiền chờ xử lý">
+                <?php echo $pendingRefundsCount; ?>
+            </span>
+            <?php endif; ?>
+        </a>
+        
+        <?php
+        // Đếm số yêu cầu hoàn trả chờ xử lý
+        $pendingReturnsCount = 0;
+        $result = mysqli_query($conn, "SELECT COUNT(*) as count FROM return_requests WHERE status = 'Chờ xử lý'");
+        if ($result) {
+            $row = mysqli_fetch_assoc($result);
+            $pendingReturnsCount = $row['count'];
+        }
+        ?>
+        <a href="?page=return_requests" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
+            <i class="fas fa-box-open w-5"></i>
+            <span>Hoàn trả hàng</span>
+            <?php if ($pendingReturnsCount > 0): ?>
+            <span class="ml-auto bg-purple-500 text-white text-xs px-2 py-1 rounded-full font-semibold" title="Yêu cầu hoàn trả chờ xử lý">
+                <?php echo $pendingReturnsCount; ?>
             </span>
             <?php endif; ?>
         </a>
@@ -108,11 +151,14 @@ if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
         </a>
         <?php endif; ?>
 
-        <?php if (hasPermission('view_chat') || hasPermission('manage_chat')): ?>
+        <?php 
+        // Chỉ Chủ doanh nghiệp (role_id=1) và Nhân viên CSKH (role_id=4) được xem Chat
+        if (isset($_SESSION['role_id']) && ($_SESSION['role_id'] == 1 || $_SESSION['role_id'] == 4)): 
+        ?>
         <a href="?page=chat" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
             <i class="fas fa-comments w-5"></i>
             <span>Chat</span>
-            </a>
+        </a>
         <?php endif; ?>
 
         <?php if (hasPermission('view_customers') || hasPermission('manage_customers')): ?>
@@ -145,7 +191,7 @@ if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
 
         <div class="border-t border-gray-200 my-4"></div>
 
-        <a href="/GODIFA/admin/logout.php" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50">
+        <a href="<?php echo ADMIN_BASE_URL; ?>logout.php" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50">
             <i class="fas fa-sign-out-alt w-5"></i>
             <span>Đăng xuất</span>
         </a>

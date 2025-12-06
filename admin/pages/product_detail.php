@@ -62,7 +62,7 @@ include __DIR__ . '/../includes/header.php';
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <div class="aspect-[4/5] bg-gray-50 flex items-center justify-center">
                             <?php if ($product['image']): ?>
-                                <img src="/GODIFA/image/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['productName']); ?>" class="w-full h-full object-cover">
+                                <img src="<?php echo BASE_URL; ?>image/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['productName']); ?>" class="w-full h-full object-cover">
                             <?php else: ?>
                                 <div class="text-gray-400 text-sm"><i class="fas fa-image text-3xl mb-2"></i><p>Chưa có hình</p></div>
                             <?php endif; ?>
@@ -85,7 +85,7 @@ include __DIR__ . '/../includes/header.php';
                                 <span class="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-semibold rounded">-<?php echo round((($product['price'] - $product['promotional_price']) / $product['price']) * 100); ?>%</span>
                             </div>
                         <?php else: ?>
-                            <div class="mb-4"><span class="text-2xl font-bold text-gray-800"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</span></div>
+                            <div class="mb-4"><span class="text-2xl font-bold text-gray-800"><?php echo number_format($product['price'], 0, ',', '.'); ?>?</span></div>
                         <?php endif; ?>
                         <div class="grid grid-cols-2 gap-3 text-sm">
                             <div class="bg-gray-50 p-3 rounded">
@@ -122,12 +122,12 @@ include __DIR__ . '/../includes/header.php';
                 <div class="lg:col-span-1 space-y-4">
                     <div class="bg-white rounded-lg shadow p-5">
                         <h3 class="text-sm font-semibold mb-3 text-gray-700">Liên kết</h3>
-                        <a href="/GODIFA/controller/cProduct.php?action=detail&id=<?php echo $product['productID']; ?>" target="_blank" class="w-full block text-center px-4 py-2 bg-gray-800 hover:bg-black text-white rounded text-sm">
+                        <a href="<?php echo BASE_URL; ?>controller/cProduct.php?action=detail&id=<?php echo $product['productID']; ?>" target="_blank" class="w-full block text-center px-4 py-2 bg-gray-800 hover:bg-black text-white rounded text-sm">
                             <i class="fas fa-external-link-alt mr-1"></i> Xem trên website (cửa hàng)
                         </a>
                     </div>
                     <div class="bg-white rounded-lg shadow p-5 text-xs text-gray-500">
-                        <p><strong>Lưu ý:</strong> Đây là trang xem chi tiết dành cho Admin. Chỉnh sửa, khóa hoặc xóa chỉ thực hiện ở trang danh sách sản phẩm.</p>
+                        <p><strong>ưu ý:</strong> Đây là trang xem chi tiết dành cho Admin. Chỉnh sửa, khóa hoặc xóa chỉ thực hiện ở trang danh sách sản phẩm.</p>
                     </div>
                 </div>
             </div>
@@ -136,6 +136,6 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Không nhúng lại products.php để tránh trùng lặp giao diện -->
+<!-- Không nhúng l?i products.php d? tránh trùng l?p giao di?n -->
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

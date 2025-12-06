@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Quản lý Voucher/Khuyến mãi
  * File: admin/pages/vouchers.php
@@ -23,17 +23,17 @@ $voucherGroupModel = new VoucherGroup();
 $success = '';
 $error = '';
 
-// Xử lý THÊM voucher
+// Xá»­ lÃ½ THÃŠM voucher
 if (isset($_POST['add_voucher']) && (hasPermission('create_voucher') || hasPermission('manage_vouchers'))) {
-    // DEBUG: Log giá trị POST
+    // DEBUG: Log giÃ¡ trá»‹ POST
     error_log("POST startDate: '" . ($_POST['startDate'] ?? 'NOT SET') . "'");
     error_log("POST endDate: '" . ($_POST['endDate'] ?? 'NOT SET') . "'");
     
-    // Validate dates trước - tự động set default nếu rỗng
+    // Validate dates trÆ°á»›c - tá»± Ä‘á»™ng set default náº¿u rá»—ng
     $startDate = trim($_POST['startDate'] ?? '');
     $endDate = trim($_POST['endDate'] ?? '');
     
-    // Auto-fill nếu rỗng (bao gồm cả whitespace)
+    // Auto-fill náº¿u rá»—ng (bao gá»“m cáº£ whitespace)
     if (empty($startDate) || $startDate === '') {
         $startDate = date('Y-m-d');
         error_log("Auto-filled startDate: $startDate");
@@ -45,7 +45,7 @@ if (isset($_POST['add_voucher']) && (hasPermission('create_voucher') || hasPermi
     
     $validationErrors = [];
     
-    // Kiểm tra ngày hợp lệ
+    // Kiá»ƒm tra ngÃ y há»£p lá»‡
     if (!empty($startDate) && strtotime($startDate) === false) {
         $validationErrors[] = "Ngày bắt đầu không hợp lệ!";
     }
@@ -72,10 +72,10 @@ if (isset($_POST['add_voucher']) && (hasPermission('create_voucher') || hasPermi
         $result = $voucherController->addVoucher($data);
         
         if ($result['success']) {
-            // Lấy ID voucher vừa tạo
+            // Láº¥y ID voucher vá»«a táº¡o
             $voucherID = $result['voucherID'];
             
-            // Xử lý gán nhóm khách hàng
+            // Xá»­ lÃ½ gÃ¡n nhÃ³m khÃ¡ch hÃ ng
             if (isset($_POST['groups']) && is_array($_POST['groups'])) {
                 $groupIDs = array_map('intval', $_POST['groups']);
                 $voucherGroupModel->assignVoucherToMultipleGroups($voucherID, $groupIDs);
@@ -95,15 +95,15 @@ if (isset($_POST['add_voucher']) && (hasPermission('create_voucher') || hasPermi
     }
 }
 
-// Xử lý SỬA voucher
+// Xá»­ lÃ½ Sá»¬A voucher
 if (isset($_POST['edit_voucher']) && hasPermission('manage_vouchers')) {
     $voucherID = intval($_POST['voucherID']);
     
-    // Validate dates trước - tự động set default nếu rỗng
+    // Validate dates trÆ°á»›c - tá»± Ä‘á»™ng set default náº¿u rá»—ng
     $startDate = $_POST['startDate'] ?? '';
     $endDate = $_POST['endDate'] ?? '';
     
-    // Auto-fill nếu rỗng
+    // Auto-fill náº¿u rá»—ng
     if (empty($startDate)) {
         $startDate = date('Y-m-d');
     }
@@ -333,7 +333,7 @@ include __DIR__ . '/../includes/header.php';
                             <tr>
                                 <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                     <i class="fas fa-ticket-alt text-4xl mb-2 text-gray-300"></i>
-                                    <p>Chưa có voucher nào</p>
+                                    <p>ChÆ°a cÃ³ voucher nÃ o</p>
                                 </td>
                             </tr>
                             <?php else: ?>
@@ -350,11 +350,11 @@ include __DIR__ . '/../includes/header.php';
                                 $userName = $voucher['userName'] ?? 'N/A';
                                 $status = $voucher['status'] ?? 1;
                                 
-                                // Kiểm tra ngày hợp lệ
+                                // Kiá»ƒm tra ngÃ y há»£p lá»‡
                                 $validStartDate = !empty($startDate) && $startDate != '0000-00-00' && strtotime($startDate) !== false;
                                 $validEndDate = !empty($endDate) && $endDate != '0000-00-00' && strtotime($endDate) !== false;
                                 
-                                // Kiểm tra trạng thái thời gian (chỉ khi ngày hợp lệ)
+                                // Kiá»ƒm tra tráº¡ng thÃ¡i thá»i gian (chá»‰ khi ngÃ y há»£p lá»‡)
                                 $isActive = false;
                                 $isExpired = false;
                                 $isUpcoming = false;
@@ -373,7 +373,7 @@ include __DIR__ . '/../includes/header.php';
                                     <td class="px-4 py-3">
                                         <div class="font-medium text-gray-900"><?php echo htmlspecialchars($voucherName); ?></div>
                                         
-                                        <!-- Hiển thị nhóm khách hàng được áp dụng -->
+                                        <!-- Hiá»ƒn thá»‹ nhÃ³m khÃ¡ch hÃ ng Ä‘Æ°á»£c Ã¡p dá»¥ng -->
                                         <div class="mt-2 flex flex-wrap gap-1">
                                             <?php if (empty($voucher['groupDetails'])): ?>
                                             <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs inline-flex items-center">
@@ -399,7 +399,7 @@ include __DIR__ . '/../includes/header.php';
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <span class="text-lg font-bold text-orange-600">
-                                            <?php echo number_format($value, 0, ',', '.'); ?>₫
+                                            <?php echo number_format($value, 0, ',', '.'); ?> VND
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
@@ -470,9 +470,9 @@ include __DIR__ . '/../includes/header.php';
                                     <td class="px-4 py-3 text-center">
                                         <div class="flex justify-center items-center space-x-2">
                                             <?php if (hasPermission('manage_vouchers')): ?>
-                                            <!-- Sửa (chỉ Owner/Admin) -->
+                                            <!-- Sá»­a (chá»‰ Owner/Admin) -->
                                             <button onclick='openEditModal(<?php echo json_encode($voucher, JSON_HEX_APOS); ?>)' 
-                                                    class="text-blue-600 hover:text-blue-800" title="Sửa">
+                                                    class="text-blue-600 hover:text-blue-800" title="Sửa voucher">
                                                 <i class="fas fa-edit text-lg"></i>
                                             </button>
                                             
@@ -502,7 +502,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal THÊM voucher -->
+<!-- Modal THÃŠM voucher -->
 <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="sticky top-0 bg-orange-500 text-white px-6 py-4 rounded-t-lg">
@@ -613,7 +613,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal SỬA voucher -->
+<!-- Modal Sá»¬A voucher -->
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="sticky top-0 bg-blue-500 text-white px-6 py-4 rounded-t-lg">
@@ -677,7 +677,7 @@ include __DIR__ . '/../includes/header.php';
                     </p>
                 </div>
                 
-                <!-- Phần chọn nhóm khách hàng -->
+                <!-- Pháº§n chá»n nhÃ³m khÃ¡ch hÃ ng -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-users text-indigo-500 mr-1"></i>
@@ -706,7 +706,7 @@ include __DIR__ . '/../includes/header.php';
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" onclick="closeEditModal()" 
                         class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg">
-                    Hủy
+                    Há»§y
                 </button>
                 <button type="submit" name="edit_voucher" 
                         class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
@@ -732,7 +732,7 @@ function validateAddDates() {
     if (startError) startError.classList.add('hidden');
     if (endError) endError.classList.add('hidden');
     
-    // Auto-fill nếu rỗng
+    // Auto-fill náº¿u rá»—ng
     if (!startDateInput.value || startDateInput.value.trim() === '') {
         startDateInput.value = today;
         console.log('Auto-filled startDate:', today);
@@ -743,7 +743,7 @@ function validateAddDates() {
         console.log('Auto-filled endDate:', next30Days);
     }
     
-    // LẤY LẠI giá trị SAU KHI SET
+    // Láº¤Y Láº I giÃ¡ trá»‹ SAU KHI SET
     const startDate = startDateInput.value;
     const endDate = endDateInput.value;
     
@@ -765,7 +765,7 @@ function validateAddDates() {
         document.getElementById('add_endDate').setAttribute('min', startDate);
     }
     
-    // ALWAYS return true để cho form submit (PHP sẽ validate lại)
+    // ALWAYS return true Ä‘á»ƒ cho form submit (PHP sáº½ validate láº¡i)
     return true;
 }
 
@@ -812,14 +812,14 @@ function validateEditDates() {
 
 // Modal functions
 function openAddModal() {
-    // Set default dates nếu chưa có
+    // Set default dates náº¿u chÆ°a cÃ³
     const today = new Date().toISOString().split('T')[0];
     const next30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
     const startDateInput = document.getElementById('add_startDate');
     const endDateInput = document.getElementById('add_endDate');
     
-    // Đảm bảo luôn có giá trị
+    // Äáº£m báº£o luÃ´n cÃ³ giÃ¡ trá»‹
     if (!startDateInput.value || startDateInput.value.trim() === '') {
         startDateInput.value = today;
     }
@@ -842,7 +842,7 @@ function openEditModal(voucher) {
     document.getElementById('edit_value').value = voucher.value;
     document.getElementById('edit_quantity').value = voucher.quantity;
     
-    // Xử lý ngày không hợp lệ (0000-00-00 hoặc rỗng)
+    // Xá»­ lÃ½ ngÃ y khÃ´ng há»£p lá»‡ (0000-00-00 hoáº·c rá»—ng)
     const today = new Date().toISOString().split('T')[0];
     const startDate = voucher.startDate && voucher.startDate !== '0000-00-00' ? voucher.startDate : today;
     const endDate = voucher.endDate && voucher.endDate !== '0000-00-00' ? voucher.endDate : today;
@@ -871,8 +871,8 @@ function openEditModal(voucher) {
     
     document.getElementById('editModal').classList.remove('hidden');
     
-    // Không validate ngay khi mở modal nếu ngày cũ không hợp lệ
-    // Cho phép user chọn ngày mới
+    // KhÃ´ng validate ngay khi má»Ÿ modal náº¿u ngÃ y cÅ© khÃ´ng há»£p lá»‡
+    // Cho phÃ©p user chá»n ngÃ y má»›i
     if (voucher.startDate && voucher.startDate !== '0000-00-00') {
         validateEditDates();
     }
@@ -883,10 +883,10 @@ function closeEditModal() {
 }
 
 function toggleVoucherStatus(id, name, newStatus) {
-    const action = newStatus === 0 ? 'KHÓA' : 'MỞ KHÓA';
+    const action = newStatus === 0 ? 'KHÓA' : 'Mở KHÓA';
     const message = newStatus === 0 
         ? `Bạn có chắc muốn KHÓA voucher "${name}"?\n\nVoucher sẽ tạm ngừng sử dụng cho đến khi mở khóa lại.`
-        : `Bạn có chắc muốn MỞ KHÓA voucher "${name}"?\n\nVoucher sẽ được kích hoạt lại.`;
+        : `Bạn có chắc muốn Mở KHÓA voucher "${name}"?\n\nVoucher sẽ được kích hoạt lại.`;
     
     if (confirm(message)) {
         window.location.href = `?page=vouchers&toggle=${id}`;

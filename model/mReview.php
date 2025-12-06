@@ -5,14 +5,14 @@ class Review {
     private $conn;
     
     public function __construct() {
-        // Giả định clsKetNoi và moKetNoi hoạt động với mysqli
+        // Giáº£ Ä‘á»‹nh clsKetNoi vÃ  moKetNoi hoáº¡t Ä‘á»™ng vá»›i mysqli
         $db = new clsKetNoi();
         $this->conn = $db->moKetNoi();
     }
     
-    // Thêm đánh giá mới
+    // ThÃªm Ä‘Ã¡nh giÃ¡ má»›i
     public function addReview($productId, $customerId, $orderId, $rating, $comment) {
-        // Mặc định: hiển thị ngay (1 = Hiển thị)
+        // Máº·c Ä‘á»‹nh: hiá»ƒn thá»‹ ngay (1 = Hiá»ƒn thá»‹)
         $status = 1;
         
         $sql = "INSERT INTO review (rating, comment, productID, customerID, orderID, status) 
@@ -20,13 +20,13 @@ class Review {
                 
         $stmt = mysqli_prepare($this->conn, $sql);
         
-        // Chuỗi tham số: i (rating), s (comment), i (productID), i (customerID), i (orderID), i (status)
+        // Chuá»—i tham sá»‘: i (rating), s (comment), i (productID), i (customerID), i (orderID), i (status)
         mysqli_stmt_bind_param($stmt, "isiiii", $rating, $comment, $productId, $customerId, $orderId, $status); 
         
         return mysqli_stmt_execute($stmt);
     }
 
-    // Toggle ẩn/hiện đánh giá (1 => 0, khác 1 => 1)
+    // Toggle áº©n/hiá»‡n Ä‘Ã¡nh giÃ¡ (1 => 0, khÃ¡c 1 => 1)
     public function toggleVisibility($reviewId) {
         $sql = "UPDATE review SET status = CASE WHEN status = 1 THEN 0 ELSE 1 END WHERE reviewID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -34,12 +34,12 @@ class Review {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Lấy đánh giá theo sản phẩm (Chỉ lấy những đánh giá ĐÃ DUYỆT)
+    // Láº¥y Ä‘Ã¡nh giÃ¡ theo sáº£n pháº©m (Chá»‰ láº¥y nhá»¯ng Ä‘Ã¡nh giÃ¡ ÄÃƒ DUYá»†T)
     public function getReviewsByProduct($productId) {
         $sql = "SELECT r.*, c.customerName 
                 FROM review r 
                 INNER JOIN customer c ON r.customerID = c.customerID 
-                WHERE r.productID = ? AND r.status = 1 /* 🌟 THAY ĐỔI: 1 = Đã duyệt 🌟 */
+                WHERE r.productID = ? AND r.status = 1 /* ðŸŒŸ THAY Äá»”I: 1 = ÄÃ£ duyá»‡t ðŸŒŸ */
                 ORDER BY r.dateReview DESC";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $productId);
@@ -52,9 +52,9 @@ class Review {
         return $reviews;
     }
     
-    // Lấy đánh giá trung bình của sản phẩm
+    // Láº¥y Ä‘Ã¡nh giÃ¡ trung bÃ¬nh cá»§a sáº£n pháº©m
     public function getAverageRating($productId) {
-        // Chỉ tính trung bình các đánh giá ĐÃ DUYỆT
+        // Chá»‰ tÃ­nh trung bÃ¬nh cÃ¡c Ä‘Ã¡nh giÃ¡ ÄÃƒ DUYá»†T
         $sql = "SELECT AVG(rating) as avgRating, COUNT(*) as totalReviews 
                 FROM review 
                 WHERE productID = ? AND status = 1";
@@ -65,7 +65,7 @@ class Review {
         return mysqli_fetch_assoc($result);
     }
     
-    // Kiểm tra khách hàng đã đánh giá sản phẩm chưa
+    // Kiá»ƒm tra khÃ¡ch hÃ ng Ä‘Ã£ Ä‘Ã¡nh giÃ¡ sáº£n pháº©m chÆ°a
     public function hasReviewed($productId, $customerId, $orderId) {
         $sql = "SELECT reviewID FROM review 
                 WHERE productID = ? AND customerID = ? AND orderID = ?";
@@ -76,7 +76,7 @@ class Review {
         return mysqli_num_rows($result) > 0;
     }
     
-    // Xóa đánh giá
+    // XÃ³a Ä‘Ã¡nh giÃ¡
     public function deleteReview($reviewId) {
         $sql = "DELETE FROM review WHERE reviewID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -84,7 +84,7 @@ class Review {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Lấy lịch sử đánh giá của khách hàng (Lấy cả chờ duyệt và đã duyệt)
+    // Láº¥y lá»‹ch sá»­ Ä‘Ã¡nh giÃ¡ cá»§a khÃ¡ch hÃ ng (Láº¥y cáº£ chá» duyá»‡t vÃ  Ä‘Ã£ duyá»‡t)
     public function getReviewsByCustomer($customerId) {
         $sql = "SELECT r.*, p.productName, p.image 
                 FROM review r 
@@ -103,20 +103,20 @@ class Review {
     }
     
     /**
-     * Cập nhật trạng thái đánh giá (Dùng cho Admin)
+     * Cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Ã¡nh giÃ¡ (DÃ¹ng cho Admin)
      */
     public function updateReviewStatus($reviewId, $newStatus) {
         $sql = "UPDATE review SET status = ? WHERE reviewID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         
-        // Tham số: i (newStatus), i (reviewId)
+        // Tham sá»‘: i (newStatus), i (reviewId)
         mysqli_stmt_bind_param($stmt, "ii", $newStatus, $reviewId);
         
         return mysqli_stmt_execute($stmt);
     }
 
     /**
-     * Đếm số lượng đánh giá theo trạng thái (status)
+     * Äáº¿m sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ theo tráº¡ng thÃ¡i (status)
      */
     public function countByStatus($status) {
         $sql = "SELECT COUNT(reviewID) AS total FROM review WHERE status = ?";
@@ -133,7 +133,7 @@ class Review {
         return $row['total'] ?? 0;
     }
 
-    // Lấy danh sách sản phẩm chờ đánh giá
+    // Láº¥y danh sÃ¡ch sáº£n pháº©m chá» Ä‘Ã¡nh giÃ¡
     public function getProductsPendingReview($customerId) {
         $sql = "
             SELECT 
@@ -156,7 +156,7 @@ class Review {
                 AND o.customerID = r.customerID
             WHERE 
                 o.customerID = ? 
-                AND (o.deliveryStatus = 'Hoàn thành' OR o.deliveryStatus = 'Đã giao')
+                AND (o.deliveryStatus = 'HoÃ n thÃ nh' OR o.deliveryStatus = 'ÄÃ£ giao')
                 AND r.reviewID IS NULL
             ORDER BY
                 o.orderDate DESC;
@@ -179,8 +179,8 @@ class Review {
     }
     
     /**
-     * Lấy danh sách đánh giá có lọc và tìm kiếm (Admin)
-     * ĐÃ SỬA LỖI BIND PARAM CHO TRẠNG THÁI VÀ TÌM KIẾM
+     * Láº¥y danh sÃ¡ch Ä‘Ã¡nh giÃ¡ cÃ³ lá»c vÃ  tÃ¬m kiáº¿m (Admin)
+     * ÄÃƒ Sá»¬A Lá»–I BIND PARAM CHO TRáº NG THÃI VÃ€ TÃŒM KIáº¾M
      */
     public function getFilteredReviews($search = '', $status = -1) {
         $sql = "
@@ -194,27 +194,27 @@ class Review {
         $types = '';
         $params = [];
         
-        // --- CÁCH KHẮC PHỤC LỖI THAM CHIẾU (REF) CHO mysqli_stmt_bind_param ---
-        // Chúng ta cần tạo một mảng chứa tham chiếu đến các biến, 
-        // không phải giá trị của chúng.
+        // --- CÃCH KHáº®C PHá»¤C Lá»–I THAM CHIáº¾U (REF) CHO mysqli_stmt_bind_param ---
+        // ChÃºng ta cáº§n táº¡o má»™t máº£ng chá»©a tham chiáº¿u Ä‘áº¿n cÃ¡c biáº¿n, 
+        // khÃ´ng pháº£i giÃ¡ trá»‹ cá»§a chÃºng.
 
-        $bind_params = []; // Mảng chứa tham chiếu đến các biến sẽ được bind
+        $bind_params = []; // Máº£ng chá»©a tham chiáº¿u Ä‘áº¿n cÃ¡c biáº¿n sáº½ Ä‘Æ°á»£c bind
     
-        // 1. Lọc theo trạng thái
+        // 1. Lá»c theo tráº¡ng thÃ¡i
         if ($status != -1) {
             $sql .= " AND r.status = ?";
             $types .= 'i';
-            $bind_params[] = &$status; // Thêm tham chiếu đến $status
+            $bind_params[] = &$status; // ThÃªm tham chiáº¿u Ä‘áº¿n $status
         }
     
-        // 2. Tìm kiếm (theo tên khách hàng hoặc tên sản phẩm)
+        // 2. TÃ¬m kiáº¿m (theo tÃªn khÃ¡ch hÃ ng hoáº·c tÃªn sáº£n pháº©m)
         $searchParam = null;
         if (!empty($search)) {
             $sql .= " AND (c.customerName LIKE ? OR p.productName LIKE ?)";
             $types .= 'ss';
             $searchParam = "%" . $search . "%";
-            $bind_params[] = &$searchParam; // Thêm tham chiếu đến $searchParam
-            $bind_params[] = &$searchParam; // Thêm tham chiếu đến $searchParam (lần 2)
+            $bind_params[] = &$searchParam; // ThÃªm tham chiáº¿u Ä‘áº¿n $searchParam
+            $bind_params[] = &$searchParam; // ThÃªm tham chiáº¿u Ä‘áº¿n $searchParam (láº§n 2)
         }
         
         $sql .= " ORDER BY r.dateReview DESC";
@@ -222,24 +222,24 @@ class Review {
         $stmt = mysqli_prepare($this->conn, $sql);
         
         if ($stmt === FALSE) {
-            // Xử lý lỗi SQL nếu cần
+            // Xá»­ lÃ½ lá»—i SQL náº¿u cáº§n
             error_log("SQL Prepare Error: " . mysqli_error($this->conn));
             return [];
         }
     
-        // Bind parameters nếu có
+        // Bind parameters náº¿u cÃ³
         if (!empty($types)) {
-            // Tạo mảng đối số đầu tiên là $stmt, thứ hai là $types, sau đó là các tham chiếu
+            // Táº¡o máº£ng Ä‘á»‘i sá»‘ Ä‘áº§u tiÃªn lÃ  $stmt, thá»© hai lÃ  $types, sau Ä‘Ã³ lÃ  cÃ¡c tham chiáº¿u
             array_unshift($bind_params, $types);
             
-            // Sử dụng call_user_func_array để bind số lượng tham số động
-            // Lưu ý: Đối số đầu tiên của call_user_func_array phải là callable, 
-            // và đối số thứ hai là một mảng các đối số cho hàm callable đó.
-            // Vì bind_param cần $stmt, chúng ta phải đưa nó vào array_merge.
+            // Sá»­ dá»¥ng call_user_func_array Ä‘á»ƒ bind sá»‘ lÆ°á»£ng tham sá»‘ Ä‘á»™ng
+            // LÆ°u Ã½: Äá»‘i sá»‘ Ä‘áº§u tiÃªn cá»§a call_user_func_array pháº£i lÃ  callable, 
+            // vÃ  Ä‘á»‘i sá»‘ thá»© hai lÃ  má»™t máº£ng cÃ¡c Ä‘á»‘i sá»‘ cho hÃ m callable Ä‘Ã³.
+            // VÃ¬ bind_param cáº§n $stmt, chÃºng ta pháº£i Ä‘Æ°a nÃ³ vÃ o array_merge.
             
             $bind_args = array_merge([$stmt], $bind_params);
             
-            // Hàm này sẽ gọi: mysqli_stmt_bind_param($stmt, $types, $param1, $param2, ...)
+            // HÃ m nÃ y sáº½ gá»i: mysqli_stmt_bind_param($stmt, $types, $param1, $param2, ...)
             if (!call_user_func_array('mysqli_stmt_bind_param', $bind_args)) {
                  error_log("Binding parameters failed: " . mysqli_stmt_error($stmt));
                  return [];
@@ -259,7 +259,7 @@ class Review {
         $sql = "SELECT COUNT(reviewID) AS total FROM review";
         $result = mysqli_query($this->conn, $sql);
     
-        // Kiểm tra kết quả truy vấn
+        // Kiá»ƒm tra káº¿t quáº£ truy váº¥n
         if ($result === FALSE) {
             return 0; 
         }

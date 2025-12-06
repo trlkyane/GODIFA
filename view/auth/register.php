@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['btn_register'])) {
         // registerAccount($customerName, $password, $email, $phone)
         $result = $controlRegister->registerAccount($hoten, $password, $email, $phone);
         if ($result == 1) {
-            echo "<script>alert('Đăng ký thành công! Bạn đã được tự động đăng nhập.'); window.location.href='/GODIFA/index.php';</script>";
+            echo "<script>alert('Đăng ký thành công! Bạn đã được tự động đăng nhập.'); window.location.href='" . BASE_URL . "index.php';</script>";
         } elseif ($result == 0) {
             echo "<script>alert('Email đã tồn tại. Vui lòng chọn email khác.');</script>";
         } else {
@@ -61,7 +61,9 @@ ob_end_flush();
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-envelope mr-2 text-blue-600"></i>Email
                 </label>
-                <input type="email" name="email" placeholder="example@email.com" required 
+                <input type="email" name="email" placeholder="example@gmail.com" required 
+                       pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                       title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
             </div>
 
@@ -69,7 +71,11 @@ ob_end_flush();
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-phone mr-2 text-blue-600"></i>Số điện thoại
                 </label>
-                <input type="text" name="phone" placeholder="0xxxxxxxxx" required 
+                <input type="tel" name="phone" placeholder="0xxxxxxxxx" required 
+                       pattern="0[0-9]{9,10}"
+                       title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
+                       maxlength="11"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
             </div>
 

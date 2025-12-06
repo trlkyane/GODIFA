@@ -62,7 +62,9 @@ if (isset($_REQUEST['btn_login'])) {
                     </label>
                     <input type="email" 
                            name="email" 
-                           placeholder="example@email.com"
+                           placeholder="example@gmail.com"
+                           pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                           title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                            required>
                 </div>
@@ -98,7 +100,7 @@ if (isset($_REQUEST['btn_login'])) {
                 <div class="text-center">
                     <p class="text-gray-600">
                         Chưa có tài khoản? 
-                        <a href="/GODIFA/view/auth/register.php" class="text-blue-600 hover:text-blue-700 font-semibold">
+                        <a href="<?php echo BASE_URL; ?>view/auth/register.php" class="text-blue-600 hover:text-blue-700 font-semibold">
                             Đăng ký ngay
                         </a>
                     </p>
@@ -116,7 +118,7 @@ if (isset($_REQUEST['btn_login'])) {
 
                 <!-- Admin Login Link -->
                 <div class="text-center">
-                    <a href="/GODIFA/admin/login.php" 
+                    <a href="<?php echo BASE_URL; ?>admin/login.php" 
                        class="text-gray-600 hover:text-gray-800 text-sm inline-flex items-center gap-2">
                         <i class="fas fa-user-shield"></i>
                         <span>Đăng nhập dành cho Admin/Nhân viên</span>
@@ -125,7 +127,7 @@ if (isset($_REQUEST['btn_login'])) {
 
                 <!-- Back to Home -->
                 <div class="text-center pt-4 border-t border-gray-200">
-                    <a href="/GODIFA/index.php" 
+                    <a href="<?php echo BASE_URL; ?>index.php" 
                        class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 transition">
                         <i class="fas fa-home"></i>
                         <span>Quay về trang chủ</span>

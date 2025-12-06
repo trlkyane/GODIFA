@@ -11,7 +11,7 @@ $basePath = __DIR__ . '/..';
 require_once $basePath . '/model/mOrder.php';
 require_once $basePath . '/model/mCart.php';
 require_once $basePath . '/model/mProduct.php';
-require_once $basePath . '/model/mReview.php'; // Đảm bảo đã có Model Review
+require_once $basePath . '/model/mReview.php'; // Ð?m b?o dã có Model Review
 
 class OrderController {
     private $orderModel;
@@ -26,7 +26,7 @@ class OrderController {
         $this->reviewModel = new Review();
     }
     
-    // ... (checkLogin(), checkout(), placeOrder() - Giữ nguyên) ...
+    // ... (checkLogin(), checkout(), placeOrder() - Gi? nguyên) ...
     private function checkLogin() {
         if (!isset($_SESSION['customer_id'])) {
             return false;
@@ -44,7 +44,7 @@ class OrderController {
         $cartTotal = $this->cartModel->getCartTotal($customerId);
         
         if (empty($cartItems)) {
-            header('Location: /GODIFA/view/cart/viewcart.php');
+            header('Location: ' . BASE_URL . 'view/cart/viewcart.php');
             exit();
         }
         return [ 'cartItems' => $cartItems, 'cartTotal' => $cartTotal ];
@@ -101,7 +101,6 @@ class OrderController {
         foreach ($orders as &$order) {
             $order['canReviewAny'] = false; 
             $orderCompleted = ($order['deliveryStatus'] == 'Hoàn thành' || $order['deliveryStatus'] == 'Đã giao');
-
             if ($orderCompleted) {
                 $orderDetails = $this->orderModel->getOrderDetails($order['orderID']);
                 
@@ -170,7 +169,7 @@ class OrderController {
     }
 
     /**
-     * Xử lý gửi đánh giá (POST).
+     * X? lý g?i dánh giá (POST).
      */
     public function submitReview() {
         if (!$this->checkLogin() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -232,10 +231,10 @@ if (isset($_GET['action'])) {
         case 'place_order':
             $result = $controller->placeOrder();
             if ($result['success']) {
-                header('Location: ../view/payment/thankyou.php?order_id=' . $result['orderId']);
+                header('Location: ' . BASE_URL . 'view/payment/thankyou.php?order_id=' . $result['orderId']);
             } else {
                 $_SESSION['notify_error'] = $result['message']; 
-                header('Location: ../view/cart/checkout.php');
+                header('Location: ' . BASE_URL . 'view/cart/checkout.php');
             }
             exit(); 
             
@@ -262,23 +261,23 @@ if (isset($_GET['action'])) {
             case 'submit_review': 
                 $result = $controller->submitReview();
                 
-                // Đặt URL chuyển hướng mặc định về lịch sử đơn hàng
+                // Ð?t URL chuy?n hu?ng m?c d?nh v? l?ch s? don hàng
                 $redirectUrl = 'cOrder.php?action=history'; 
                 
-                // Nếu order_id được gửi lên hợp lệ, chuyển hướng về chi tiết đơn hàng đó
+                // N?u order_id du?c g?i lên h?p l?, chuy?n hu?ng v? chi ti?t don hàng dó
                 if (isset($_POST['order_id']) && filter_input(INPUT_POST, 'order_id', FILTER_VALIDATE_INT)) {
-                    // Sửa: Đảm bảo trỏ về cOrder.php
+                    // S?a: Ð?m b?o tr? v? cOrder.php
                     $redirectUrl = 'cOrder.php?action=detail&id=' . (int)$_POST['order_id']; 
                 }
     
-                // Đặt thông báo vào session
+                // Ð?t thông báo vào session
                 if ($result['success']) {
                     $_SESSION['notify_success'] = $result['message']; 
                 } else {
                     $_SESSION['notify_error'] = $result['message']; 
                 }
                 
-                // Thực hiện chuyển hướng
+                // Th?c hi?n chuy?n hu?ng
                 header('Location: ' . $redirectUrl);
                 exit();
     
@@ -289,7 +288,7 @@ if (isset($_GET['action'])) {
                 break;
                 
             default:
-                // Sửa: Đảm bảo trỏ về cOrder.php
+                // S?a: Ð?m b?o tr? v? cOrder.php
                 header('Location: cOrder.php?action=history');
                 break;
         }

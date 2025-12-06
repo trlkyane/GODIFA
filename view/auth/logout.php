@@ -46,6 +46,7 @@ if (ini_get("session.use_cookies")) {
 }
 
 // Redirect về trang chủ frontend
-header("Location: /GODIFA/index.php?logout=success");
+require_once __DIR__ . '/../../config/constants.php';
+header("Location: " . BASE_URL . "index.php?logout=success");
 exit();
 

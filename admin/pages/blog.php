@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../middleware/auth.php';
+require_once __DIR__ . '/../../config/constants.php';
 requireStaff();
 
 // Check permission - Có thể xem hoặc quản lý bài viết
@@ -130,7 +131,7 @@ if ($searchKeyword) {
 
 $totalBlogs = $blogController->countBlogs();
 
-$pageTitle = 'Quản lý Bài viết';
+$pageTitle = 'Quản lý bài viết';
 include __DIR__ . '/../includes/header.php';
 ?>
 
@@ -222,30 +223,30 @@ include __DIR__ . '/../includes/header.php';
                     $status = $blog['status'] ?? 1;
                     $image = $blog['image'] ?? '';
                     
-                    // Excerpt (100 ký tự đầu)
+                    // Excerpt (100 ký t? d?u)
                     $excerpt = mb_substr(strip_tags($content), 0, 100) . '...';
                     
-                    // Màu header theo trạng thái
+                    // Màu header theo tr?ng thái
                     $headerColor = $status == 1 
                         ? 'bg-gradient-to-r from-green-500 to-teal-600' 
                         : 'bg-gradient-to-r from-gray-400 to-gray-500';
                     ?>
                     <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden <?php echo $status == 0 ? 'opacity-75' : ''; ?>">
-                        <!-- Hình ảnh -->
+                        <!-- Hình ?nh -->
                         <?php if ($image): ?>
                         <div class="aspect-video w-full overflow-hidden bg-gray-100">
-                            <img src="/GODIFA/image/<?php echo htmlspecialchars($image); ?>" 
+                            <img src="<?php echo BASE_URL; ?>image/<?php echo htmlspecialchars($image); ?>" 
                                  alt="<?php echo htmlspecialchars($title); ?>"
                                  class="w-full h-full object-cover">
                         </div>
                         <?php endif; ?>
                         
-                        <!-- Header với màu động theo trạng thái -->
+                        <!-- Header với màu dùng theo trạng thái -->
                         <div class="<?php echo $headerColor; ?> p-4">
                             <h3 class="text-white font-bold text-lg line-clamp-2">
                                 <?php echo htmlspecialchars($title); ?>
                                 <?php if ($status == 0): ?>
-                                <i class="fas fa-lock ml-2 text-sm" title="Đã khóa"></i>
+                                <i class="fas fa-lock ml-2 text-sm" title="Ðã khóa"></i>
                                 <?php endif; ?>
                             </h3>
                         </div>
@@ -276,7 +277,7 @@ include __DIR__ . '/../includes/header.php';
                                     <i class="fas fa-edit mr-1"></i> Sửa
                                 </button>
                                 
-                                <!-- Khóa/Mở khóa -->
+                                <!-- Khóa/M? khóa -->
                                 <?php if ($status == 1): ?>
                                 <button onclick="toggleBlogStatus(<?php echo $blogID; ?>, '<?php echo htmlspecialchars($title); ?>')" 
                                         class="px-3 py-1 bg-orange-100 text-orange-600 rounded hover:bg-orange-200 text-sm" title="Khóa bài viết">
@@ -292,7 +293,7 @@ include __DIR__ . '/../includes/header.php';
                                 
                                 <?php if (hasPermission('delete_blog')): ?>
                                 <button onclick="deleteBlog(<?php echo $blogID; ?>, '<?php echo htmlspecialchars($title); ?>')" 
-                                        class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm">
+                                        class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm" title="Xóa bài viết">
                                     <i class="fas fa-trash mr-1"></i> Xóa
                                 </button>
                                 <?php endif; ?>
@@ -467,7 +468,7 @@ function openEditModal(blog) {
     // Hiển thị ảnh hiện tại
     const imageDiv = document.getElementById('edit_currentImage');
     if (blog.image) {
-        imageDiv.innerHTML = `<img src="/GODIFA/image/${blog.image}" alt="Current" class="w-48 h-32 object-cover rounded border">`;
+        imageDiv.innerHTML = `<img src="<?php echo BASE_URL; ?>image/${blog.image}" alt="Current" class="w-48 h-32 object-cover rounded border">`;
     } else {
         imageDiv.innerHTML = '<p class="text-gray-500 text-sm">Chưa có hình ảnh</p>';
     }

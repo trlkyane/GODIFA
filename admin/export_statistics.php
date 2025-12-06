@@ -1,17 +1,17 @@
 <?php
 /**
  * Export Statistics to Excel
- * Xuất báo cáo thống kê ra file Excel
+ * Xuáº¥t bÃ¡o cÃ¡o thá»‘ng kÃª ra file Excel
  */
 
-// Bật output buffering ngay từ đầu để tránh output không mong muốn
+// Báº­t output buffering ngay tá»« Ä‘áº§u Ä‘á»ƒ trÃ¡nh output khÃ´ng mong muá»‘n
 ob_start();
 
-// Load auth và constants
+// Load auth vÃ  constants
 require_once __DIR__ . '/middleware/auth.php';
 require_once __DIR__ . '/../config/constants.php';
 
-// Start session nếu chưa có
+// Start session náº¿u chÆ°a cÃ³
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_ADMIN);
     session_start();
@@ -23,7 +23,7 @@ requireLogin();
 // Check permission
 if (!hasPermission('view_statistics')) {
     ob_end_clean();
-    die('Permission denied - Bạn không có quyền xem thống kê');
+    die('Permission denied - Báº¡n khÃ´ng cÃ³ quyá»n xem thá»‘ng kÃª');
 }
 
 // Load required files
@@ -116,7 +116,7 @@ $sheet->getStyle('B' . $currentRow)->getFont()->getColor()->setARGB($growth >= 0
 $currentRow += 2;
 
 // ===== ORDER SUMMARY =====
-$sheet->setCellValue('A' . $currentRow, 'TỔNG QUAN ĐỐN HÀNG');
+$sheet->setCellValue('A' . $currentRow, 'TỔNG QUAN ĐƠN HÀNG');
 $sheet->mergeCells('A' . $currentRow . ':B' . $currentRow);
 $sheet->getStyle('A' . $currentRow)->getFont()->setBold(true)->setSize(12);
 $sheet->getStyle('A' . $currentRow)->getFill()
@@ -171,7 +171,7 @@ if (!empty($topProducts)) {
         $sheet->setCellValue('A' . $currentRow, $index + 1);
         $sheet->setCellValue('B' . $currentRow, $product['productName']);
         $sheet->setCellValue('C' . $currentRow, number_format($product['totalSold']));
-        $sheet->setCellValue('D' . $currentRow, number_format($product['revenue'], 0, ',', '.') . ' đ');
+        $sheet->setCellValue('D' . $currentRow, number_format($product['revenue'], 0, ',', '.') . ' Ä‘');
         $currentRow++;
     }
 } else {
@@ -241,7 +241,7 @@ $currentRow++;
 if (!empty($chartData)) {
     foreach ($chartData as $data) {
         $sheet->setCellValue('A' . $currentRow, $data['date']);
-        $sheet->setCellValue('B' . $currentRow, number_format($data['revenue'], 0, ',', '.') . ' đ');
+        $sheet->setCellValue('B' . $currentRow, number_format($data['revenue'], 0, ',', '.') . ' Ä‘');
         $currentRow++;
     }
 } else {
@@ -263,15 +263,15 @@ $sheet->getStyle('A1:' . $highestColumn . $highestRow)->getBorders()->getAllBord
 // ===== EXPORT FILE =====
 $filename = 'Bao_cao_thong_ke_' . date('Y-m-d_His') . '.xlsx';
 
-// Xóa tất cả output buffer trước khi xuất file
+// XÃ³a táº¥t cáº£ output buffer trÆ°á»›c khi xuáº¥t file
 while (ob_get_level()) {
     ob_end_clean();
 }
 
-// Tạo file tạm
+// Táº¡o file táº¡m
 $tempFile = sys_get_temp_dir() . '/' . $filename;
 
-// Tạo Writer và lưu vào file tạm
+// Táº¡o Writer vÃ  lÆ°u vÃ o file táº¡m
 $writer = new Xlsx($spreadsheet);
 $writer->save($tempFile);
 
@@ -283,10 +283,10 @@ header('Cache-Control: max-age=0');
 header('Cache-Control: must-revalidate');
 header('Pragma: public');
 
-// Đọc file và xuất ra
+// Äá»c file vÃ  xuáº¥t ra
 readfile($tempFile);
 
-// Xóa file tạm
+// XÃ³a file táº¡m
 @unlink($tempFile);
 
 exit;

@@ -1,13 +1,13 @@
-﻿<?php
+<?php
 // Middleware: Chỉ cho phép khách hàng truy cập
 require_once __DIR__ . '/../../middleware/customer_only.php';
+require_once __DIR__ . '/../../config/constants.php';
 
 // Session đã được start ở controller
 // Dữ liệu $product, $reviews, $avgRating, $relatedProducts đã được truyền từ controller
-
 // Nếu truy cập trực tiếp (không qua controller), redirect về trang sản phẩm
 if (!isset($product)) {
-    header("Location: list.php");
+    header("Location: " . BASE_URL . "view/product/list.php");
     exit();
 }
 
@@ -18,9 +18,9 @@ include __DIR__ . '/../layout/header.php';
     
     <!-- Breadcrumb -->
     <nav class="mb-6 text-xs text-gray-500">
-        <a href="/GODIFA/index.php" class="hover:text-black transition">Trang chủ</a>
+        <a href="<?php echo BASE_URL; ?>index.php" class="hover:text-black transition">Trang chủ</a>
         <span class="mx-2">/</span>
-        <a href="/GODIFA/view/product/list.php" class="hover:text-black transition">Sản phẩm</a>
+        <a href="<?php echo BASE_URL; ?>view/product/list.php" class="hover:text-black transition">Sản phẩm</a>
         <span class="mx-2">/</span>
         <span class="text-gray-900"><?php echo htmlspecialchars($product['productName']); ?></span>
     </nav>
@@ -30,7 +30,7 @@ include __DIR__ . '/../layout/header.php';
         <!-- Product Image -->
         <div class="relative">
             <div class="aspect-[4/5] w-full overflow-hidden bg-gray-50 rounded-sm">
-                <img src="/GODIFA/image/<?php echo $product['image']; ?>" 
+                <img src="<?php echo BASE_URL; ?>image/<?php echo $product['image']; ?>" 
                      alt="<?php echo htmlspecialchars($product['productName']); ?>" 
                      class="w-full h-full object-cover">
                 
@@ -68,7 +68,7 @@ include __DIR__ . '/../layout/header.php';
                 </div>
                 <span class="text-xs text-gray-500">
                     <?php echo number_format($avgRating['avgRating'] ?? 0, 1); ?>/5 
-                    <span class="mx-1">·</span>
+                    <span class="mx-1">đ</span>
                     <?php echo $totalReviews; ?> đánh giá
                 </span>
             </div>
@@ -80,10 +80,10 @@ include __DIR__ . '/../layout/header.php';
                 <?php if (!empty($product['promotional_price']) && $product['promotional_price'] > 0): ?>
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-2xl font-bold text-red-600">
-                            <?php echo number_format($product['promotional_price'], 0, ',', '.'); ?>₫
+                            <?php echo number_format($product['promotional_price'], 0, ',', '.'); ?>đ
                         </span>
                         <span class="text-base font-medium text-gray-400 line-through">
-                            <?php echo number_format($product['price'], 0, ',', '.'); ?>₫
+                            <?php echo number_format($product['price'], 0, ',', '.'); ?>đ
                         </span>
                         <span class="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-semibold rounded">
                             -<?php echo round((($product['price'] - $product['promotional_price']) / $product['price']) * 100); ?>%
@@ -91,7 +91,7 @@ include __DIR__ . '/../layout/header.php';
                     </div>
                 <?php else: ?>
                     <span class="text-2xl font-bold text-gray-900">
-                        <?php echo number_format($product['price'], 0, ',', '.'); ?>₫
+                        <?php echo number_format($product['price'], 0, ',', '.'); ?>đ
                     </span>
                 <?php endif; ?>
             </div>
@@ -227,7 +227,7 @@ include __DIR__ . '/../layout/header.php';
                                 <span class="font-semibold text-gray-900 text-sm">
                                     <?php echo htmlspecialchars($review['customerName']); ?>
                                 </span>
-                                <span class="text-gray-300">·</span>
+                                <span class="text-gray-300">•</span>
                                 <div class="flex text-yellow-400">
                                     <?php for ($i = 1; $i <= 5; $i++): ?>
                                         <svg class="w-3.5 h-3.5 <?php echo $i > $review['rating'] ? 'text-gray-200' : ''; ?> fill-current" viewBox="0 0 20 20">
@@ -235,7 +235,7 @@ include __DIR__ . '/../layout/header.php';
                                         </svg>
                                     <?php endfor; ?>
                                 </div>
-                                <span class="text-gray-300">·</span>
+                                <span class="text-gray-300">•</span>
                                 <span class="text-xs text-gray-500">
                                     <?php echo date('d/m/Y', strtotime($review['dateReview'])); ?>
                                 </span>
@@ -268,19 +268,19 @@ include __DIR__ . '/../layout/header.php';
             ?>
                 <div class="group relative">
                     <div class="aspect-[3/4] w-full overflow-hidden rounded-sm bg-gray-100">
-                        <img src="/GODIFA/image/<?php echo $r['image']; ?>" 
+                        <img src="<?php echo BASE_URL; ?>image/<?php echo $r['image']; ?>" 
                              alt="<?php echo htmlspecialchars($r['productName']); ?>" 
                              class="h-full w-full object-cover object-center group-hover:scale-105 transition duration-500 ease-in-out">
                     </div>
                     <div class="mt-3">
                         <h3 class="text-xs text-gray-700 mb-1 line-clamp-2">
-                            <a href="/GODIFA/controller/cProduct.php?action=detail&id=<?php echo $r['productID']; ?>">
+                            <a href="<?php echo BASE_URL; ?>controller/cProduct.php?action=detail&id=<?php echo $r['productID']; ?>">
                                 <span aria-hidden="true" class="absolute inset-0"></span>
                                 <?php echo htmlspecialchars($r['productName']); ?>
                             </a>
                         </h3>
                         <p class="text-sm font-semibold text-gray-900">
-                            <?php echo number_format($r['price'], 0, ',', '.'); ?>₫
+                            <?php echo number_format($r['price'], 0, ',', '.'); ?>đ
                         </p>
                     </div>
                 </div>
@@ -318,25 +318,25 @@ function increaseQty() {
 }
 function addCart(id) {
     const qty = document.getElementById('qty').value;
-    fetch('../controller/cCart.php?action=add', {
+    fetch('<?php echo BASE_URL; ?>controller/cCart.php?action=add', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${id}&quantity=${qty}`
     })
     .then(r => r.json())
-    .then(d => { alert(d.success ? '✅ Đã thêm vào giỏ hàng!' : '❌ ' + (d.message || 'Lỗi!')); })
-    .catch(() => alert('❌ Lỗi kết nối!'));
+    .then(d => { alert(d.success ? '? ï¿½ï¿½ thï¿½m vï¿½o gi? hï¿½ng!' : '? ' + (d.message || 'L?i!')); })
+    .catch(() => alert('? L?i k?t n?i!'));
 }
 function buyNow(id) {
     const qty = document.getElementById('qty').value;
-    fetch('../controller/cCart.php?action=add', {
+    fetch('<?php echo BASE_URL; ?>controller/cCart.php?action=add', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${id}&quantity=${qty}`
     })
     .then(r => r.json())
-    .then(d => { if(d.success) window.location.href = '../view/cart/checkout.php'; else alert('❌ Lỗi!'); })
-    .catch(() => alert('❌ Lỗi kết nối!'));
+    .then(d => { if(d.success) window.location.href = '<?php echo BASE_URL; ?>view/cart/checkout.php'; else alert('? L?i!'); })
+    .catch(() => alert('? L?i k?t n?i!'));
 }
 </script>
 

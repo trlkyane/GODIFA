@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/html; charset=UTF-8');
 require_once __DIR__ . '/middleware/auth.php';
 
 // Yêu cầu đăng nhập với vai trò nhân viên
@@ -13,6 +14,8 @@ $validPages = [
     'products' => 'pages/products.php',
     'categories' => 'pages/categories.php',
     'orders' => 'pages/orders.php',
+    'refund_requests' => 'pages/refund_requests.php',
+    'return_requests' => 'pages/return_requests.php',
     'users' => 'pages/users.php',
     'customers' => 'pages/customers.php',
     'customer_groups' => 'pages/customer_groups.php',

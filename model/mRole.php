@@ -9,7 +9,7 @@ class Role {
         $this->conn = $db->moKetNoi();
     }
     
-    // Lấy tất cả roles
+    // Láº¥y táº¥t cáº£ roles
     public function getAllRoles() {
         $sql = "SELECT * FROM role ORDER BY roleID ASC";
         $result = mysqli_query($this->conn, $sql);
@@ -20,7 +20,7 @@ class Role {
         return $roles;
     }
     
-    // Lấy role theo ID
+    // Láº¥y role theo ID
     public function getRoleById($id) {
         $sql = "SELECT * FROM role WHERE roleID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);

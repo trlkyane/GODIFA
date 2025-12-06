@@ -25,7 +25,7 @@ include __DIR__ . '/../layout/header.php';
           <div class="flex gap-6 pb-6 border-b border-gray-100 cart-item" id="item-<?= $productId ?>">
             <!-- Product Image -->
             <div class="w-24 h-24 flex-shrink-0 bg-gray-50 rounded-sm overflow-hidden">
-              <img src="/GODIFA/image/<?= htmlspecialchars($item['image']) ?>" 
+              <img src="<?php echo BASE_URL; ?>image/<?= htmlspecialchars($item['image']) ?>" 
                    alt="<?= htmlspecialchars($item['productName']) ?>"
                    class="w-full h-full object-cover">
             </div>
@@ -115,12 +115,12 @@ include __DIR__ . '/../layout/header.php';
             </div>
           </div>
 
-          <a href="/GODIFA/view/cart/checkout.php" 
+          <a href="<?php echo BASE_URL; ?>view/cart/checkout.php" 
              class="block w-full bg-black text-white text-center py-4 text-sm font-bold uppercase tracking-wide hover:bg-gray-800 transition rounded-sm">
             Thanh toán
           </a>
 
-          <a href="/GODIFA/view/product/list.php" 
+          <a href="<?php echo BASE_URL; ?>view/product/list.php" 
              class="block w-full text-center py-3 text-sm text-gray-600 hover:text-black transition mt-3">
             Tiếp tục mua sắm
           </a>
@@ -135,7 +135,7 @@ include __DIR__ . '/../layout/header.php';
       </svg>
       <h2 class="text-2xl font-bold text-gray-900 mb-3 brand-font">Giỏ hàng trống</h2>
       <p class="text-gray-500 mb-8">Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
-      <a href="/GODIFA/view/product/list.php" 
+      <a href="<?php echo BASE_URL; ?>view/product/list.php" 
          class="inline-block bg-black text-white px-8 py-3 text-sm font-bold uppercase tracking-wide hover:bg-gray-800 transition rounded-sm">
         Khám phá sản phẩm
       </a>
@@ -200,7 +200,7 @@ function updateQuantity(productId, quantity) {
         return;
     }
     
-    fetch('/GODIFA/controller/cCart.php?action=update', {
+    fetch('<?php echo BASE_URL; ?>controller/cCart.php?action=update', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${productId}&quantity=${quantity}`
@@ -230,7 +230,7 @@ function updateQuantity(productId, quantity) {
 function removeItem(productId) {
     if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
     
-    fetch('/GODIFA/controller/cCart.php?action=remove', {
+    fetch('<?php echo BASE_URL; ?>controller/cCart.php?action=remove', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${productId}`
@@ -264,7 +264,7 @@ function removeItem(productId) {
 function clearAllCart() {
     if (!confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')) return;
     
-    fetch('/GODIFA/controller/cCart.php?action=clear', {
+    fetch('<?php echo BASE_URL; ?>controller/cCart.php?action=clear', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
     })

@@ -53,6 +53,16 @@ define('BASE_PATH', __DIR__ . '/..');
 define('UPLOAD_PATH', BASE_PATH . '/image/');
 define('LOG_PATH', BASE_PATH . '/logs/');
 
+// ==================== URLS ====================
+// Lấy BASE_URL từ database.php nếu đã được define, nếu không thì define mặc định
+if (!defined('BASE_URL')) {
+    // Detect environment: local vs production
+    $isLocal = (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || 
+                strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false);
+    define('BASE_URL', $isLocal ? 'http://localhost/GODIFA/' : 'https://godifa.id.vn/');
+}
+define('ADMIN_BASE_URL', BASE_URL . 'admin/');
+
 // ==================== PAGINATION ====================
 define('ITEMS_PER_PAGE', 20);
 define('PRODUCTS_PER_PAGE', 12);
@@ -75,4 +85,10 @@ define('VOUCHER_FIXED', 'fixed');
 // ==================== QR CODE EXPIRY ====================
 define('QR_EXPIRY_MINUTES', 15);
 
-?>
+// ==================== CHAT & WEBSOCKET ====================
+// Socket.IO Server URL (thay đổi khi deploy lên VPS)
+if (!defined('SOCKET_SERVER_URL')) {
+    $isLocal = (strpos($_SERVER['HTTP_HOST'] ?? 'localhost', 'localhost') !== false || 
+                strpos($_SERVER['HTTP_HOST'] ?? '127.0.0.1', '127.0.0.1') !== false);
+    define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://chat.godifa.id.vn');
+}

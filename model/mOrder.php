@@ -11,8 +11,8 @@ class Order {
     
     // Tạo đơn hàng mới
     public function createOrder($customerId, $totalAmount, $paymentMethod, $voucherId = 0) {
-        $paymentStatus = 'Chờ thanh toán';
-        $deliveryStatus = 'Chờ xử lý';
+    $paymentStatus = 'Chờ thanh toán';
+    $deliveryStatus = 'Chờ xử lý';
         $sql = "INSERT INTO `order` (orderDate, paymentStatus, deliveryStatus, totalAmount, paymentMethod, customerID, voucherID) 
                 VALUES (NOW(), ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -55,7 +55,7 @@ class Order {
     
     // Lấy chi tiết đơn hàng
     public function getOrderDetails($orderId) {
-        $sql = "SELECT od.*, p.productName, p.image 
+        $sql = "SELECT od.*, p.productName, p.image
                 FROM order_details od 
                 INNER JOIN product p ON od.productID = p.productID 
                 WHERE od.orderID = ?";
@@ -114,13 +114,16 @@ class Order {
     
     // Cập nhật trạng thái thanh toán
     public function updatePaymentStatus($orderId, $paymentStatus, $paymentDate = null) {
-        // Nếu chuyển sang "Đã thanh toán" và không có paymentDate, tự động set thời gian hiện tại
+    // Nếu chuyển sang "Đã thanh toán" và không có paymentDate, tự động set thời gian hiện tại
+        // Dùng MySQL NOW() thay vì PHP date() để đảm bảo cùng timezone với orderDate
         if ($paymentStatus === 'Đã thanh toán' && $paymentDate === null) {
-            $paymentDate = date('Y-m-d H:i:s');
+            $nowResult = mysqli_query($this->conn, "SELECT NOW() as currentTime");
+            $nowRow = mysqli_fetch_assoc($nowResult);
+            $paymentDate = $nowRow['currentTime'];
         }
         
-        // Nếu chuyển về "Chờ thanh toán" hoặc "Đã hủy", xóa paymentDate
-        if (in_array($paymentStatus, ['Chờ thanh toán', 'Đã hủy'])) {
+    // Nếu chuyển về "Chờ thanh toán" hoặc "Đã hủy", xóa paymentDate
+    if (in_array($paymentStatus, ['Chờ thanh toán', 'Đã hủy'])) {
             $sql = "UPDATE `order` SET paymentStatus = ?, paymentDate = NULL WHERE orderID = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
             mysqli_stmt_bind_param($stmt, "si", $paymentStatus, $orderId);
@@ -143,46 +146,130 @@ class Order {
     
     // Cập nhật cả 2 trạng thái
     public function updateOrderStatus($orderId, $paymentStatus, $deliveryStatus, $cancelReason = null) {
-        $paymentDate = null;
+        // Lấy thông tin đơn hàng hiện tại
+        $checkSql = "SELECT paymentMethod, paymentStatus, paymentDate, deliveryStatus FROM `order` WHERE orderID = ?";
+        $checkStmt = mysqli_prepare($this->conn, $checkSql);
+        mysqli_stmt_bind_param($checkStmt, "i", $orderId);
+        mysqli_stmt_execute($checkStmt);
+        $result = mysqli_stmt_get_result($checkStmt);
+        $order = mysqli_fetch_assoc($result);
+        
+        if (!$order) {
+            return false;
+        }
+        
+        // Giữ nguyên paymentDate hiện tại, không ghi đè
+        $paymentDate = $order['paymentDate'];
+        $shouldUpdatePaymentDate = false;
         
         // Auto update payment status for COD when delivery is completed
         if ($deliveryStatus === 'Hoàn thành') {
-            // Get order payment method
-            $checkSql = "SELECT paymentMethod, paymentStatus FROM `order` WHERE orderID = ?";
-            $checkStmt = mysqli_prepare($this->conn, $checkSql);
-            mysqli_stmt_bind_param($checkStmt, "i", $orderId);
-            mysqli_stmt_execute($checkStmt);
-            $result = mysqli_stmt_get_result($checkStmt);
-            $order = mysqli_fetch_assoc($result);
-            
             // If COD and payment is pending, auto mark as paid
-            if ($order && $order['paymentMethod'] === 'COD' && 
+            if ($order['paymentMethod'] === 'COD' && 
                 strpos($order['paymentStatus'], 'Chờ thanh toán') !== false) {
                 $paymentStatus = 'Đã thanh toán';
-                $paymentDate = date('Y-m-d H:i:s'); // Ghi nhận thời điểm hoàn thành giao hàng COD
+                // Chỉ set paymentDate nếu chưa có - Dùng MySQL NOW() để đảm bảo cùng timezone với orderDate
+                if ($paymentDate === null) {
+                    // Lấy timestamp từ MySQL NOW() thay vì PHP date()
+                    $nowResult = mysqli_query($this->conn, "SELECT NOW() as currentTime");
+                    $nowRow = mysqli_fetch_assoc($nowResult);
+                    $paymentDate = $nowRow['currentTime'];
+                    $shouldUpdatePaymentDate = true;
+                }
             }
         }
         
-        // Nếu chuyển sang "Đã thanh toán", ghi nhận paymentDate
+    // Nếu chuyển sang "Đã thanh toán" và chưa có paymentDate, ghi nhận thời điểm
         if ($paymentStatus === 'Đã thanh toán' && $paymentDate === null) {
-            $paymentDate = date('Y-m-d H:i:s');
+            // Dùng MySQL NOW() để đảm bảo cùng timezone với orderDate
+            $nowResult = mysqli_query($this->conn, "SELECT NOW() as currentTime");
+            $nowRow = mysqli_fetch_assoc($nowResult);
+            $paymentDate = $nowRow['currentTime'];
+            $shouldUpdatePaymentDate = true;
         }
         
-        if ($cancelReason !== null) {
-            $sql = "UPDATE `order` SET paymentStatus = ?, paymentDate = ?, deliveryStatus = ?, cancelReason = ? WHERE orderID = ?";
-            $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "ssssi", $paymentStatus, $paymentDate, $deliveryStatus, $cancelReason, $orderId);
-        } else {
-            $sql = "UPDATE `order` SET paymentStatus = ?, paymentDate = ?, deliveryStatus = ? WHERE orderID = ?";
-            $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "sssi", $paymentStatus, $paymentDate, $deliveryStatus, $orderId);
+        // Nếu hủy đơn, xóa paymentDate
+        if ($paymentStatus === 'Đã hủy') {
+            $paymentDate = null;
+            $shouldUpdatePaymentDate = true;
         }
+        
+        // Build SQL dynamically - chỉ update paymentDate khi cần
+        if ($cancelReason !== null) {
+            $sql = "UPDATE `order` SET paymentStatus = ?, deliveryStatus = ?, cancelReason = ?";
+            $types = "sss";
+            $params = [$paymentStatus, $deliveryStatus, $cancelReason];
+        } else {
+            $sql = "UPDATE `order` SET paymentStatus = ?, deliveryStatus = ?";
+            $types = "ss";
+            $params = [$paymentStatus, $deliveryStatus];
+        }
+        
+        // Chỉ thêm paymentDate vào UPDATE nếu có thay đổi
+        if ($shouldUpdatePaymentDate) {
+            // Thêm vào trước WHERE
+            $sql = str_replace(" WHERE", ", paymentDate = ? WHERE", $sql . " WHERE");
+            $types .= "s";
+            $params[] = $paymentDate;
+        } else {
+            $sql .= " WHERE";
+        }
+        
+        $sql .= " orderID = ?";
+        $types .= "i";
+        $params[] = $orderId;
+        
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
         return mysqli_stmt_execute($stmt);
     }
     
     // Hủy đơn hàng
     public function cancelOrder($orderId, $cancelReason = 'Không rõ lý do') {
+        // Hoàn lại tồn kho trước khi hủy đơn
+        $this->restoreStock($orderId);
+        
         return $this->updateOrderStatus($orderId, 'Đã hủy', 'Đã hủy', $cancelReason);
+    }
+    
+    // Trừ tồn kho khi xác nhận đơn (chuyển sang vận chuyển)
+    private function reduceStock($orderId) {
+        // Lấy danh sách sản phẩm trong đơn
+        $sql = "SELECT productID, quantity FROM order_details WHERE orderID = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $orderId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        // Trừ tồn kho cho từng sản phẩm
+        while ($item = mysqli_fetch_assoc($result)) {
+            $updateSql = "UPDATE product SET stockQuantity = stockQuantity - ? WHERE productID = ?";
+            $updateStmt = mysqli_prepare($this->conn, $updateSql);
+            mysqli_stmt_bind_param($updateStmt, "ii", $item['quantity'], $item['productID']);
+            mysqli_stmt_execute($updateStmt);
+        }
+        
+        return true;
+    }
+    
+    // Hoàn lại tồn kho khi hủy đơn
+    private function restoreStock($orderId) {
+        // Lấy danh sách sản phẩm trong đơn
+        $sql = "SELECT productID, quantity FROM order_details WHERE orderID = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $orderId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        // Hoàn lại từng sản phẩm
+        while ($item = mysqli_fetch_assoc($result)) {
+            $updateSql = "UPDATE product SET stockQuantity = stockQuantity + ? WHERE productID = ?";
+            $updateStmt = mysqli_prepare($this->conn, $updateSql);
+            mysqli_stmt_bind_param($updateStmt, "ii", $item['quantity'], $item['productID']);
+            mysqli_stmt_execute($updateStmt);
+        }
+        
+        return true;
     }
     
     // Cập nhật ghi chú đơn hàng (nội bộ - chỉ admin)
@@ -290,7 +377,7 @@ class Order {
     }
     
     // ============================================
-    // METHODS MỚI CHO SEPAY & GHN
+    // METHODS Má»šI CHO SEPAY & GHN
     // ============================================
     
     /**
@@ -358,6 +445,28 @@ class Order {
             $history[] = $row;
         }
         return $history;
+    }
+    
+    // Đếm số đơn mới thanh toán trong X phút gần đây
+    public function countNewPaidOrders($minutesAgo = 30) {
+        // Kiểm tra cột paymentDate có tồn tại không
+        $result = mysqli_query($this->conn, "SHOW COLUMNS FROM `order` LIKE 'paymentDate'");
+        if (!$result || mysqli_num_rows($result) == 0) {
+            return 0; // Chưa có cột paymentDate
+        }
+        
+        // Đếm đơn thanh toán trong X phút gần đây
+        $sql = "SELECT COUNT(*) as total 
+                FROM `order` 
+                WHERE paymentStatus = 'Đã thanh toán'
+                AND paymentDate IS NOT NULL
+                AND paymentDate >= DATE_SUB(NOW(), INTERVAL ? MINUTE)";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $minutesAgo);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+        return $row['total'] ?? 0;
     }
     
     public function __destruct() {

@@ -9,7 +9,7 @@ class AuthController {
         $this->customerModel = new Customer();
     }
     
-    // Đăng ký
+    // ÄÄƒng kÃ½
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $customerName = trim($_POST['customer_name']);
@@ -80,7 +80,7 @@ class AuthController {
     }
 }
 
-// Xử lý request
+// Xá»­ lÃ½ request
 if (isset($_GET['action'])) {
     $controller = new AuthController();
     $action = $_GET['action'];
@@ -90,9 +90,9 @@ if (isset($_GET['action'])) {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $controller->register();
                 if ($result['success']) {
-                    header('Location: ../view/auth/login.php?success=1');
+                    header('Location: ' . BASE_URL . 'view/auth/login.php?success=1');
                 } else {
-                    header('Location: ../view/auth/register.php?error=' . urlencode($result['message']));
+                    header('Location: ' . BASE_URL . 'view/auth/register.php?error=' . urlencode($result['message']));
                 }
             } else {
                 include '../view/auth/register.php';
@@ -103,9 +103,9 @@ if (isset($_GET['action'])) {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $controller->login();
                 if ($result['success']) {
-                    header('Location: ../index.php');
+                    header('Location: ' . BASE_URL . 'index.php');
                 } else {
-                    header('Location: ../view/auth/login.php?error=' . urlencode($result['message']));
+                    header('Location: ' . BASE_URL . 'view/auth/login.php?error=' . urlencode($result['message']));
                 }
             } else {
                 include '../view/auth/login.php';
@@ -117,7 +117,7 @@ if (isset($_GET['action'])) {
             break;
             
         default:
-            header('Location: ../index.php');
+            header('Location: ' . BASE_URL . 'index.php');
     }
 }
 ?>

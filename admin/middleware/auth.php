@@ -1,6 +1,6 @@
 <?php
 /**
- * Middleware kiểm tra quyền truy cập
+ * Middleware ki?m tra quy?n truy c?p
  * File: admin/middleware/auth.php
  */
 
@@ -15,17 +15,17 @@ if (session_status() === PHP_SESSION_NONE) {
 // ==================== FUNCTIONS ====================
 
 /**
- * Kiểm tra đăng nhập
+ * Ki?m tra dang nh?p
  */
 function requireLogin() {
     if (!isset($_SESSION['user_id'])) {
-        header('Location: /GODIFA/admin/login.php');
+        header('Location: ' . ADMIN_BASE_URL . 'login.php');
         exit();
     }
 }
 
 /**
- * Yêu cầu vai trò cụ thể
+ * Yêu c?u vai trò c? th?
  */
 function requireRole($allowedRoles = []) {
     requireLogin();
@@ -33,13 +33,13 @@ function requireRole($allowedRoles = []) {
     $userRole = $_SESSION['role_id'] ?? 0;
     
     if (!in_array($userRole, $allowedRoles)) {
-        header('Location: 403.php');
+        header('Location: ' . ADMIN_BASE_URL . '403.php');
         exit();
     }
 }
 
 /**
- * Yêu cầu phải là nhân viên (role 1,2,3,4)
+ * Yêu c?u ph?i là nhân viên (role 1,2,3,4)
  */
 function requireStaff() {
     requireRole([ROLE_OWNER, ROLE_ADMIN, ROLE_SALES, ROLE_SUPPORT]);
@@ -47,176 +47,171 @@ function requireStaff() {
 
 // ==================== PERMISSIONS ====================
 
-// Danh sách quyền theo vai trò
+// Danh sách quy?n theo vai trò
 $rolePermissions = [
     ROLE_OWNER => [
-        // Dashboard & Thống kê
+        // Dashboard & Th?ng kê
         'view_dashboard',       // Xem dashboard
-        'view_statistics',      // Xem thống kê
+        'view_statistics',      // Xem th?ng kê
         
         // Nhân viên
-        'manage_users',         // Quản lý nhân viên (toàn quyền)
-        'delete_user',          // Xóa nhân viên (chỉ Owner)
+        'manage_users',         // Qu?n lý nhân viên (toàn quy?n)
+        'delete_user',          // Xóa nhân viên (ch? Owner)
         
-        // Sản phẩm & Danh mục
-        'view_products',        // Xem sản phẩm
-        'manage_products',      // Quản lý sản phẩm (thêm, sửa)
-        'delete_product',       // Xóa sản phẩm (Owner & Admin)
-        'view_categories',      // Xem danh mục
-        'manage_categories',    // Quản lý danh mục
+        // S?n ph?m & Danh m?c
+        'view_products',        // Xem s?n ph?m
+        'manage_products',      // Qu?n lý s?n ph?m (thêm, s?a)
+        'delete_product',       // Xóa s?n ph?m (Owner & Admin)
+        'view_categories',      // Xem danh m?c
+        'manage_categories',    // Qu?n lý danh m?c
         
-        // Đơn hàng
-        'view_orders',          // Xem đơn hàng
-        'create_order',         // Tạo đơn hàng
-        'edit_own_order',       // Sửa đơn do mình tạo
-        'edit_all_orders',      // Sửa tất cả đơn hàng
-        'update_order_status',  // Cập nhật trạng thái
-        'enter_order',          // Nhập đơn thủ công
-        'delete_order',         // Xóa đơn hàng
+        // Ðon hàng
+        'view_orders',          // Xem don hàng
+        'create_order',         // T?o don hàng
+        'edit_own_order',       // S?a don do mình t?o
+        'edit_all_orders',      // S?a t?t c? don hàng
+        'update_order_status',  // C?p nh?t tr?ng thái
+        'enter_order',          // Nh?p don th? công
+        'delete_order',         // Xóa don hàng
         
         // Voucher
         'view_vouchers',        // Xem voucher
-        'create_voucher',       // Tạo voucher
-        'apply_voucher',        // Áp dụng voucher
-        'manage_vouchers',      // Quản lý voucher (sửa, xóa)
+        'create_voucher',       // T?o voucher
+        'apply_voucher',        // Áp d?ng voucher
+        'manage_vouchers',      // Qu?n lý voucher (s?a, xóa)
         
-        // Bài viết
-        'view_blog',            // Xem bài viết
-        'manage_blog',          // Quản lý bài viết (thêm, sửa)
-        'delete_blog',          // Xóa bài viết (Owner & Admin)
+        // Bài vi?t
+        'view_blog',            // Xem bài vi?t
+        'manage_blog',          // Qu?n lý bài vi?t (thêm, s?a)
+        'delete_blog',          // Xóa bài vi?t (Owner & Admin)
         
         // Chat
         'view_chat',            // Xem chat
-        'manage_chat',          // Quản lý chat
+        'manage_chat',          // Qu?n lý chat
         
         // Khách hàng
         'view_customers',       // Xem khách hàng
-        'manage_customers',     // Quản lý khách hàng (sửa thông tin, khóa/mở)
-        'view_customer_history',// Xem lịch sử mua hàng
+        'manage_customers',     // Qu?n lý khách hàng (s?a thông tin, khóa/m?)
+        'view_customer_history',// Xem l?ch s? mua hàng
         
-        // Đánh giá
-        'view_reviews',         // Xem đánh giá
-        'manage_reviews',       // Quản lý đánh giá (duyệt, xóa)
+        // Ðánh giá
+        'view_reviews',         // Xem dánh giá
+        'manage_reviews',       // Qu?n lý dánh giá (duy?t, xóa)
         
-        'full_access'           // Toàn quyền
+        'full_access'           // Toàn quy?n
     ],
     ROLE_ADMIN => [
-        // Dashboard & Thống kê (Chỉ xem)
+        // Dashboard & Th?ng kê (Ch? xem)
         'view_dashboard',       // Xem dashboard
-        'view_statistics',      // Xem thống kê
+        'view_statistics',      // Xem th?ng kê
         
-        // Sản phẩm & Danh mục (Toàn quyền)
-        'view_products',        // Xem sản phẩm
-        'manage_products',      // Quản lý sản phẩm (thêm, sửa)
-        'delete_product',       // Xóa sản phẩm
-        'view_categories',      // Xem danh mục
-        'manage_categories',    // Quản lý danh mục (thêm, sửa, xóa)
+        // S?n ph?m & Danh m?c (Toàn quy?n)
+        'view_products',        // Xem s?n ph?m
+        'manage_products',      // Qu?n lý s?n ph?m (thêm, s?a)
+        'delete_product',       // Xóa s?n ph?m
+        'view_categories',      // Xem danh m?c
+        'manage_categories',    // Qu?n lý danh m?c (thêm, s?a, xóa)
         
-        // Nhân viên (Toàn quyền)
-        'manage_users',         // Quản lý nhân viên (thêm, sửa, xóa)
+        // Nhân viên (Toàn quy?n)
+        'manage_users',         // Qu?n lý nhân viên (thêm, s?a, xóa)
         'delete_user',          // Xóa nhân viên
         
-        // Bài viết (Toàn quyền)
-        'view_blog',            // Xem bài viết
-        'manage_blog',          // Quản lý bài viết (thêm, sửa)
-        'delete_blog',          // Xóa bài viết
+        // Bài vi?t (Toàn quy?n)
+        'view_blog',            // Xem bài vi?t
+        'manage_blog',          // Qu?n lý bài vi?t (thêm, s?a)
+        'delete_blog',          // Xóa bài vi?t
         
-        // Đơn hàng (Chỉ xem)
-        'view_orders',          // Xem đơn hàng
+        // Ðon hàng (Ch? xem)
+        'view_orders',          // Xem don hàng
         
-        // Voucher (Chỉ xem)
+        // Voucher (Ch? xem)
         'view_vouchers',        // Xem voucher
         
-        // Chat (Chỉ xem tin nhắn)
-        'view_chat',            // Xem tin nhắn khách hàng
-        
-        // Khách hàng (Chỉ xem)
+        // Khách hàng (Ch? xem)
         'view_customers',       // Xem thông tin khách hàng
-        'view_customer_history',// Xem lịch sử mua hàng
+        'view_customer_history',// Xem l?ch s? mua hàng
         
-        // Nhóm khách hàng (Chỉ xem)
+        // Nhóm khách hàng (Ch? xem)
         'view_customer_groups', // Xem nhóm khách hàng
         
-        // Đánh giá (Chỉ xem)
-        'view_reviews',         // Xem đánh giá
+        // Ðánh giá (Ch? xem)
+        'view_reviews',         // Xem dánh giá
     ],
     ROLE_SALES => [
-        // Dashboard & Thống kê (Chỉ xem)
+        // Dashboard & Th?ng kê (Ch? xem)
         'view_dashboard',       // Xem dashboard
-        'view_statistics',      // Xem thống kê
+        'view_statistics',      // Xem th?ng kê
         
-        // Đơn hàng (Toàn quyền)
-        'view_orders',          // Xem đơn hàng
-        'create_order',         // Tạo đơn hàng mới
-        'edit_own_order',       // Chỉnh sửa đơn do mình tạo
-        'edit_all_orders',      // Sửa tất cả đơn hàng
-        'update_order_status',  // Cập nhật trạng thái
-        'enter_order',          // Nhập đơn thủ công
-        'delete_order',         // Xóa đơn hàng
+        // Ðon hàng (Toàn quy?n)
+        'view_orders',          // Xem don hàng
+        'create_order',         // T?o don hàng m?i
+        'edit_own_order',       // Ch?nh s?a don do mình t?o
+        'edit_all_orders',      // S?a t?t c? don hàng
+        'update_order_status',  // C?p nh?t tr?ng thái
+        'enter_order',          // Nh?p don th? công
+        'delete_order',         // Xóa don hàng
         
-        // Voucher (Toàn quyền)
+        // Voucher (Toàn quy?n)
         'view_vouchers',        // Xem voucher
-        'create_voucher',       // Tạo voucher
-        'manage_vouchers',      // Sửa, xóa voucher
-        'apply_voucher',        // Áp dụng voucher
+        'create_voucher',       // T?o voucher
+        'manage_vouchers',      // S?a, xóa voucher
+        'apply_voucher',        // Áp d?ng voucher
         
-        // Sản phẩm & Danh mục (Chỉ xem)
-        'view_products',        // Xem sản phẩm
-        'view_categories',      // Xem danh mục
+        // S?n ph?m & Danh m?c (Ch? xem)
+        'view_products',        // Xem s?n ph?m
+        'view_categories',      // Xem danh m?c
         
-        // Bài viết (Chỉ xem)
-        'view_blog',            // Xem bài viết
+        // Bài vi?t (Ch? xem)
+        'view_blog',            // Xem bài vi?t
         
-        // Chat (Chỉ xem)
-        'view_chat',            // Xem chat
         
-        // Khách hàng (Chỉ xem)
+        // Khách hàng (Ch? xem)
         'view_customers',       // Xem khách hàng
-        'view_customer_history',// Xem lịch sử mua hàng
+        'view_customer_history',// Xem l?ch s? mua hàng
         'view_customer_groups', // Xem nhóm khách hàng
         
-        // Đánh giá (Chỉ xem)
-        'view_reviews',         // Xem đánh giá
+        // Ðánh giá (Ch? xem)
+        'view_reviews',         // Xem dánh giá
     ],
     ROLE_SUPPORT => [
-        // Dashboard & Thống kê (Chỉ xem)
+        // Dashboard & Th?ng kê (Ch? xem)
         'view_dashboard',       // Xem dashboard
-        'view_statistics',      // Xem thống kê
+        'view_statistics',      // Xem th?ng kê
         
-        // Đánh giá (Toàn quyền)
-        'view_reviews',         // Xem đánh giá
-        'manage_reviews',       // Quản lý đánh giá (duyệt, ẩn/hiện, xóa)
-        'respond_to_reviews',   // Phản hồi đánh giá
+        // Ðánh giá (Toàn quy?n)
+        'view_reviews',         // Xem dánh giá
+        'manage_reviews',       // Qu?n lý dánh giá (duy?t, ?n/hi?n, xóa)
+        'respond_to_reviews',   // Ph?n h?i dánh giá
         
-        // Chat (Toàn quyền)
+        // Chat (Toàn quy?n)
         'view_chat',            // Xem chat
-        'manage_chat',          // Quản lý chat, phản hồi khách hàng
+        'manage_chat',          // Qu?n lý chat, ph?n h?i khách hàng
         
-        // Khách hàng (Toàn quyền)
+        // Khách hàng (Toàn quy?n)
         'view_customers',       // Xem khách hàng
-        'manage_customers',     // Quản lý khách hàng (sửa thông tin, khóa/mở)
-        'view_customer_history',// Xem lịch sử mua hàng
+        'manage_customers',     // Qu?n lý khách hàng (s?a thông tin, khóa/m?)
+        'view_customer_history',// Xem l?ch s? mua hàng
         'view_customer_groups', // Xem nhóm khách hàng
-        'edit_customer_info',   // Cập nhật thông tin khách hàng
+        'edit_customer_info',   // C?p nh?t thông tin khách hàng
         'add_customer_notes',   // Ghi chú khách hàng
         
-        // Sản phẩm & Danh mục (Chỉ xem)
-        'view_products',        // Xem sản phẩm
-        'view_categories',      // Xem danh mục
+        // S?n ph?m & Danh m?c (Ch? xem)
+        'view_products',        // Xem s?n ph?m
+        'view_categories',      // Xem danh m?c
         
-        // Đơn hàng (Chỉ xem)
-        'view_orders',          // Xem đơn hàng
+        // Ðon hàng (Ch? xem)
+        'view_orders',          // Xem don hàng
         
-        // Voucher (Chỉ xem)
+        // Voucher (Ch? xem)
         'view_vouchers',        // Xem voucher
         
-        // Bài viết (Chỉ xem)
-        'view_blog',            // Xem bài viết
+        // Bài vi?t (Ch? xem)
+        'view_blog',            // Xem bài vi?t
     ]
 ];
 
 /**
- * Kiểm tra quyền cụ thể
+ * Ki?m tra quy?n c? th?
  */
 function hasPermission($permission) {
     global $rolePermissions;
@@ -227,7 +222,7 @@ function hasPermission($permission) {
     
     $userRole = $_SESSION['role_id'] ?? 0;
     
-    // Chủ doanh nghiệp có toàn quyền
+    // Ch? doanh nghi?p có toàn quy?n
     if ($userRole == ROLE_OWNER) {
         return true;
     }
@@ -240,7 +235,7 @@ function hasPermission($permission) {
 }
 
 /**
- * Lấy tên vai trò
+ * L?y tên vai trò
  */
 function getRoleName($roleId) {
     $roles = [
@@ -254,7 +249,7 @@ function getRoleName($roleId) {
 }
 
 /**
- * Lấy màu badge theo role
+ * L?y màu badge theo role
  */
 function getRoleBadgeClass($roleId) {
     $badges = [
@@ -268,7 +263,7 @@ function getRoleBadgeClass($roleId) {
 }
 
 /**
- * Lấy icon theo role
+ * L?y icon theo role
  */
 function getRoleIcon($roleId) {
     $icons = [
@@ -282,43 +277,43 @@ function getRoleIcon($roleId) {
 }
 
 /**
- * Kiểm tra quyền chỉnh sửa/xóa/đổi mật khẩu nhân viên
- * Quy tắc:
- * - Owner có thể sửa tất cả
- * - Admin chỉ được sửa nhân viên cấp dưới (Sales, Support) - roleID > 2
- * - Không được sửa nhân viên cùng cấp hoặc cấp cao hơn
+ * Ki?m tra quy?n ch?nh s?a/xóa/d?i m?t kh?u nhân viên
+ * Quy t?c:
+ * - Owner có th? s?a t?t c?
+ * - Admin ch? du?c s?a nhân viên c?p du?i (Sales, Support) - roleID > 2
+ * - Không du?c s?a nhân viên cùng c?p ho?c c?p cao hon
  * 
- * @param int $currentUserRoleID - Role ID của người đang thực hiện
- * @param int $targetUserRoleID - Role ID của nhân viên muốn sửa
+ * @param int $currentUserRoleID - Role ID c?a ngu?i dang th?c hi?n
+ * @param int $targetUserRoleID - Role ID c?a nhân viên mu?n s?a
  * @return bool
  */
 function canEditUser($currentUserRoleID, $targetUserRoleID) {
-    // Owner có thể sửa tất cả
+    // Owner có th? s?a t?t c?
     if ($currentUserRoleID == ROLE_OWNER) {
         return true;
     }
     
-    // Admin chỉ được sửa nhân viên có roleID > 2 (Sales và Support)
+    // Admin ch? du?c s?a nhân viên có roleID > 2 (Sales và Support)
     if ($currentUserRoleID == ROLE_ADMIN && $targetUserRoleID > ROLE_ADMIN) {
         return true;
     }
     
-    // Các trường hợp khác không được phép
+    // Các tru?ng h?p khác không du?c phép
     return false;
 }
 
 /**
- * Kiểm tra quyền thêm nhân viên với roleID cụ thể
- * Quy tắc:
- * - Owner có thể thêm tất cả các roleID
- * - Các role khác KHÔNG được thêm nhân viên
+ * Ki?m tra quy?n thêm nhân viên v?i roleID c? th?
+ * Quy t?c:
+ * - Owner có th? thêm t?t c? các roleID
+ * - Các role khác KHÔNG du?c thêm nhân viên
  * 
- * @param int $currentUserRoleID - Role ID của người đang thực hiện
- * @param int $newRoleID - Role ID muốn tạo
+ * @param int $currentUserRoleID - Role ID c?a ngu?i dang th?c hi?n
+ * @param int $newRoleID - Role ID mu?n t?o
  * @return bool
  */
 function canAddUserWithRole($currentUserRoleID, $newRoleID) {
-    // Chỉ Owner mới được thêm nhân viên
+    // Ch? Owner m?i du?c thêm nhân viên
     return ($currentUserRoleID == ROLE_OWNER);
 }
 ?>

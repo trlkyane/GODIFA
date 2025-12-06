@@ -21,6 +21,14 @@ class cCustomerLogin {
         $customer = $customerModel->login($email, $password);
         
         if ($customer) {
+            // Kiểm tra trạng thái tài khoản (status = 0 nghĩa là đã bị khóa)
+            if (isset($customer['status']) && $customer['status'] == 0) {
+                echo "<script>alert('Tài khoản của bạn đã bị khóa! Vui lòng liên hệ admin.');</script>";
+                require_once __DIR__ . '/../config/constants.php';
+                header("refresh:0;url=" . BASE_URL . "view/auth/customer-login.php");
+                exit();
+            }
+            
             // Lưu thông tin customer vào session
             $_SESSION["customer_id"] = $customer["customerID"];
             $_SESSION["customer_name"] = $customer["customerName"];
@@ -33,18 +41,20 @@ class cCustomerLogin {
             $cartSync->syncCartOnLogin($customer["customerID"]);
             
             // Kiểm tra có redirect sau login không (ví dụ từ checkout)
-            $redirectUrl = '/GODIFA/index.php';
+            require_once __DIR__ . '/../config/constants.php';
+            $redirectUrl = BASE_URL . 'index.php';
             if (isset($_SESSION['redirect_after_login'])) {
-                $redirectUrl = $_SESSION['redirect_after_login'];
+                $redirectUrl = BASE_URL . ltrim($_SESSION['redirect_after_login'], '/');
                 unset($_SESSION['redirect_after_login']); // Xóa sau khi dùng
             }
             
             echo "<script>alert('Đăng nhập thành công! Chào mừng " . htmlspecialchars($customer["customerName"]) . "');</script>";
-            header("refresh:0;url=$redirectUrl");
+            header("refresh:0;url=" . $redirectUrl);
             exit();
         } else {
             echo "<script>alert('Email hoặc mật khẩu không đúng!');</script>";
-            header("refresh:0;url=/GODIFA/view/auth/customer-login.php");
+            require_once __DIR__ . '/../config/constants.php';
+            header("refresh:0;url=" . BASE_URL . "view/auth/customer-login.php");
             exit();
         }
     }

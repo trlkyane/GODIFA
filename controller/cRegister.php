@@ -3,7 +3,7 @@
  * Customer Register Controller
  * File: controller/cRegister.php
  * 
- * Xử lý đăng ký cho CUSTOMER (bảng customer)
+ * Xá»­ lÃ½ Ä‘Äƒng kÃ½ cho CUSTOMER (báº£ng customer)
  */
 
 include_once(__DIR__ . "/../model/mCustomer.php");
@@ -11,24 +11,24 @@ include_once(__DIR__ . "/../model/mCustomer.php");
 class cRegister {
     
     /**
-     * Đăng ký tài khoản Customer mới
-     * @param string $customerName - Tên khách hàng
-     * @param string $password - Mật khẩu
+     * ÄÄƒng kÃ½ tÃ i khoáº£n Customer má»›i
+     * @param string $customerName - TÃªn khÃ¡ch hÃ ng
+     * @param string $password - Máº­t kháº©u
      * @param string $email - Email
-     * @param string $phone - Số điện thoại
+     * @param string $phone - Sá»‘ Ä‘iá»‡n thoáº¡i
      * @return int 1=Success, 0=Email exists, -1=Error
      */
     public function registerAccount($customerName, $password, $email, $phone) {
         $customerModel = new Customer();
         
-        // Kiểm tra email đã tồn tại
+        // Kiá»ƒm tra email Ä‘Ã£ tá»“n táº¡i
         if ($customerModel->emailExists($email)) {
-            return 0; // Email đã tồn tại
+            return 0; // Email Ä‘Ã£ tá»“n táº¡i
         }
         
-        // Đăng ký tài khoản mới vào bảng customer
+        // ÄÄƒng kÃ½ tÃ i khoáº£n má»›i vÃ o báº£ng customer
         if ($customerModel->register($customerName, $phone, $email, $password)) {
-            // Tự động đăng nhập sau khi đăng ký thành công
+            // Tá»± Ä‘á»™ng Ä‘Äƒng nháº­p sau khi Ä‘Äƒng kÃ½ thÃ nh cÃ´ng
             $customer = $customerModel->login($email, $password);
             if ($customer) {
                 $_SESSION['customer_id'] = $customer['customerID'];
@@ -37,9 +37,9 @@ class cRegister {
                 $_SESSION['customer_phone'] = $customer['phone'];
                 $_SESSION['is_customer_logged_in'] = true;
             }
-            return 1; // Thành công
+            return 1; // ThÃ nh cÃ´ng
         } else {
-            return -1; // Lỗi khác
+            return -1; // Lá»—i khÃ¡c
         }
     }
 }

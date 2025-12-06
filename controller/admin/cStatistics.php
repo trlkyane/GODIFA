@@ -1,7 +1,7 @@
 <?php
 /**
  * Controller: Admin Statistics
- * Xử lý logic thống kê và báo cáo
+ * Xá»­ lÃ½ logic thá»‘ng kÃª vÃ  bÃ¡o cÃ¡o
  */
 
 require_once __DIR__ . '/../../model/mStatistics.php';
@@ -14,15 +14,15 @@ class cStatistics {
     }
     
     /**
-     * Lấy tất cả dữ liệu thống kê
+     * Láº¥y táº¥t cáº£ dá»¯ liá»‡u thá»‘ng kÃª
      */
     public function getAllStatistics() {
         $period = $_GET['period'] ?? 'month';
-        $originalPeriod = $period; // Lưu lại period gốc để hiển thị
+        $originalPeriod = $period; // LÆ°u láº¡i period gá»‘c Ä‘á»ƒ hiá»ƒn thá»‹
         $startDate = $_GET['start_date'] ?? null;
         $endDate = $_GET['end_date'] ?? null;
 
-        // Hỗ trợ các period mới - chuyển thành custom cho xử lý dữ liệu
+        // Há»— trá»£ cÃ¡c period má»›i - chuyá»ƒn thÃ nh custom cho xá»­ lÃ½ dá»¯ liá»‡u
         $periodForQuery = $period;
         if ($period == '7days') {
             $startDate = date('Y-m-d', strtotime('-6 days'));
@@ -59,14 +59,14 @@ class cStatistics {
             'topProducts' => $this->model->getTopProducts($periodForQuery, 5, $startDate, $endDate),
             'paymentMethods' => $this->model->getPaymentMethods($periodForQuery, $startDate, $endDate),
             'chartData' => $this->model->getRevenueChartData($periodForQuery, $startDate, $endDate),
-            'period' => $originalPeriod, // Trả về period gốc để hiển thị đúng
+            'period' => $originalPeriod, // Tráº£ vá» period gá»‘c Ä‘á»ƒ hiá»ƒn thá»‹ Ä‘Ãºng
             'startDate' => $startDate,
             'endDate' => $endDate
         ];
     }
     
     /**
-     * Lấy label hiển thị theo period
+     * Láº¥y label hiá»ƒn thá»‹ theo period
      */
     public function getPeriodLabel($period) {
         $labels = [

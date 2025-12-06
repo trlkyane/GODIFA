@@ -1,7 +1,7 @@
 <?php
 /**
  * Controller: cCategory (Admin version)
- * Xử lý logic nghiệp vụ và validation cho quản lý danh mục
+ * Xá»­ lÃ½ logic nghiá»‡p vá»¥ vÃ  validation cho quáº£n lÃ½ danh má»¥c
  */
 
 require_once __DIR__ . '/../../model/mCategory.php';
@@ -14,23 +14,23 @@ class cCategory {
     }
     
     /**
-     * Lấy tất cả danh mục
+     * Láº¥y táº¥t cáº£ danh má»¥c
      */
     public function getAllCategories() {
         return $this->categoryModel->getAllCategories();
     }
     
     /**
-     * Lấy danh mục theo ID
+     * Láº¥y danh má»¥c theo ID
      */
     public function getCategoryById($id) {
         return $this->categoryModel->getCategoryById($id);
     }
     
     /**
-     * Thêm danh mục mới
-     * @param array $data - Dữ liệu danh mục
-     * @return array ['success' => bool, 'message' hoặc 'errors' => mixed]
+     * ThÃªm danh má»¥c má»›i
+     * @param array $data - Dá»¯ liá»‡u danh má»¥c
+     * @return array ['success' => bool, 'message' hoáº·c 'errors' => mixed]
      */
     public function addCategory($data) {
         $errors = [];
@@ -64,10 +64,10 @@ class cCategory {
     }
     
     /**
-     * Cập nhật danh mục
-     * @param int $id - ID danh mục
-     * @param array $data - Dữ liệu cập nhật
-     * @return array ['success' => bool, 'message' hoặc 'errors' => mixed]
+     * Cáº­p nháº­t danh má»¥c
+     * @param int $id - ID danh má»¥c
+     * @param array $data - Dá»¯ liá»‡u cáº­p nháº­t
+     * @return array ['success' => bool, 'message' hoáº·c 'errors' => mixed]
      */
     public function updateCategory($id, $data) {
         $errors = [];
@@ -89,7 +89,7 @@ class cCategory {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Cập nhật danh mục
+        // Cáº­p nháº­t danh má»¥c
         $result = $this->categoryModel->updateCategory(
             $id,
             $data['categoryName'],
@@ -107,8 +107,8 @@ class cCategory {
     // REMOVED: deleteCategory() - Chỉ dùng khóa/mở (toggleStatus), không xóa
     
     /**
-     * Bật/tắt trạng thái danh mục
-     * @param int $id - ID danh mục
+     * Báº­t/táº¯t tráº¡ng thÃ¡i danh má»¥c
+     * @param int $id - ID danh má»¥c
      * @return array ['success' => bool, 'message' => string]
      */
     public function toggleStatus($id) {
@@ -148,7 +148,7 @@ class cCategory {
     }
     
     /**
-     * Đếm số sản phẩm trong danh mục
+     * Äáº¿m sá»‘ sáº£n pháº©m trong danh má»¥c
      */
     public function countProductsInCategory($categoryID) {
         return $this->categoryModel->countProductsInCategory($categoryID);

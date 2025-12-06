@@ -1,12 +1,13 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../model/database.php';
+require_once __DIR__ . '/../../config/constants.php';
 
 // Lấy orderID từ URL
 $orderID = isset($_GET['orderID']) ? intval($_GET['orderID']) : 0;
 
 if (!$orderID) {
-    header('Location: checkout.php');
+    header('Location: ' . BASE_URL . 'view/cart/checkout.php');
     exit;
 }
 
@@ -14,7 +15,7 @@ if (!$orderID) {
 $db = Database::getInstance();
 $conn = $db->connect();
 
-$stmt = $conn->prepare("
+$stmt = mysqli_prepare($conn, "
     SELECT o.orderID, o.orderDate, o.totalAmount, o.paymentStatus, o.transactionCode,
            o.qrUrl, o.qrExpiredAt,
            d.recipientName, d.recipientPhone, d.fullAddress
@@ -22,10 +23,10 @@ $stmt = $conn->prepare("
     LEFT JOIN order_delivery d ON o.orderID = d.orderID
     WHERE o.orderID = ?
 ");
-$stmt->bind_param("i", $orderID);
-$stmt->execute();
-$result = $stmt->get_result();
-$order = $result->fetch_assoc();
+mysqli_stmt_bind_param($stmt, "i", $orderID);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$order = mysqli_fetch_assoc($result);
 
 // ✅ Ưu tiên load từ database, fallback sang session nếu DB NULL
 $qrUrl = $order['qrUrl'] ?? $_SESSION['qr_url'] ?? null;
@@ -40,9 +41,9 @@ if (!$qrUrl || !$qrExpiredAt) {
     $qrExpiredAt = date('Y-m-d H:i:s', time() + 15 * 60); // 15 phút
     
     // ✅ Lưu vào database
-    $stmtUpdate = $conn->prepare("UPDATE `order` SET qrUrl = ?, qrExpiredAt = ? WHERE orderID = ?");
-    $stmtUpdate->bind_param("ssi", $qrUrl, $qrExpiredAt, $orderID);
-    $stmtUpdate->execute();
+    $stmtUpdate = mysqli_prepare($conn, "UPDATE `order` SET qrUrl = ?, qrExpiredAt = ? WHERE orderID = ?");
+    mysqli_stmt_bind_param($stmtUpdate, "ssi", $qrUrl, $qrExpiredAt, $orderID);
+    mysqli_stmt_execute($stmtUpdate);
     
     // Lưu vào session (fallback)
     $_SESSION['qr_url'] = $qrUrl;
@@ -58,13 +59,13 @@ if (!$order) {
 
 // Kiểm tra đã thanh toán chưa
 if ($order['paymentStatus'] === 'Đã thanh toán') {
-    header('Location: ../payment/thankyou.php?orderID=' . $orderID);
+    header('Location: ' . BASE_URL . 'view/payment/thankyou.php?orderID=' . $orderID);
     exit;
 }
 
 // Kiểm tra đã hủy chưa
 if ($order['paymentStatus'] === 'Đã hủy') {
-    echo "<script>alert('Đơn hàng này đã bị hủy!'); window.location.href = '/GODIFA';</script>";
+    echo "<script>alert('Đơn hàng này đã bị hủy!'); window.location.href = '" . BASE_URL . "';</script>";
     exit;
 }
 
@@ -91,10 +92,10 @@ $isExpired = $remainingSeconds <= 0;
     <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/GODIFA" class="text-2xl font-bold text-indigo-600">GODIFA</a>
+            <a href="<?php echo BASE_URL; ?>" class="text-2xl font-bold text-indigo-600">GODIFA</a>
             <nav class="space-x-4 text-sm">
-                <a href="/GODIFA" class="hover:text-indigo-600">Trang chủ</a>
-                <a href="/GODIFA/view/cart/viewcart.php" class="hover:text-indigo-600">Giỏ hàng</a>
+                <a href="<?php echo BASE_URL; ?>" class="hover:text-indigo-600">Trang chủ</a>
+                <a href="<?php echo BASE_URL; ?>view/cart/viewcart.php" class="hover:text-indigo-600">Giỏ hàng</a>
             </nav>
         </div>
     </header>
@@ -237,12 +238,12 @@ $isExpired = $remainingSeconds <= 0;
 
         // Polling API để check payment status
         function checkPaymentStatus() {
-            fetch('/GODIFA/api/check_payment_status.php?orderID=<?= $orderID ?>')
+            fetch('<?php echo BASE_URL; ?>api/check_payment_status.php?orderID=<?= $orderID ?>')
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'Đã thanh toán') {
                         // Chuyển sang trang thank you
-                        window.location.href = '/GODIFA/view/payment/thankyou.php?orderID=<?= $orderID ?>';
+                        window.location.href = '<?php echo BASE_URL; ?>view/payment/thankyou.php?orderID=<?= $orderID ?>';
                     }
                 })
                 .catch(error => console.error('Error checking payment:', error));
@@ -259,7 +260,7 @@ $isExpired = $remainingSeconds <= 0;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tạo...';
             
-            fetch('/GODIFA/api/renew_qr.php?orderID=<?= $orderID ?>')
+            fetch('<?php echo BASE_URL; ?>api/renew_qr.php?orderID=<?= $orderID ?>')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

@@ -2,7 +2,7 @@
 /**
  * Payment Controller
  * File: controller/cPayment.php
- * Xử lý thanh toán SePay QR
+ * Xá»­ lÃ½ thanh toÃ¡n SePay QR
  */
 
 require_once __DIR__ . '/../model/mPayment.php';
@@ -20,11 +20,11 @@ class cPayment {
     }
     
     /**
-     * Tạo thanh toán QR cho đơn hàng
+     * Táº¡o thanh toÃ¡n QR cho Ä‘Æ¡n hÃ ng
      */
     public function createQRPayment($orderID) {
         try {
-            // Lấy thông tin đơn hàng
+            // Láº¥y thÃ´ng tin Ä‘Æ¡n hÃ ng
             $order = $this->orderModel->getOrderById($orderID);
             
             if (!$order) {
@@ -140,7 +140,7 @@ class cPayment {
                 ];
             }
             
-            // Lấy payment từ DB
+            // Láº¥y payment tá»« DB
             $payment = $this->paymentModel->getPaymentByTransactionCode($transactionCode);
             
             if (!$payment) {
@@ -150,7 +150,7 @@ class cPayment {
                 ];
             }
             
-            // Kiểm tra đã xử lý chưa
+            // Kiá»ƒm tra Ä‘Ã£ xá»­ lÃ½ chÆ°a
             if ($payment['status'] === 'paid') {
                 return [
                     'success' => true,
@@ -158,7 +158,7 @@ class cPayment {
                 ];
             }
             
-            // Kiểm tra số tiền
+            // Kiá»ƒm tra sá»‘ tiá»n
             if ($amount < $payment['amount']) {
                 return [
                     'success' => false,
@@ -166,7 +166,7 @@ class cPayment {
                 ];
             }
             
-            // Cập nhật payment status
+            // Cáº­p nháº­t payment status
             $this->paymentModel->updatePaymentStatus(
                 $transactionCode,
                 $status === 'success' ? 'paid' : 'failed',

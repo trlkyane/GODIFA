@@ -2,7 +2,7 @@
 /**
  * Voucher Group Model
  * File: model/mVoucherGroup.php
- * Xử lý quan hệ giữa voucher và nhóm khách hàng
+ * Xá»­ lÃ½ quan há»‡ giá»¯a voucher vÃ  nhÃ³m khÃ¡ch hÃ ng
  */
 
 require_once __DIR__ . '/database.php';
@@ -15,9 +15,9 @@ class VoucherGroup {
         $this->conn = $db->moKetNoi();
     }
     
-    // Gán voucher cho một nhóm
+    // GÃ¡n voucher cho má»™t nhÃ³m
     public function assignVoucherToGroup($voucherID, $groupID) {
-        // Kiểm tra xem đã gán chưa
+        // Kiá»ƒm tra xem Ä‘Ã£ gÃ¡n chÆ°a
         $checkSql = "SELECT * FROM voucher_group WHERE voucherID = ? AND groupID = ?";
         $stmt = mysqli_prepare($this->conn, $checkSql);
         mysqli_stmt_bind_param($stmt, "ii", $voucherID, $groupID);
@@ -25,24 +25,24 @@ class VoucherGroup {
         $result = mysqli_stmt_get_result($stmt);
         
         if (mysqli_num_rows($result) > 0) {
-            return true; // Đã tồn tại
+            return true; // ÄÃ£ tá»“n táº¡i
         }
         
-        // Thêm mới
+        // ThÃªm má»›i
         $sql = "INSERT INTO voucher_group (voucherID, groupID) VALUES (?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "ii", $voucherID, $groupID);
         return mysqli_stmt_execute($stmt);
     }
     
-    // Gán voucher cho nhiều nhóm
+    // GÃ¡n voucher cho nhiá»u nhÃ³m
     public function assignVoucherToMultipleGroups($voucherID, $groupIDs) {
-        // Xóa tất cả gán cũ
+        // XÃ³a táº¥t cáº£ gÃ¡n cÅ©
         $this->removeAllGroupsFromVoucher($voucherID);
         
-        // Gán mới
+        // GÃ¡n má»›i
         if (empty($groupIDs)) {
-            return true; // Không gán nhóm nào = voucher công khai
+            return true; // KhÃ´ng gÃ¡n nhÃ³m nÃ o = voucher cÃ´ng khai
         }
         
         foreach ($groupIDs as $groupID) {
@@ -51,7 +51,7 @@ class VoucherGroup {
         return true;
     }
     
-    // Xóa một nhóm khỏi voucher
+    // XÃ³a má»™t nhÃ³m khá»i voucher
     public function removeGroupFromVoucher($voucherID, $groupID) {
         $sql = "DELETE FROM voucher_group WHERE voucherID = ? AND groupID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -59,7 +59,7 @@ class VoucherGroup {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa tất cả nhóm khỏi voucher
+    // XÃ³a táº¥t cáº£ nhÃ³m khá»i voucher
     public function removeAllGroupsFromVoucher($voucherID) {
         $sql = "DELETE FROM voucher_group WHERE voucherID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -67,7 +67,7 @@ class VoucherGroup {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Lấy danh sách nhóm được gán cho voucher
+    // Láº¥y danh sÃ¡ch nhÃ³m Ä‘Æ°á»£c gÃ¡n cho voucher
     public function getGroupsByVoucher($voucherID) {
         $sql = "
             SELECT cg.* 
@@ -87,7 +87,7 @@ class VoucherGroup {
         return $groups;
     }
     
-    // Lấy IDs của các nhóm được gán cho voucher
+    // Láº¥y IDs cá»§a cÃ¡c nhÃ³m Ä‘Æ°á»£c gÃ¡n cho voucher
     public function getGroupIDsByVoucher($voucherID) {
         $sql = "SELECT groupID FROM voucher_group WHERE voucherID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -101,7 +101,7 @@ class VoucherGroup {
         return $groupIDs;
     }
     
-    // Lấy voucher theo nhóm khách hàng (cho frontend)
+    // Láº¥y voucher theo nhÃ³m khÃ¡ch hÃ ng (cho frontend)
     public function getVouchersByGroup($groupID) {
         $sql = "
             SELECT DISTINCT v.* 
@@ -123,7 +123,7 @@ class VoucherGroup {
         return $vouchers;
     }
     
-    // Kiểm tra voucher có public không (không gán nhóm nào)
+    // Kiá»ƒm tra voucher cÃ³ public khÃ´ng (khÃ´ng gÃ¡n nhÃ³m nÃ o)
     public function isPublicVoucher($voucherID) {
         $sql = "SELECT COUNT(*) as count FROM voucher_group WHERE voucherID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);

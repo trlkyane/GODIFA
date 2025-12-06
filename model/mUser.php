@@ -9,7 +9,7 @@ class User {
         $this->conn = $db->moKetNoi();
     }
     
-    // Đăng nhập người dùng (admin/staff)
+    // ÄÄƒng nháº­p ngÆ°á»i dÃ¹ng (admin/staff)
     public function login($email, $password) {
         $hashedPassword = md5($password);
         
@@ -24,7 +24,7 @@ class User {
         return mysqli_fetch_assoc($result);
     }
     
-    // Lấy thông tin người dùng theo ID
+    // Láº¥y thÃ´ng tin ngÆ°á»i dÃ¹ng theo ID
     public function getUserById($id) {
         $sql = "SELECT u.*, r.roleName 
                 FROM user u 
@@ -37,7 +37,7 @@ class User {
         return mysqli_fetch_assoc($result);
     }
     
-    // Lấy tất cả người dùng
+    // Láº¥y táº¥t cáº£ ngÆ°á»i dÃ¹ng
     public function getAllUsers() {
         $sql = "SELECT u.*, r.roleName 
                 FROM user u 
@@ -51,7 +51,7 @@ class User {
         return $users;
     }
     
-    // Thêm người dùng mới
+    // ThÃªm ngÆ°á»i dÃ¹ng má»›i
     public function addUser($userName, $email, $password, $phone, $roleId) {
         $hashedPassword = md5($password);
         $status = '1';
@@ -63,7 +63,7 @@ class User {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Cập nhật thông tin người dùng
+    // Cáº­p nháº­t thÃ´ng tin ngÆ°á»i dÃ¹ng
     public function updateUser($id, $userName, $email, $phone, $roleId, $status) {
         $sql = "UPDATE user SET userName = ?, email = ?, phone = ?, roleID = ?, status = ? WHERE userID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -71,7 +71,7 @@ class User {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đổi mật khẩu
+    // Äá»•i máº­t kháº©u
     public function changePassword($id, $newPassword) {
         $hashedPassword = md5($newPassword);
         $sql = "UPDATE user SET password = ? WHERE userID = ?";
@@ -80,7 +80,7 @@ class User {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Toggle trạng thái (Khóa/Mở khóa)
+    // Toggle tráº¡ng thÃ¡i (KhÃ³a/Má»Ÿ khÃ³a)
     public function toggleStatus($id) {
         $sql = "UPDATE user SET status = IF(status = 1, 0, 1) WHERE userID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -88,7 +88,7 @@ class User {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa người dùng
+    // XÃ³a ngÆ°á»i dÃ¹ng
     public function deleteUser($id) {
         $sql = "DELETE FROM user WHERE userID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -96,7 +96,7 @@ class User {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Kiểm tra email đã tồn tại
+    // Kiá»ƒm tra email Ä‘Ã£ tá»“n táº¡i
     public function emailExists($email) {
         $sql = "SELECT userID FROM user WHERE email = ?";
         $stmt = mysqli_prepare($this->conn, $sql);

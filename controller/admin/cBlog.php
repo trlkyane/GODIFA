@@ -13,17 +13,17 @@ class cBlog {
         $this->blogModel = new Blog();
     }
     
-    // Lấy tất cả bài viết
+    // Láº¥y táº¥t cáº£ bÃ i viáº¿t
     public function getAllBlogs() {
         return $this->blogModel->getAllBlogs();
     }
     
-    // Lấy bài viết theo ID
+    // Láº¥y bÃ i viáº¿t theo ID
     public function getBlogById($id) {
         return $this->blogModel->getBlogById($id);
     }
     
-    // Thêm bài viết
+    // ThÃªm bÃ i viáº¿t
     public function addBlog($data) {
         // Validate
         $errors = [];
@@ -40,7 +40,7 @@ class cBlog {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Thêm bài viết
+        // ThÃªm bÃ i viáº¿t
         $result = $this->blogModel->addBlog(
             $data['title'],
             $data['content'],
@@ -54,7 +54,7 @@ class cBlog {
         return ['success' => false, 'errors' => ['Lỗi khi thêm bài viết!']];
     }
     
-    // Cập nhật bài viết
+    // Cáº­p nháº­t bÃ i viáº¿t
     public function updateBlog($id, $data) {
         // Validate
         $errors = [];
@@ -71,7 +71,7 @@ class cBlog {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Cập nhật bài viết
+        // Cáº­p nháº­t bÃ i viáº¿t
         $image = isset($data['image']) ? $data['image'] : null;
         $result = $this->blogModel->updateBlog(
             $id,
@@ -87,7 +87,7 @@ class cBlog {
         return ['success' => false, 'errors' => ['Lỗi khi cập nhật bài viết!']];
     }
     
-    // Xóa bài viết
+    // XÃ³a bÃ i viáº¿t
     public function deleteBlog($id) {
         $result = $this->blogModel->deleteBlog($id);
         
@@ -120,12 +120,12 @@ class cBlog {
         return $this->blogModel->searchBlogs($keyword);
     }
     
-    // Đếm tổng số bài viết
+    // Äáº¿m tá»•ng sá»‘ bÃ i viáº¿t
     public function countBlogs() {
         return $this->blogModel->countBlogs();
     }
     
-    // Lấy bài viết mới nhất
+    // Láº¥y bÃ i viáº¿t má»›i nháº¥t
     public function getRecentBlogs($limit = 5) {
         return $this->blogModel->getRecentBlogs($limit);
     }

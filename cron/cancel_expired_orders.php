@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Cronjob: Auto Cancel Expired Orders
  * File: cron/cancel_expired_orders.php
@@ -13,12 +13,13 @@
  *    - Trigger: Every 30 minutes
  * 
  * 2. Linux Crontab:
- *    "star/30 * * * * /usr/bin/php /var/www/GODIFA/cron/cancel_expired_orders.php"
+ *    "star/30 * * * * /usr/bin/php /var/www/cron/cancel_expired_orders.php"
  * 
  * 3. Test manually: php C:\wamp64\www\GODIFA\cron\cancel_expired_orders.php
  */
 
 require_once __DIR__ . '/../model/database.php';
+require_once __DIR__ . '/../model/mOrder.php';
 
 // Logging
 function logMessage($message) {
@@ -49,13 +50,13 @@ try {
         AND qrExpiredAt < NOW()
     ";
     
-    $result = $conn->query($sql);
+    $result = mysqli_query($conn, $sql);
     
     if (!$result) {
-        throw new Exception("Query failed: " . $conn->error);
+        throw new Exception("Query failed: " . mysqli_error($conn));
     }
     
-    $expiredOrders = $result->fetch_all(MYSQLI_ASSOC);
+    $expiredOrders = mysqli_fetch_all($result, MYSQLI_ASSOC);
     $count = count($expiredOrders);
     
     if ($count === 0) {
@@ -65,38 +66,33 @@ try {
     
     logMessage("Found $count expired orders to cancel");
     
-    // Chuẩn bị statement để update
-    $updateStmt = $conn->prepare("
-        UPDATE `order` 
-        SET paymentStatus = 'Đã hủy', 
-            cancelReason = 'QR code hết hạn - Tự động hủy' 
-        WHERE orderID = ?
-    ");
-    
-    if (!$updateStmt) {
-        throw new Exception("Prepare statement failed: " . $conn->error);
-    }
+    // Khởi tạo Order model để sử dụng cancelOrder() (tự động hoàn stock)
+    $orderModel = new Order();
     
     $successCount = 0;
     $failCount = 0;
     
-    // Hủy từng đơn
+    // Hủy từng đơn - SỬ DỤNG cancelOrder() để tự động hoàn lại stock
     foreach ($expiredOrders as $order) {
-        $updateStmt->bind_param("i", $order['orderID']);
+        $cancelReason = "QR code hết hạn ({$order['qrExpiredAt']}) - Tự động hủy";
         
-        if ($updateStmt->execute()) {
+        // cancelOrder() sẽ tự động:
+        // 1. Hoàn lại stock (restoreStock) - CHỈ cho đơn COD đã trừ stock
+        // 2. Set paymentStatus = 'Đã hủy'
+        // 3. Set deliveryStatus = 'Đã hủy'
+        // 4. Ghi cancelReason
+        if ($orderModel->cancelOrder($order['orderID'], $cancelReason)) {
             $successCount++;
-            logMessage("✅ Cancelled order #{$order['orderID']} - {$order['transactionCode']}");
+            logMessage("✅ Cancelled order #{$order['orderID']} - {$order['transactionCode']} (stock restored if needed)");
         } else {
             $failCount++;
-            logMessage("❌ Failed to cancel order #{$order['orderID']}: " . $updateStmt->error);
+            logMessage("❌ Failed to cancel order #{$order['orderID']}");
         }
     }
     
     logMessage("=== Cronjob completed: $successCount succeeded, $failCount failed ===");
     
-    $updateStmt->close();
-    $conn->close();
+    mysqli_close($conn);
     
     exit(0);
     

@@ -296,7 +296,7 @@ if ($user_type === 'customer' && $user_id !== 'guest') {
     </div>
 
     <div id="chat-metadata" 
-        data-user-id="<?php echo htmlspecialchars($user_id); ?>" 
+        data-user-id="<?php echo htmlspecialchars($user_id); ?>"
         data-user-type="<?php echo htmlspecialchars($user_type); ?>"
         data-conversation-id="<?php echo $currentConversationID; ?>"
         style="display: none;">
@@ -304,7 +304,12 @@ if ($user_type === 'customer' && $user_id !== 'guest') {
     
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     
-    <script src="/GODIFA/public/js/chat_client.js"></script> 
+    <script>
+        // Truyền BASE_URL cho JavaScript
+        window.BASE_URL = '<?php echo BASE_URL; ?>';
+    </script>
+    
+    <script src="<?php echo BASE_URL; ?>public/js/chat_client.js"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {

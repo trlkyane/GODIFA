@@ -16,22 +16,22 @@ class cUser {
         $this->roleModel = new Role();
     }
     
-    // Lấy tất cả nhân viên
+    // Láº¥y táº¥t cáº£ nhÃ¢n viÃªn
     public function getAllUsers() {
         return $this->userModel->getAllUsers();
     }
     
-    // Lấy nhân viên theo ID
+    // Láº¥y nhÃ¢n viÃªn theo ID
     public function getUserById($id) {
         return $this->userModel->getUserById($id);
     }
     
-    // Lấy tất cả roles
+    // Láº¥y táº¥t cáº£ roles
     public function getAllRoles() {
         return $this->roleModel->getAllRoles();
     }
     
-    // Thêm nhân viên
+    // ThÃªm nhÃ¢n viÃªn
     public function addUser($data, $currentRoleID = null) {
         // Validate
         $errors = [];
@@ -72,7 +72,7 @@ class cUser {
             return ['success' => false, 'errors' => $errors];
         }
         
-        // Thêm nhân viên
+        // ThÃªm nhÃ¢n viÃªn
         $result = $this->userModel->addUser(
             $data['userName'],
             $data['email'],
@@ -88,14 +88,14 @@ class cUser {
         return ['success' => false, 'errors' => ['Lỗi khi thêm nhân viên!']];
     }
     
-    // Cập nhật nhân viên
+    // Cáº­p nháº­t nhÃ¢n viÃªn
     public function updateUser($id, $data, $currentRoleID = null) {
-        // PHÂN QUYỀN: Kiểm tra trước khi validate
-        // Nhân viên Quản trị không được sửa nhân viên cùng hoặc cao hơn cấp mình
-        if ($currentRoleID == 2) { // Nhân viên Quản trị
+        // PHÃ‚N QUYá»€N: Kiá»ƒm tra trÆ°á»›c khi validate
+        // NhÃ¢n viÃªn Quáº£n trá»‹ khÃ´ng Ä‘Æ°á»£c sá»­a nhÃ¢n viÃªn cÃ¹ng hoáº·c cao hÆ¡n cáº¥p mÃ¬nh
+        if ($currentRoleID == 2) { // NhÃ¢n viÃªn Quáº£n trá»‹
             $targetUser = $this->userModel->getUserById($id);
             
-            // Kiểm tra nhân viên đang được sửa
+            // Kiá»ƒm tra nhÃ¢n viÃªn Ä‘ang Ä‘Æ°á»£c sá»­a
             if ($targetUser && ($targetUser['roleID'] == 1 || $targetUser['roleID'] == 2)) {
                 return [
                     'success' => false,
@@ -158,7 +158,7 @@ class cUser {
         return ['success' => false, 'errors' => ['Lỗi khi cập nhật nhân viên!']];
     }
     
-    // Đổi mật khẩu
+    // Äá»•i máº­t kháº©u
     public function changePassword($id, $data) {
         // Validate
         $errors = [];

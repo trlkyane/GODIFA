@@ -2,30 +2,30 @@
 require_once __DIR__ . '/database.php';
 
 class Customer {
-    // Cập nhật thông tin khách hàng (bao gồm ghi chú)
+    // Cáº­p nháº­t thÃ´ng tin khÃ¡ch hÃ ng (bao gá»“m ghi chÃº)
 public function updateCustomer($id, $data) {
     
-    // 1. Gán các giá trị cần ràng buộc vào các biến độc lập
+    // 1. GÃ¡n cÃ¡c giÃ¡ trá»‹ cáº§n rÃ ng buá»™c vÃ o cÃ¡c biáº¿n Ä‘á»™c láº­p
     $customerName = $data['customerName'];
     $phone = $data['phone'];
     $email = $data['email'];
     
-    // Xử lý biến 'note' để đảm bảo nó là một biến và có giá trị mặc định
-    // Dù isset() kiểm tra có tồn tại hay không, giá trị gán cuối cùng phải là một biến độc lập
+    // Xá»­ lÃ½ biáº¿n 'note' Ä‘á»ƒ Ä‘áº£m báº£o nÃ³ lÃ  má»™t biáº¿n vÃ  cÃ³ giÃ¡ trá»‹ máº·c Ä‘á»‹nh
+    // DÃ¹ isset() kiá»ƒm tra cÃ³ tá»“n táº¡i hay khÃ´ng, giÃ¡ trá»‹ gÃ¡n cuá»‘i cÃ¹ng pháº£i lÃ  má»™t biáº¿n Ä‘á»™c láº­p
     $note = isset($data['note']) ? $data['note'] : '';
 
     $sql = "UPDATE customer SET customerName = ?, phone = ?, email = ?, note = ? WHERE customerID = ?";
     $stmt = mysqli_prepare($this->conn, $sql);
     
-    // 2. Sử dụng các biến độc lập trong mysqli_stmt_bind_param()
+    // 2. Sá»­ dá»¥ng cÃ¡c biáº¿n Ä‘á»™c láº­p trong mysqli_stmt_bind_param()
     mysqli_stmt_bind_param(
         $stmt,
         "ssssi",
-        $customerName, // Biến độc lập (Argument 3)
-        $phone,        // Biến độc lập (Argument 4)
-        $email,        // Biến độc lập (Argument 5)
-        $note,         // Biến độc lập (Argument 6 - Đã gây ra lỗi trước đó)
-        $id            // Biến độc lập (Argument 7)
+        $customerName, // Biáº¿n Ä‘á»™c láº­p (Argument 3)
+        $phone,        // Biáº¿n Ä‘á»™c láº­p (Argument 4)
+        $email,        // Biáº¿n Ä‘á»™c láº­p (Argument 5)
+        $note,         // Biáº¿n Ä‘á»™c láº­p (Argument 6 - ÄÃ£ gÃ¢y ra lá»—i trÆ°á»›c Ä‘Ã³)
+        $id            // Biáº¿n Ä‘á»™c láº­p (Argument 7)
     );
     
     return mysqli_stmt_execute($stmt);
@@ -37,18 +37,21 @@ public function updateCustomer($id, $data) {
         $this->conn = $db->moKetNoi();
     }
     
-    // Đăng ký khách hàng mới
+    // ÄÄƒng kÃ½ khÃ¡ch hÃ ng má»›i
     public function register($customerName, $phone, $email, $password) {
-        // Hash password bằng MD5 (như trong database mẫu)
+        // Hash password báº±ng MD5 (nhÆ° trong database máº«u)
         $hashedPassword = md5($password);
         
-        $sql = "INSERT INTO customer (customerName, phone, email, password) VALUES (?, ?, ?, ?)";
+        // Máº§c Ä'á»‹nh gáº£n nhÃ³m Broze (groupID = 1) cho khÃ¡ch hÃ ng má»›i
+        $defaultGroupID = 1; // Broze - Chi tiÃªu 0-5tr
+        
+        $sql = "INSERT INTO customer (customerName, phone, email, password, groupID) VALUES (?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssss", $customerName, $phone, $email, $hashedPassword);
+        mysqli_stmt_bind_param($stmt, "ssssi", $customerName, $phone, $email, $hashedPassword, $defaultGroupID);
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đăng nhập
+    // ÄÄƒng nháº­p
     public function login($email, $password) {
         $hashedPassword = md5($password);
         
@@ -60,7 +63,7 @@ public function updateCustomer($id, $data) {
         return mysqli_fetch_assoc($result);
     }
     
-    // Kiểm tra email đã tồn tại
+    // Kiá»ƒm tra email Ä‘Ã£ tá»“n táº¡i
     public function emailExists($email) {
         $sql = "SELECT customerID FROM customer WHERE email = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -70,7 +73,7 @@ public function updateCustomer($id, $data) {
         return mysqli_num_rows($result) > 0;
     }
     
-    // Lấy khách hàng theo số điện thoại
+    // Láº¥y khÃ¡ch hÃ ng theo sá»‘ Ä‘iá»‡n thoáº¡i
     public function getCustomerByPhone($phone) {
         $sql = "SELECT * FROM customer WHERE phone = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -80,9 +83,10 @@ public function updateCustomer($id, $data) {
         return mysqli_fetch_assoc($result);
     }
     
-    // Tạo khách hàng mới (cho admin tạo đơn)
+    // Táº¡o khÃ¡ch hÃ ng má»›i (cho admin táº¡o Ä‘Æ¡n)
     public function createCustomer($data) {
         $hashedPassword = md5($data['password']);
+        $note = isset($data['note']) ? $data['note'] : '';
         $sql = "INSERT INTO customer (customerName, phone, email, address, password, note) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "ssssss", 
@@ -91,7 +95,7 @@ public function updateCustomer($id, $data) {
             $data['email'], 
             $data['address'], 
             $hashedPassword,
-            isset($data['note']) ? $data['note'] : ''
+            $note
         );
         
         if (mysqli_stmt_execute($stmt)) {
@@ -100,7 +104,7 @@ public function updateCustomer($id, $data) {
         return false;
     }
     
-    // Lấy thông tin khách hàng theo ID
+    // Láº¥y thÃ´ng tin khÃ¡ch hÃ ng theo ID
     public function getCustomerById($id) {
     $sql = "SELECT * FROM customer WHERE customerID = ?";             
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -110,7 +114,7 @@ public function updateCustomer($id, $data) {
         return mysqli_fetch_assoc($result);
     }
     
-    // Lấy tất cả khách hàng (với thông tin nhóm)
+    // Láº¥y táº¥t cáº£ khÃ¡ch hÃ ng (vá»›i thÃ´ng tin nhÃ³m)
     public function getAllCustomers() {
         $sql = "SELECT c.*, cg.groupName, cg.color as groupColor
                 FROM customer c
@@ -124,7 +128,7 @@ public function updateCustomer($id, $data) {
         return $customers;
     }
     
-    // Cập nhật thông tin cơ bản khách hàng (chỉ tên và SĐT)
+    // Cáº­p nháº­t thÃ´ng tin cÆ¡ báº£n khÃ¡ch hÃ ng (chá»‰ tÃªn vÃ  SÄT)
     public function updateCustomerBasicInfo($id, $customerName, $phone) {
         $sql = "UPDATE customer 
                 SET customerName = ?, phone = ?
@@ -136,7 +140,7 @@ public function updateCustomer($id, $data) {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Cập nhật trạng thái khách hàng (Hoạt động/Đã khóa)
+    // Cáº­p nháº­t tráº¡ng thÃ¡i khÃ¡ch hÃ ng (Hoáº¡t Ä‘á»™ng/ÄÃ£ khÃ³a)
     public function updateStatus($id, $status) {
         $sql = "UPDATE customer SET status = ? WHERE customerID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -144,7 +148,7 @@ public function updateCustomer($id, $data) {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Cập nhật nhóm khách hàng
+    // Cáº­p nháº­t nhÃ³m khÃ¡ch hÃ ng
     public function updateGroup($id, $groupID) {
         $sql = "UPDATE customer SET groupID = ? WHERE customerID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -152,7 +156,7 @@ public function updateCustomer($id, $data) {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đổi mật khẩu
+    // Äá»•i máº­t kháº©u
     public function changePassword($id, $newPassword) {
         $hashedPassword = md5($newPassword);
         $sql = "UPDATE customer SET password = ? WHERE customerID = ?";
@@ -161,7 +165,7 @@ public function updateCustomer($id, $data) {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Xóa khách hàng
+    // XÃ³a khÃ¡ch hÃ ng
     public function deleteCustomer($id) {
         $sql = "DELETE FROM customer WHERE customerID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -169,7 +173,7 @@ public function updateCustomer($id, $data) {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Đếm tổng số khách hàng
+    // Äáº¿m tá»•ng sá»‘ khÃ¡ch hÃ ng
     public function countCustomers() {
         $sql = "SELECT COUNT(*) as total FROM customer";
         $result = mysqli_query($this->conn, $sql);
@@ -177,7 +181,7 @@ public function updateCustomer($id, $data) {
         return $row['total'];
     }
     
-    // Lấy lịch sử mua hàng của khách hàng
+    // Láº¥y lá»‹ch sá»­ mua hÃ ng cá»§a khÃ¡ch hÃ ng
     public function getOrderHistory($customerID) {
         $sql = "SELECT o.*, 
                        COUNT(od.productID) as productCount,
@@ -198,11 +202,13 @@ public function updateCustomer($id, $data) {
         return $orders;
     }
     
-    // Thống kê khách hàng
+    // Thá»'ng kÃª khÃ¡ch hÃ ng
     public function getCustomerStats($customerID) {
         $sql = "SELECT 
                     COUNT(o.orderID) as totalOrders,
-                    COALESCE(SUM(CASE WHEN o.paymentStatus = 'Đã thanh toán' THEN o.totalAmount ELSE 0 END), 0) as totalSpent,
+                    COALESCE(SUM(CASE WHEN o.paymentStatus = 'ÄÃ£ thanh toÃ¡n' THEN o.totalAmount ELSE 0 END), 0) as totalSpent,
+                    COUNT(CASE WHEN o.deliveryStatus = 'HoÃ n thÃ nh' THEN 1 END) as completedOrders,
+                    COUNT(CASE WHEN o.deliveryStatus = 'ÄÃ£ há»§y' OR o.paymentStatus = 'ÄÃ£ há»§y' THEN 1 END) as cancelledOrders,
                     MAX(o.orderDate) as lastOrderDate
                 FROM `order` o
                 WHERE o.customerID = ?";
@@ -213,7 +219,7 @@ public function updateCustomer($id, $data) {
         return mysqli_fetch_assoc($result);
     }
     
-    // Tìm kiếm khách hàng (với thông tin nhóm)
+    // TÃ¬m kiáº¿m khÃ¡ch hÃ ng (vá»›i thÃ´ng tin nhÃ³m)
     public function searchCustomers($keyword) {
         $searchTerm = "%$keyword%";
         $sql = "SELECT c.*, cg.groupName, cg.color as groupColor

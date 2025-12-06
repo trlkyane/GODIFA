@@ -1,6 +1,6 @@
 <?php
 /**
- * Test file - Kiểm tra xuất Excel đơn giản
+ * Test file - Kiá»ƒm tra xuáº¥t Excel Ä‘Æ¡n giáº£n
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -8,16 +8,16 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-// Tạo spreadsheet mới
+// Táº¡o spreadsheet má»›i
 $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
 
-// Thêm dữ liệu đơn giản
+// ThÃªm dá»¯ liá»‡u Ä‘Æ¡n giáº£n
 $sheet->setCellValue('A1', 'Test Excel');
 $sheet->setCellValue('A2', 'Hello World');
 $sheet->setCellValue('B2', '123456');
 
-// Xuất file
+// Xuáº¥t file
 $filename = 'test_' . date('YmdHis') . '.xlsx';
 
 // Clear buffer
@@ -30,7 +30,7 @@ header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetm
 header('Content-Disposition: attachment;filename="' . $filename . '"');
 header('Cache-Control: max-age=0');
 
-// Tạo writer và xuất
+// Táº¡o writer vÃ  xuáº¥t
 $writer = new Xlsx($spreadsheet);
 $writer->save('php://output');
 exit;

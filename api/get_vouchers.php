@@ -3,11 +3,11 @@
  * API: Get Available Vouchers for Customer
  * File: api/get_vouchers.php
  * 
- * Lấy danh sách voucher khả dụng cho khách hàng dựa trên:
+ * Láº¥y danh sÃ¡ch voucher kháº£ dá»¥ng cho khÃ¡ch hÃ ng dá»±a trÃªn:
  * - Customer group
- * - Voucher còn hạn
- * - Voucher còn số lượng
- * - Voucher đang active
+ * - Voucher cÃ²n háº¡n
+ * - Voucher cÃ²n sá»‘ lÆ°á»£ng
+ * - Voucher Ä‘ang active
  */
 
 header('Content-Type: application/json');
@@ -19,7 +19,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../model/database.php';
 
-// Kiểm tra đăng nhập
+// Kiá»ƒm tra Ä‘Äƒng nháº­p
 if (!isset($_SESSION['customer_id'])) {
     echo json_encode([
         'success' => false,
@@ -34,12 +34,12 @@ try {
     
     $customerID = $_SESSION['customer_id'];
     
-    // Lấy groupID của customer
-    $stmtCustomer = $conn->prepare("SELECT groupID FROM customer WHERE customerID = ?");
-    $stmtCustomer->bind_param("i", $customerID);
-    $stmtCustomer->execute();
-    $result = $stmtCustomer->get_result();
-    $customer = $result->fetch_assoc();
+    // Láº¥y groupID cá»§a customer
+    $stmtCustomer = mysqli_prepare($conn, "SELECT groupID FROM customer WHERE customerID = ?");
+    mysqli_stmt_bind_param($stmtCustomer, "i", $customerID);
+    mysqli_stmt_execute($stmtCustomer);
+    $result = mysqli_stmt_get_result($stmtCustomer);
+    $customer = mysqli_fetch_assoc($result);
     
     $groupID = $customer['groupID'] ?? null;
     
@@ -69,7 +69,8 @@ try {
             ORDER BY v.value DESC
         ";
         
-        $vouchers = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
+        $result = mysqli_query($conn, $sql);
+        $vouchers = mysqli_fetch_all($result, MYSQLI_ASSOC);
         
     } else {
         // Customer có nhóm - lấy voucher của nhóm đó + voucher public
@@ -100,14 +101,14 @@ try {
                 vg.groupID = ? 
                 OR v.voucherID NOT IN (SELECT DISTINCT voucherID FROM voucher_group)
             )
-            GROUP BY v.voucherID
             ORDER BY voucherType DESC, v.value DESC
         ";
         
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $groupID, $groupID);
-        $stmt->execute();
-        $vouchers = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $groupID, $groupID);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $vouchers = mysqli_fetch_all($result, MYSQLI_ASSOC);
     }
     
     // Format data

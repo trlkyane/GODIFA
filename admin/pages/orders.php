@@ -1,15 +1,15 @@
-<?php
+﻿<?php
 /**
- * Quản lý Đơn hàng
+ * Quản lý¿½ ï¿½on hï¿½ng
  * File: admin/pages/orders.php
- * MVC Pattern: Xử lý logic trực tiếp trong page
+ * MVC Pattern: Xử lý¿½ logic tr?c ti?p trong page
  */
 
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
 
 if (!hasPermission('view_orders')) {
-    die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">Bạn không có quyền truy cập trang này!</div></div>');
+    die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">B?n khï¿½ng cï¿½ quy?n truy c?p trang nï¿½y!</div></div>');
 }
 
 require_once __DIR__ . '/../../controller/admin/cOrder.php';
@@ -18,7 +18,7 @@ require_once __DIR__ . '/../../model/mOrder.php';
 $orderController = new cOrder();
 $orderModel = new Order();
 
-// AJAX: Lấy chi tiết đơn hàng
+// AJAX: Lấy chi tiết don hï¿½ng
 if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail' && isset($_GET['orderID'])) {
     $oid = intval($_GET['orderID']);
     $order = $orderController->getOrderById($oid);
@@ -38,7 +38,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail' && isset($_
     $paymentStatus = $order['paymentStatus'];
     $deliveryStatus = $order['deliveryStatus'];
     $statusBucket = 'pending';
-    if ($paymentStatus === 'Đã hủy' || $deliveryStatus === 'Đã hủy') {
+    if ($deliveryStatus === 'Đã hoàn tiền' || $paymentStatus === 'Đã hoàn tiền') {
+        $statusBucket = 'refunded';
+    } elseif ($deliveryStatus === 'Chờ xử lý hoàn tiền') {
+        $statusBucket = 'pending'; // Hiển thị trong tab "Chờ xử lý" để admin xem
+    } elseif ($paymentStatus === 'Đã hủy' || $deliveryStatus === 'Đã hủy') {
         $statusBucket = 'cancelled';
     } elseif ($deliveryStatus === 'Hoàn thành') {
         $statusBucket = 'completed';
@@ -53,6 +57,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail' && isset($_
         'processing' => ['label' => 'Đang vận chuyển', 'class' => 'text-blue-600'],
         'completed' => ['label' => 'Hoàn thành', 'class' => 'text-green-600'],
         'cancelled' => ['label' => 'Đã hủy', 'class' => 'text-red-600'],
+        'refunded' => ['label' => 'Đã hoàn tiền', 'class' => 'text-purple-600'],
     ];
 
     $statusDisplay = $statusStyles[$statusBucket];
@@ -69,7 +74,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail' && isset($_
     exit;
 }
 
-// AJAX: Cập nhật ghi chú đơn hàng
+// AJAX: cập nhật ghi chú đơn hàng
 if (isset($_POST['action']) && $_POST['action'] === 'update_order_note') {
     header('Content-Type: application/json');
     
@@ -101,7 +106,7 @@ $error = '';
 
 // POST actions (confirm / cancel / update delivery)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Confirm order - Chuyển sang "Đang tiến hành vận chuyển"
+    // Confirm order - Chuyển sang "ï¿½ang ti?n hï¿½nh vận chuyển"
     if (isset($_POST['confirm_order']) && (hasPermission('update_order_status') || hasPermission('manage_orders'))) {
         $orderID = intval($_POST['orderID']);
         
@@ -167,9 +172,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['cancel_order']) && (hasPermission('update_order_status') || hasPermission('manage_orders'))) {
         $orderID = intval($_POST['orderID']);
         $cancelReason = trim($_POST['cancelReason'] ?? 'Không rõ lý do');
-        $result = $orderModel->updateOrderStatus($orderID, 'Đã hủy', 'Đã hủy', $cancelReason);
+        
+        // Sử dụng cancelOrder() thay vì updateOrderStatus() để tự động hoàn lại stock
+        $result = $orderModel->cancelOrder($orderID, $cancelReason);
+        
         if ($result) {
-            $_SESSION['success_message'] = "Đã hủy đơn hàng #$orderID. Lý do: $cancelReason";
+            $_SESSION['success_message'] = "Đã hủy đơn hàng #$orderID. Lý do: $cancelReason (Đã hoàn lại tồn kho)";
             header('Location: ' . $_SERVER['PHP_SELF'] . '?page=orders');
             exit;
         } else {
@@ -222,35 +230,45 @@ $stats = [
     'pending' => 0,
     'processing' => 0,
     'completed' => 0,
-    'cancelled' => 0
+    'cancelled' => 0,
+    'refunded' => 0
 ];
 
 foreach ($orders as $order) {
     $ps = $order['paymentStatus'] ?? '';
     $ds = $order['deliveryStatus'] ?? '';
     
-    if ($ps === 'Đã hủy' || $ds === 'Đã hủy') {
+    if ($ds === 'Đã hoàn tiền' || $ps === 'Đã hoàn tiền') {
+        $stats['refunded']++;
+    } elseif ($ds === 'Chờ xử lý hoàn tiền') {
+        // Đơn đang chờ admin xác nhận hoàn tiền -> đếm vào pending để admin xử lý
+        $stats['pending']++;
+    } elseif ($ps === 'Đã hủy' || $ds === 'Đã hủy') {
         $stats['cancelled']++;
     } elseif ($ds === 'Hoàn thành') {
         $stats['completed']++;
-    } elseif ($ds === 'Đang tiến hành vận chuyển') {
+    } elseif ($ds === 'Đang tiến hành vận chuyển' || $ds === 'Đang Xử lý' || $ds === 'Đang giao') {
+        // Tất cả trạng thái "đang Xử lý/giao hàng" đều thuộc processing
         $stats['processing']++;
     } elseif ($ds === 'Chờ xác nhận') {
         $stats['pending']++;
     } else {
-        // Backward compatibility với trạng thái cũ
-        if ($ds === 'Đang giao' || $ds === 'Đang xử lý') {
-            $stats['processing']++;
-        } else {
-            $stats['pending']++;
-        }
+        // Các trạng thái khác mặc định là pending
+        $stats['pending']++;
     }
 }
 
-$pageTitle = 'Quản lý Đơn hàng';
+$pageTitle = 'Quản lý đơn hàng';
 
-// Load helper để hiển thị thời gian thanh toán
+// Load helper d? Hiển thị thời gian thanh toï¿½n
 require_once __DIR__ . '/../includes/payment_delay_helper.php';
+
+// Count new paid orders in recent window (used to show badge on tabs)
+$newPaidOrdersCount = 0;
+if (isset($orderModel)) {
+    // default window: 30 minutes
+    $newPaidOrdersCount = $orderModel->countNewPaidOrders(30);
+}
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -267,14 +285,14 @@ include __DIR__ . '/../includes/header.php';
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-gray-800">
                         <i class="fas fa-shopping-cart text-blue-500 mr-2"></i>
-                        Quản lý Đơn hàng
+                        Quản lý đơn hàng
                     </h1>
                     <p class="text-sm text-gray-600 mt-1">
                         Tổng số: <strong><?php echo $stats['total'] ?? 0; ?></strong> đơn hàng
                         <span class="mx-2">|</span>
-                        Chờ xử lý: <span class="text-yellow-600 font-semibold"><?php echo $stats['pending'] ?? 0; ?></span>
+                        Chờ Xử lý: <span class="text-yellow-600 font-semibold"><?php echo $stats['pending'] ?? 0; ?></span>
                         <span class="mx-2">|</span>
-                        Đang xử lý: <span class="text-blue-600 font-semibold"><?php echo $stats['processing'] ?? 0; ?></span>
+                        Đang Xử lý: <span class="text-blue-600 font-semibold"><?php echo $stats['processing'] ?? 0; ?></span>
                         <span class="mx-2">|</span>
                         Hoàn thành: <span class="text-green-600 font-semibold"><?php echo $stats['completed'] ?? 0; ?></span>
                     </p>
@@ -309,13 +327,16 @@ include __DIR__ . '/../includes/header.php';
                     <i class="fas fa-list mr-1"></i> Tất cả (<?php echo $stats['total'] ?? 0; ?>)
                 </button>
                 <button onclick="filterOrders('pending')" class="filter-btn px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                    <i class="fas fa-clock mr-1"></i> Chờ xử lý (<?php echo $stats['pending'] ?? 0; ?>)
+                    <i class="fas fa-clock mr-1"></i> Chờ Xử lý (<?php echo $stats['pending'] ?? 0; ?>)
                 </button>
                 <button onclick="filterOrders('processing')" class="filter-btn px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                    <i class="fas fa-sync mr-1"></i> Đang xử lý (<?php echo $stats['processing'] ?? 0; ?>)
+                    <i class="fas fa-sync mr-1"></i> Đang Xử lý (<?php echo $stats['processing'] ?? 0; ?>)
                 </button>
                 <button onclick="filterOrders('completed')" class="filter-btn px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                     <i class="fas fa-check mr-1"></i> Hoàn thành (<?php echo $stats['completed'] ?? 0; ?>)
+                </button>
+                <button onclick="filterOrders('refunded')" class="filter-btn px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                    <i class="fas fa-undo mr-1"></i> Đã hoàn tiền (<?php echo $stats['refunded'] ?? 0; ?>)
                 </button>
                 <button onclick="filterOrders('cancelled')" class="filter-btn px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                     <i class="fas fa-times mr-1"></i> Đã hủy (<?php echo $stats['cancelled'] ?? 0; ?>)
@@ -352,7 +373,7 @@ include __DIR__ . '/../includes/header.php';
                         class="px-6 py-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                     >
                         <i class="fas fa-redo"></i>
-                        Xem tất cả
+                        Xem Tất cả
                     </a>
                     <?php endif; ?>
                 </form>
@@ -411,8 +432,8 @@ include __DIR__ . '/../includes/header.php';
                                 $paymentDate = $order['paymentDate'] ?? null;
                                 $totalAmount = $order['totalAmount'] ?? 0;
                                 $paymentMethod = $order['paymentMethod'] ?? 'N/A';
-                                $paymentStatus = $order['paymentStatus'] ?? 'Chờ thanh toán';
-                                $deliveryStatus = $order['deliveryStatus'] ?? 'Chờ xử lý';
+                                $paymentStatus = $order['paymentStatus'] ?? 'Chưa thanh toán';
+                                $deliveryStatus = $order['deliveryStatus'] ?? 'Chưa Xử lý';
                                 $totalProducts = $order['totalProducts'] ?? 0;
                                 $isLatePayment = $order['isLatePayment'] ?? 0;
                                 $paymentDelayMinutes = $order['paymentDelayMinutes'] ?? null;
@@ -440,22 +461,25 @@ include __DIR__ . '/../includes/header.php';
                                 // Trạng thái thanh toán (Tiếng Việt)
                                 $paymentStatusLabels = [
                                     'Đã thanh toán' => 'Đã thanh toán',
-                                    'Chờ thanh toán' => 'Chờ thanh toán',
+                                    'Chưa thanh toán' => 'Chưa thanh toán',
                                     'Đã hủy' => 'Đã hủy',
+                                    'Đã hoàn tiền' => 'Đã hoàn tiền',
                                     // Backward compatibility
                                     'completed' => 'Đã thanh toán',
-                                    'pending' => 'Chờ thanh toán',
+                                    'pending' => 'Chưa thanh toán',
                                     'cancelled' => 'Đã hủy'
                                 ];
                                 
                                 $paymentColors = [
                                     'Đã thanh toán' => 'bg-green-100 text-green-800 border-green-300',
-                                    'Chờ thanh toán' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                                    'Chưa thanh toán' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
                                     'Đã hủy' => 'bg-red-100 text-red-800 border-red-300',
+                                    'Đã hoàn tiền' => 'bg-purple-100 text-purple-800 border-purple-300',
                                     // Backward compatibility
                                     'completed' => 'bg-green-100 text-green-800 border-green-300',
                                     'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                                    'cancelled' => 'bg-red-100 text-red-800 border-red-300'
+                                    'cancelled' => 'bg-red-100 text-red-800 border-red-300',
+                                    'refunded' => 'bg-purple-100 text-purple-800 border-purple-300'
                                 ];
                                 
                                 // Trạng thái giao hàng (Tiếng Việt)
@@ -463,41 +487,59 @@ include __DIR__ . '/../includes/header.php';
                                     'Hoàn thành' => 'bg-green-100 text-green-800 border-green-300',
                                     'Đang tiến hành vận chuyển' => 'bg-blue-100 text-blue-800 border-blue-300',
                                     'Chờ xác nhận' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                                    'Chờ xử lý hoàn tiền' => 'bg-orange-100 text-orange-800 border-orange-300',
                                     'Đã hủy' => 'bg-red-100 text-red-800 border-red-300',
+                                    'Yêu cầu hoàn trả' => 'bg-orange-100 text-orange-800 border-orange-300',
+                                    'Đang hoàn trả' => 'bg-orange-100 text-orange-800 border-orange-300',
+                                    'Đã hoàn trả' => 'bg-purple-100 text-purple-800 border-purple-300',
+                                    'Đã hoàn tiền' => 'bg-purple-100 text-purple-800 border-purple-300',
                                     // Backward compatibility (old statuses)
                                     'Đang giao' => 'bg-blue-100 text-blue-800 border-blue-300',
-                                    'Chờ xử lý' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                                    'Đang xử lý' => 'bg-blue-100 text-blue-800 border-blue-300',
+                                    'Chờ Xử lý' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                                    'Đang Xử lý' => 'bg-blue-100 text-blue-800 border-blue-300',
                                 ];
                                 
                                 $deliveryLabels = [
                                     'Hoàn thành' => 'Hoàn thành',
                                     'Đang tiến hành vận chuyển' => 'Đang vận chuyển',
                                     'Chờ xác nhận' => 'Chờ xác nhận',
+                                    'Chờ xử lý hoàn tiền' => 'Chờ xử lý hoàn tiền',
                                     'Đã hủy' => 'Đã hủy',
+                                    'Yêu cầu hoàn trả' => 'Yêu cầu hoàn trả',
+                                    'Đang hoàn trả' => 'Đang hoàn trả',
+                                    'Đã hoàn trả' => 'Đã hoàn trả',
+                                    'Đã hoàn tiền' => 'Đã hoàn tiền',
                                     // Backward compatibility
                                     'completed' => 'Hoàn thành',
                                     'shipping' => 'Đang giao',
-                                    'pending' => 'Chờ xử lý',
-                                    'cancelled' => 'Giao thất bại'
+                                    'pending' => 'Chờ Xử lý',
+                                    'cancelled' => 'Đã hủy',
+                                    'refunded' => 'Đã hoàn tiền'
                                 ];
                                 
                                 // Lấy labels
-                                $paymentStatusLabel = $paymentStatusLabels[$paymentStatus] ?? 'Chờ thanh toán';
+                                $paymentStatusLabel = $paymentStatusLabels[$paymentStatus] ?? 'Chưa thanh toán';
                                 $paymentColor = $paymentColors[$paymentStatus] ?? 'bg-gray-100 text-gray-800 border-gray-300';
                                 $deliveryColor = $deliveryColors[$deliveryStatus] ?? 'bg-yellow-100 text-yellow-800 border-yellow-300';
-                                $deliveryLabel = $deliveryLabels[$deliveryStatus] ?? 'Chờ xử lý';
+                                $deliveryLabel = $deliveryLabels[$deliveryStatus] ?? 'Chờ Xử lý';
                                 
                                 // Xác định trạng thái filter (cho filter buttons)
                                 $filterStatus = 'pending'; // Mặc định
-                                if ($paymentStatus == 'Đã hủy' || $deliveryStatus == 'Đã hủy') {
+                                if ($deliveryStatus === 'Đã hoàn tiền' || $paymentStatus === 'Đã hoàn tiền') {
+                                    $filterStatus = 'refunded';
+                                } elseif ($deliveryStatus === 'Chờ xử lý hoàn tiền') {
+                                    $filterStatus = 'pending'; // Hiển thị trong tab "Chờ xử lý" để admin xem
+                                } elseif ($paymentStatus == 'Đã hủy' || $deliveryStatus == 'Đã hủy') {
                                     $filterStatus = 'cancelled';
                                 } elseif ($deliveryStatus == 'Hoàn thành') {
                                     $filterStatus = 'completed';
-                                } elseif ($paymentStatus == 'Đã thanh toán' && ($deliveryStatus == 'Đang giao' || $deliveryStatus == 'Đang xử lý')) {
+                                } elseif ($deliveryStatus == 'Đang tiến hành vận chuyển' || $deliveryStatus == 'Đang giao' || $deliveryStatus == 'Đang Xử lý') {
+                                    // Tất cả trạng thái đang Xử lý/giao hàng
                                     $filterStatus = 'processing';
+                                } elseif ($deliveryStatus == 'Chờ xác nhận') {
+                                    $filterStatus = 'pending';
                                 } else {
-                                    $filterStatus = 'pending'; // Chờ xử lý, Chờ thanh toán
+                                    $filterStatus = 'pending'; // Các trạng thái khác
                                 }
                                 ?>
                                 <tr class="hover:bg-gray-50 order-row cursor-pointer" data-status="<?php echo $filterStatus; ?>" onclick='viewOrderDetailAjax(<?php echo $orderID; ?>)'>
@@ -538,12 +580,25 @@ include __DIR__ . '/../includes/header.php';
                                     
                                     <!-- Ngày thanh toán -->
                                     <td class="px-4 py-3">
-                                        <?php if ($paymentStatus === 'Đã thanh toán' && $paymentDate): ?>
+                                        <?php 
+                                        // Hiển thị paymentDate nếu đã thanh toán hoặc đang/đã hoàn tiền
+                                        $showPaymentDate = in_array($paymentStatus, ['Đã thanh toán', 'Đã hoàn tiền']) 
+                                                        || in_array($deliveryStatus, ['Chờ xử lý hoàn tiền', 'Đã hoàn tiền']);
+                                        ?>
+                                        <?php if ($showPaymentDate && $paymentDate): ?>
+                                            <!-- Đơn có lịch sử thanh toán thực tế -->
                                             <div class="text-sm text-gray-900"><?php echo date('d/m/Y H:i', strtotime($paymentDate)); ?></div>
                                             <div class="text-xs text-gray-500"><?php echo strtoupper(date('D', strtotime($paymentDate))); ?></div>
-                                        <?php elseif ($paymentStatus === 'Chờ thanh toán'): ?>
+                                        <?php elseif ($showPaymentDate && !$paymentDate): ?>
+                                            <!-- Đơn cũ đã thanh toán (không có lịch sử) -->
+                                            <span class="text-xs text-gray-500" title="Đơn cũ không có dữ liệu thời gian thanh toán">
+                                                <i class="fas fa-check-circle text-green-500"></i> Đã thanh toán
+                                            </span>
+                                        <?php elseif ($paymentStatus === 'Chưa thanh toán'): ?>
+                                            <!-- Đơn chưa thanh toán -->
                                             <span class="text-xs text-gray-400 italic">Chưa thanh toán</span>
                                         <?php else: ?>
+                                            <!-- Đơn hủy hoặc trạng thái khác -->
                                             <span class="text-xs text-gray-400">-</span>
                                         <?php endif; ?>
                                     </td>
@@ -570,11 +625,52 @@ include __DIR__ . '/../includes/header.php';
                                     <!-- Thao tác -->
                                     <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
                                         <div class="flex justify-center items-center gap-2">
-                                            <!-- Xác nhận đơn - Chuyển sang "Đang tiến hành vận chuyển" -->
-                                            <?php if ($deliveryStatus === 'Chờ xác nhận' && hasPermission('update_order_status')): ?>
+                                            <!-- Xác nhận đơn - Chuyển sang "đang tiến hành vận chuyển" -->
+                                            <?php 
+                                            // Logic xác nhận đơn:
+                                            // - COD: Luôn cho phép xác nhận (thanh toán khi nhận hàng)
+                                            // - QR/Bank Transfer: Chỉ cho phép khi đã thanh toán
+                                            $canConfirm = false;
+                                            $confirmDisabledReason = '';
+                                            
+                                            if ($deliveryStatus === 'Chờ xác nhận' && hasPermission('update_order_status')) {
+                                                $isCOD = (strtolower($paymentMethod) === 'cod' || stripos($paymentMethod, 'cod') !== false);
+                                                $isQR = (stripos($paymentMethod, 'qr') !== false || 
+                                                         stripos($paymentMethod, 'bank') !== false || 
+                                                         stripos($paymentMethod, 'transfer') !== false);
+                                                
+                                                if ($isCOD) {
+                                                    // COD: Luôn OK
+                                                    $canConfirm = true;
+                                                } elseif ($isQR) {
+                                                    // QR: Phải đã thanh toán
+                                                    if ($paymentStatus === 'Đã thanh toán') {
+                                                        $canConfirm = true;
+                                                    } else {
+                                                        $confirmDisabledReason = 'Khách chưa thanh toán QR';
+                                                    }
+                                                } else {
+                                                    // Phương thức khác: Phải đã thanh toán
+                                                    if ($paymentStatus === 'Đã thanh toán') {
+                                                        $canConfirm = true;
+                                                    } else {
+                                                        $confirmDisabledReason = 'Chưa thanh toán';
+                                                    }
+                                                }
+                                            }
+                                            ?>
+                                            
+                                            <?php if ($canConfirm): ?>
                                             <button onclick='confirmOrder(<?php echo $orderID; ?>, "<?php echo htmlspecialchars($customerName); ?>")' 
                                                     class="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-200" 
                                                     title="Xác nhận & Bắt đầu vận chuyển">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <?php elseif ($deliveryStatus === 'Chờ xác nhận' && hasPermission('update_order_status') && $confirmDisabledReason): ?>
+                                            <!-- Nút bế và hiệu hóa với lý do -->
+                                            <button disabled
+                                                    class="p-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                                    title="?? <?php echo $confirmDisabledReason; ?>">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                             <?php endif; ?>
@@ -589,7 +685,17 @@ include __DIR__ . '/../includes/header.php';
                                             <?php endif; ?>
                                             
                                             <!-- Hủy đơn -->
-                                            <?php if ($deliveryStatus !== 'Đã hủy' && $deliveryStatus !== 'Hoàn thành' && hasPermission('update_order_status')): ?>
+                                            <?php 
+                                            // Chỉ cho phép hủy khi: Chờ xác nhận HOẶC (đang vận chuyển + chưa thanh toán)
+                                            // KHÔNG cho hủy khi: đang vận chuyển, Hoàn thành, Đã hủy
+                                            $canCancel = false;
+                                            if ($deliveryStatus === 'Chờ xác nhận') {
+                                                $canCancel = true; // Chờ xác nhận luôn hủy được
+                                            }
+                                            // KHÔNG cho hủy khi đang vận chuyển, hoàn thành, đã hủy
+                                            
+                                            if ($canCancel && hasPermission('update_order_status')): 
+                                            ?>
                                             <button onclick='openCancelOrderModal(<?php echo $orderID; ?>, "<?php echo htmlspecialchars($customerName); ?>")' 
                                                     class="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200" 
                                                     title="Hủy đơn hàng">
@@ -609,7 +715,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal: Xem chi tiết đơn hàng -->
+<!-- Modal: Xem chi ti?t don hï¿½ng -->
 <div id="detailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-lg bg-white mb-10">
         <div class="flex justify-between items-center pb-3 border-b">
@@ -623,7 +729,7 @@ include __DIR__ . '/../includes/header.php';
         </div>
         
         <div class="mt-4 space-y-4">
-            <!-- Thông tin khách hàng -->
+            <!-- Thï¿½ng tin khï¿½ch hï¿½ng -->
             <div class="bg-blue-50 p-4 rounded-lg">
                 <h4 class="font-bold text-gray-700 mb-2">
                     <i class="fas fa-user mr-2"></i>Thông tin khách hàng
@@ -654,26 +760,26 @@ include __DIR__ . '/../includes/header.php';
                 <p id="detail_cancelReason" class="text-sm text-gray-700 italic"></p>
             </div>
             
-            <!-- Ghi chú đơn hàng (nội bộ) -->
+            <!-- ghi chú đơn hàng (nội bộ) -->
             <?php if (hasPermission('update_order_status')): ?>
             <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
                 <h4 class="font-bold text-purple-700 mb-2">
-                    <i class="fas fa-sticky-note mr-2"></i>Ghi chú nội bộ
+                    <i class="fas fa-sticky-note mr-2"></i>ghi chú đơn hàng (nội bộ)
                 </h4>
                 <textarea id="detail_note" rows="3" 
                     class="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 text-sm"
                     placeholder="Nhập ghi chú về đơn hàng này (chỉ admin mới thấy)..."></textarea>
                 <button onclick="saveOrderNote()" 
                     class="mt-2 px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors">
-                    <i class="fas fa-save mr-1"></i> Lưu ghi chú
+                    <i class="fas fa-save mr-1"></i> ưu ghi chú
                 </button>
                 <span id="note_save_status" class="ml-2 text-sm"></span>
             </div>
             <?php else: ?>
-            <!-- Hiển thị ghi chú cho staff không có quyền edit -->
+            <!-- Hiển thị ghi chú¿½ cho staff khï¿½ng cï¿½ quy?n edit -->
             <div id="noteReadOnlyBox" class="hidden bg-purple-50 p-4 rounded-lg border-l-4 border-purple-300">
                 <h4 class="font-bold text-purple-700 mb-2">
-                    <i class="fas fa-sticky-note mr-2"></i>Ghi chú nội bộ
+                    <i class="fas fa-sticky-note mr-2"></i>ghi chú đơn hàng (nội bộ)
                 </h4>
                 <p id="detail_note_readonly" class="text-sm text-gray-700 italic whitespace-pre-wrap"></p>
             </div>
@@ -709,13 +815,13 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal: Cập nhật trạng thái -->
+<!-- Modal: cập nhật trạng thái -->
 <div id="statusModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
         <div class="flex justify-between items-center pb-3 border-b">
             <h3 class="text-xl font-bold text-gray-800">
                 <i class="fas fa-edit text-blue-500 mr-2"></i>
-                Cập nhật trạng thái đơn hàng
+                cập nhật trạng thái đơn hàng
             </h3>
             <button onclick="closeStatusModal()" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times text-xl"></i>
@@ -741,14 +847,14 @@ include __DIR__ . '/../includes/header.php';
                 </label>
                 <select name="deliveryStatus" id="status_deliveryStatus" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-                    <option value="Đang tiến hành vận chuyển">🔵 Đang tiến hành vận chuyển</option>
-                    <option value="Hoàn thành">🟢 Hoàn thành</option>
+                    <option value="đang tiến hành vận chuyển">🚚 đang tiến hành vận chuyển</option>
+                    <option value="Hoàn thành">Hoàn thành</option>
                 </select>
                 <p class="text-xs text-gray-500 mt-1">
-                    <i class="fas fa-info-circle"></i> COD sẽ tự động "Đã thanh toán" khi Hoàn thành
+                    <i class="fas fa-info-circle"></i> COD sẽ tự động "đã thanh toán" khi Hoàn thành
                 </p>
                 <p class="text-xs text-blue-600 mt-1">
-                    💡 Dùng nút "Xác nhận" hoặc "Hủy" bên ngoài cho các trạng thái khác
+                    Dùng nút "Xác nhận" hoặc "Hủy" bên ngoài cho các trạng thái khác
                 </p>
             </div>
             
@@ -759,14 +865,14 @@ include __DIR__ . '/../includes/header.php';
                 </button>
                 <button type="submit"
                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    <i class="fas fa-save mr-1"></i> Cập nhật
+                    <i class="fas fa-save mr-1"></i> cập nhật
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal: Hủy đơn hàng -->
+<!-- Modal: H?y don hï¿½ng -->
 <div id="cancelOrderModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
         <div class="flex justify-between items-center pb-3 border-b">
@@ -818,7 +924,7 @@ include __DIR__ . '/../includes/header.php';
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 
 <script>
-// Không còn embed toàn bộ chi tiết sản phẩm (tối ưu). Sử dụng AJAX khi người dùng mở chi tiết.
+// Không cần embed toàn bộ chi tiết sản phẩm (tối ưu). Sử dụng AJAX khi người dùng mở chi tiết.
 
 // Filter orders by status
 function filterOrders(status) {
@@ -840,17 +946,17 @@ function filterOrders(status) {
 }
 
 // View order details
-// AJAX lấy chi tiết đơn hàng
+// AJAX Lấy chi tiết don hï¿½ng
 function viewOrderDetailAjax(orderID) {
-    // Reset modal content trước khi load
+    // Reset modal content tru?c khi load
     document.getElementById('detail_orderID').textContent = '#'+orderID;
     document.getElementById('detail_customerName').textContent = '...';
     document.getElementById('detail_phone').textContent = '...';
     document.getElementById('detail_orderDate').textContent = '...';
     document.getElementById('detail_paymentMethod').textContent = '...';
-    document.getElementById('detail_status').innerHTML = '<span class="text-gray-500">Đang tải...</span>';
+    document.getElementById('detail_status').innerHTML = '<span class="text-gray-500">đang tải...</span>';
     document.getElementById('detail_totalAmount').textContent = '...';
-    document.getElementById('detail_products').innerHTML = '<p class="text-gray-500">Đang tải sản phẩm...</p>';
+    document.getElementById('detail_products').innerHTML = '<p class="text-gray-500">đang tải sản phẩm...</p>';
     document.getElementById('cancelReasonBox').classList.add('hidden');
     document.getElementById('detailModal').classList.remove('hidden');
 
@@ -896,15 +1002,15 @@ function viewOrderDetailAjax(orderID) {
             
             // Render products
             if (details.length === 0) {
-                document.getElementById('detail_products').innerHTML = '<p class="text-gray-500 italic">Không có sản phẩm</p>';
+                document.getElementById('detail_products').innerHTML = '<p class="text-gray-500 italic">Khï¿½ng cï¿½ s?n ph?m</p>';
             } else {
                 let html = '<div class="space-y-3">';
                 details.forEach(item => {
                     const subtotal = item.quantity * item.price;
-                    const img = item.image ? `/GODIFA/image/${item.image}` : '/GODIFA/image/no-image.png';
+                    const img = item.image ? `<?php echo BASE_URL; ?>image/${item.image}` : '<?php echo BASE_URL; ?>image/no-image.png';
                     html += `
                         <div class="flex items-center gap-3 p-2 bg-white rounded border">
-                            <img src="${img}" alt="${item.productName}" class="w-16 h-16 object-cover rounded" onerror="this.src='/GODIFA/image/no-image.png'">
+                            <img src="${img}" alt="${item.productName}" class="w-16 h-16 object-cover rounded" onerror="this.src='<?php echo BASE_URL; ?>image/no-image.png'">
                             <div class="flex-1">
                                 <h5 class="font-semibold text-gray-900">${item.productName}</h5>
                                 <p class="text-sm text-gray-600">Số lượng: <span class="font-medium">${item.quantity}</span> × <span class="font-medium">${new Intl.NumberFormat('vi-VN').format(item.price)} đ</span></p>
@@ -990,7 +1096,7 @@ function closeStatusModal() {
     document.getElementById('statusModal').classList.add('hidden');
 }
 
-// Lưu ghi chú đơn hàng
+// Luu ghi chú đơn hàng
 function saveOrderNote() {
     const noteTextarea = document.getElementById('detail_note');
     const statusSpan = document.getElementById('note_save_status');
@@ -1043,10 +1149,9 @@ function confirmOrder(orderID, customerName) {
         form.submit();
     }
 }
-
 // Hoàn thành đơn hàng - Chuyển sang "Hoàn thành" (COD tự động "Đã thanh toán")
 function completeOrder(orderID, customerName) {
-    if (confirm(`Hoàn thành đơn hàng #${orderID} của khách "${customerName}"?\n\nĐơn hàng sẽ được đánh dấu: Hoàn thành\n(COD sẽ tự động chuyển sang Đã thanh toán)`)) {
+    if (confirm(`Hoàn thành đơn hàng #${orderID} của khách "${customerName}"?\n\nĐơn hàng sẽ được đánh dấu: Hoàn thành\n(COD sẽ tự động Chuyển sang Đã thanh toán)`)) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.innerHTML = `
@@ -1058,7 +1163,7 @@ function completeOrder(orderID, customerName) {
     }
 }
 
-// Mở modal hủy đơn
+// Mở modal hủy đơn hàng
 function openCancelOrderModal(orderID, customerName) {
     document.getElementById('cancel_orderID').value = orderID;
     document.getElementById('cancel_orderLabel').textContent = '#' + orderID;

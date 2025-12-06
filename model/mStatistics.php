@@ -1,7 +1,7 @@
 <?php
 /**
  * Model: Statistics
- * Xử lý dữ liệu thống kê, báo cáo
+ * Xá»­ lÃ½ dá»¯ liá»‡u thá»‘ng kÃª, bÃ¡o cÃ¡o
  */
 
 require_once __DIR__ . '/database.php';
@@ -15,10 +15,10 @@ class Statistics {
     }
     
     /**
-     * Lấy thống kê doanh thu theo kỳ
+     * Láº¥y thá»‘ng kÃª doanh thu theo ká»³
      * @param string $period - 'day', 'week', 'month', 'year', 'custom'
-     * @param string $startDate - Ngày bắt đầu (cho custom)
-     * @param string $endDate - Ngày kết thúc (cho custom)
+     * @param string $startDate - NgÃ y báº¯t Ä‘áº§u (cho custom)
+     * @param string $endDate - NgÃ y káº¿t thÃºc (cho custom)
      * @return array
      */
     public function getRevenueStats($period = 'month', $startDate = null, $endDate = null) {
@@ -29,7 +29,7 @@ class Statistics {
             'growth' => 0
         ];
         
-        // Doanh thu kỳ hiện tại
+        // Doanh thu ká»³ hiá»‡n táº¡i
         $sql = "SELECT 
             SUM(CASE WHEN paymentStatus = 'Đã thanh toán' THEN totalAmount ELSE 0 END) as completed,
             SUM(CASE WHEN paymentStatus = 'Chờ thanh toán' THEN totalAmount ELSE 0 END) as pending,
@@ -46,7 +46,7 @@ class Statistics {
             $stats['pending'] = $row['pending'] ?? 0;
         }
         
-        // Tính tăng trưởng so với kỳ trước
+        // TÃ­nh tÄƒng trÆ°á»Ÿng so vá»›i ká»³ trÆ°á»›c
         $prevTotal = $this->getPreviousPeriodRevenue($period);
         if ($prevTotal > 0) {
             $stats['growth'] = (($stats['completed'] - $prevTotal) / $prevTotal) * 100;
@@ -56,7 +56,7 @@ class Statistics {
     }
     
     /**
-     * Lấy thống kê đơn hàng theo kỳ
+     * Láº¥y thá»‘ng kÃª Ä‘Æ¡n hÃ ng theo ká»³
      */
     public function getOrderStats($period = 'month', $startDate = null, $endDate = null) {
         $stats = [
@@ -115,7 +115,7 @@ class Statistics {
     }
     
     /**
-     * Phân tích phương thức thanh toán
+     * PhÃ¢n tÃ­ch phÆ°Æ¡ng thá»©c thanh toÃ¡n
      */
     public function getPaymentMethods($period = 'month', $startDate = null, $endDate = null) {
         $methods = [];
@@ -146,7 +146,7 @@ class Statistics {
     public function getRevenueChartData($period = 'month', $startDate = null, $endDate = null) {
         $chartData = [];
         $dates = [];
-        // Xác định danh sách ngày cần lấy
+        // XÃ¡c Ä‘á»‹nh danh sÃ¡ch ngÃ y cáº§n láº¥y
         if ($period == 'custom' && $startDate && $endDate) {
             $begin = new DateTime($startDate);
             $end = new DateTime($endDate);
@@ -183,7 +183,7 @@ class Statistics {
     }
     
     /**
-     * Lấy doanh thu kỳ trước (để tính growth)
+     * Láº¥y doanh thu ká»³ trÆ°á»›c (Ä‘á»ƒ tÃ­nh growth)
      */
     private function getPreviousPeriodRevenue($period) {
         $sql = "SELECT SUM(totalAmount) as total FROM `order` WHERE paymentStatus = 'Đã thanh toán'";
@@ -230,7 +230,7 @@ class Statistics {
     }
     
     /**
-     * Lấy thống kê khách hàng (mở rộng sau)
+     * Láº¥y thá»‘ng kÃª khÃ¡ch hÃ ng (má»Ÿ rá»™ng sau)
      */
     public function getCustomerStats($period = 'month') {
         // TODO: Implement customer statistics

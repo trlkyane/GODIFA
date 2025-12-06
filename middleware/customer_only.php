@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Middleware: Chỉ cho phép khách hàng (customer) truy cập
  * Chặn admin/staff truy cập trang người dùng
@@ -20,7 +20,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['role_id'])) {
     // Chỉ cho phép Customer (role_id = 0)
     if ($roleID !== ROLE_CUSTOMER) {
         // Nếu là Staff hoặc Admin, chuyển hướng về trang admin
-        header('Location: /GODIFA/admin/index.php');
+        header('Location: ' . ADMIN_BASE_URL . 'index.php');
         exit();
     }
 }

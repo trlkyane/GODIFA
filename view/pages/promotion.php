@@ -15,7 +15,7 @@
       <nav class="space-x-6 text-sm font-semibold">
         <a href="../index.php" class="hover:text-blue-600">Trang chủ</a>
         <a href="product.php" class="hover:text-blue-600">Sản phẩm</a>
-        <a href="/GODIFA/view/cart/viewcart.php" class="hover:text-blue-600">Giỏ hàng</a>
+        <a href="<?php echo BASE_URL; ?>view/cart/viewcart.php" class="hover:text-blue-600">Giỏ hàng</a>
         <?php
             if(!isset($_SESSION["dn"])){
               echo '<a href="vLogin.php" class="hover:text-blue-600">Đăng nhập</a>';

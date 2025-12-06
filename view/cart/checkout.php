@@ -6,22 +6,23 @@
  */
 
 require_once __DIR__ . '/../../middleware/customer_only.php';
+require_once __DIR__ . '/../../config/constants.php';
 
-// ✅ Bắt buộc đăng nhập trước khi checkout
+// Bắt buộc đăng nhập trước khi checkout
 if (!isset($_SESSION['customer_id']) || !isset($_SESSION['is_customer_logged_in'])) {
     // Lưu URL hiện tại để redirect về sau khi đăng nhập
-    $_SESSION['redirect_after_login'] = '/GODIFA/view/cart/checkout.php';
+    $_SESSION['redirect_after_login'] = '/view/cart/checkout.php';
     
     echo "<script>
         alert('Vui lòng đăng nhập để tiếp tục thanh toán!');
-        window.location.href = '/GODIFA/view/auth/customer-login.php';
+        window.location.href = '" . BASE_URL . "view/auth/customer-login.php';
     </script>";
     exit;
 }
 
 // Kiểm tra giỏ hàng
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
-    header('Location: viewcart.php');
+    header('Location: ' . BASE_URL . 'view/cart/viewcart.php');
     exit;
 }
 
@@ -31,11 +32,11 @@ $db = Database::getInstance();
 $conn = $db->connect();
 
 $customerID = $_SESSION['customer_id']; // Sửa từ customerID thành customer_id
-$stmt = $conn->prepare("SELECT customerName as fullName, email, phone FROM customer WHERE customerID = ?");
-$stmt->bind_param("i", $customerID);
-$stmt->execute();
-$result = $stmt->get_result();
-$customer = $result->fetch_assoc();
+$stmt = mysqli_prepare($conn, "SELECT customerName as fullName, email, phone FROM customer WHERE customerID = ?");
+mysqli_stmt_bind_param($stmt, "i", $customerID);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$customer = mysqli_fetch_assoc($result);
 
 // Nếu không tìm thấy customer, set giá trị mặc định
 if (!$customer) {
@@ -67,9 +68,9 @@ foreach ($_SESSION['cart'] as $item) {
     <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/GODIFA" class="text-2xl font-bold text-indigo-600">GODIFA</a>
+            <a href="<?php echo BASE_URL; ?>" class="text-2xl font-bold text-indigo-600">GODIFA</a>
             <nav class="space-x-4 text-sm">
-                <a href="/GODIFA" class="hover:text-indigo-600">Trang chủ</a>
+                <a href="<?php echo BASE_URL; ?>" class="hover:text-indigo-600">Trang chủ</a>
                 <a href="viewcart.php" class="hover:text-indigo-600">Giỏ hàng</a>
             </nav>
         </div>
@@ -92,7 +93,7 @@ foreach ($_SESSION['cart'] as $item) {
                         <i class="fas fa-truck"></i> Thông tin giao hàng
                     </h2>
 
-                    <form action="/GODIFA/controller/cCheckout.php" method="POST" id="checkoutForm">
+                    <form action="<?php echo BASE_URL; ?>controller/cCheckout.php" method="POST" id="checkoutForm">
                         
                         <!-- Họ và tên -->
                         <div class="mb-4">
@@ -116,6 +117,8 @@ foreach ($_SESSION['cart'] as $item) {
                                 <input type="email" 
                                        name="email" 
                                        required 
+                                       pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                                       title="Vui lòng nhập email Gmail (ví dụ: example@gmail.com)"
                                        value="<?= htmlspecialchars($customer['email'] ?? '') ?>"
                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                        placeholder="example@gmail.com">
@@ -127,7 +130,10 @@ foreach ($_SESSION['cart'] as $item) {
                                 <input type="tel" 
                                        name="phone" 
                                        required 
-                                       pattern="[0-9]{10,11}"
+                                       pattern="0[0-9]{9,10}"
+                                       maxlength="11"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                       title="Số điện thoại phải bắt đầu bằng số 0 và có 10-11 chữ số"
                                        value="<?= htmlspecialchars($customer['phone'] ?? '') ?>"
                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                        placeholder="0987654321">
@@ -266,7 +272,7 @@ foreach ($_SESSION['cart'] as $item) {
                                     <span class="text-gray-400">x<?= $item['quantity'] ?? 0 ?></span>
                                 </span>
                                 <span class="font-semibold">
-                                    <?= number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 0), 0, ',', '.') ?>₫
+                                    <?= number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 0), 0, ',', '.') ?>?
                                 </span>
                             </div>
                         <?php endforeach; ?>
@@ -329,7 +335,7 @@ foreach ($_SESSION['cart'] as $item) {
                             </button>
                             
                             <!-- Link xem tất cả voucher -->
-                            <a href="/GODIFA/view/voucher/vouchers.php" target="_blank"
+                            <a href="<?php echo BASE_URL; ?>view/voucher/vouchers.php" target="_blank"
                                class="mt-2 block text-center text-xs text-indigo-600 hover:text-indigo-800 hover:underline">
                                 <i class="fas fa-external-link-alt mr-1"></i>Xem tất cả mã giảm giá
                             </a>
@@ -423,15 +429,18 @@ foreach ($_SESSION['cart'] as $item) {
         document.getElementById('shipping-fee-value').value = shippingFee;
         updateTotal();
     };
+    
+    // Khai báo BASE_URL cho JavaScript (VPS Compatible)
+    window.BASE_URL = '<?php echo BASE_URL; ?>';
     </script>
     
     <!-- GHN Address Selector Script -->
-    <script src="/GODIFA/public/js/ghn-address.js?v=3.0"></script>
+    <script src="<?php echo BASE_URL; ?>public/js/ghn-address.js?v=3.1"></script>
     
     <script>
     // Load vouchers khi trang load
     document.addEventListener('DOMContentLoaded', function() {
-        // Reset voucher inputs khi load trang để tránh dính mã cũ
+        // Reset voucher inputs khi load trang để tránh định mã cũ
         selectedVoucher = null;
         discountAmount = 0;
         document.getElementById('voucher-id').value = '';
@@ -442,7 +451,7 @@ foreach ($_SESSION['cart'] as $item) {
     
     // Load danh sách voucher từ API
     function loadVouchers() {
-        fetch('/GODIFA/api/get_vouchers.php')
+        fetch('<?php echo BASE_URL; ?>api/get_vouchers.php')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -640,9 +649,9 @@ foreach ($_SESSION['cart'] as $item) {
             // Áp dụng voucher
             selectVoucher(voucher);
             input.value = '';
-            showVoucherMessage(`✅ Đã áp dụng mã ${code} thành công!`, 'success');
+            showVoucherMessage(`✓ Đã áp dụng mã ${code} thành công!`, 'success');
         } else {
-            showVoucherMessage('❌ Mã giảm giá không tồn tại hoặc đã hết hạn', 'error');
+            showVoucherMessage('✗ Mã giảm giá không tồn tại hoặc đã hết hạn', 'error');
         }
     }
     
@@ -665,7 +674,7 @@ foreach ($_SESSION['cart'] as $item) {
     }
     
     // Update hidden inputs before form submit
-    document.querySelector('form[action="/GODIFA/controller/cCheckout.php"]').addEventListener('submit', function(e) {
+    document.querySelector('form[action="<?php echo BASE_URL; ?>controller/cCheckout.php"]').addEventListener('submit', function(e) {
         const selector = window.ghnAddressSelector;
         if (selector) {
             const data = selector.getSelectedData();

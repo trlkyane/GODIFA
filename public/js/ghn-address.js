@@ -1,9 +1,11 @@
-/**
+﻿/**
  * GHN Address Selector with 3-level Cascading Dropdowns
  * File: public/js/ghn-address.js
+ * VPS Compatible: Sử dụng BASE_URL từ global
  * 
  * Usage: Include this in checkout.php
- * <script src="/public/js/ghn-address.js"></script>
+ * <script>window.BASE_URL = '<?php echo BASE_URL; ?>';</script>
+ * <script src="<?php echo BASE_URL; ?>public/js/ghn-address.js"></script>
  */
 
 class GHNAddressSelector {
@@ -18,6 +20,9 @@ class GHNAddressSelector {
         this.selectedDistrict = null;
         this.selectedWard = null;
         this.baseTotal = 0;
+        
+        // Get BASE_URL from global scope (set in PHP)
+        this.baseUrl = window.BASE_URL || '/';
         
         this.init();
     }
@@ -38,7 +43,7 @@ class GHNAddressSelector {
     
     async loadProvinces() {
         try {
-            const response = await fetch('/GODIFA/api/ghn/provinces.php');
+            const response = await fetch(`${this.baseUrl}api/ghn/provinces.php`);
             const result = await response.json();
             
             if (result.success) {
@@ -88,7 +93,7 @@ class GHNAddressSelector {
         this.districtSelect.innerHTML = '<option value="">Đang tải...</option>';
         
         try {
-            const response = await fetch(`/GODIFA/api/ghn/districts.php?provinceId=${this.selectedProvince.id}`);
+            const response = await fetch(`${this.baseUrl}api/ghn/districts.php?provinceId=${this.selectedProvince.id}`);
             const result = await response.json();
             
             if (result.success) {
@@ -137,7 +142,7 @@ class GHNAddressSelector {
         this.wardSelect.innerHTML = '<option value="">Đang tải...</option>';
         
         try {
-            const response = await fetch(`/GODIFA/api/ghn/wards.php?districtId=${this.selectedDistrict.id}`);
+            const response = await fetch(`${this.baseUrl}api/ghn/wards.php?districtId=${this.selectedDistrict.id}`);
             const result = await response.json();
             
             if (result.success) {
@@ -206,7 +211,7 @@ class GHNAddressSelector {
         console.log('Request data:', requestData);
         
         try {
-            const response = await fetch('/GODIFA/api/ghn/calculate_fee.php', {
+            const response = await fetch(`${this.baseUrl}api/ghn/calculate_fee.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

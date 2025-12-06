@@ -23,30 +23,30 @@ class mLogin {
             $password = md5($password); // Mã hóa mật khẩu
 
             // Kiểm tra trùng email
-            $check = $con->prepare("SELECT userID FROM user WHERE email = ?");
-            $check->bind_param("s", $email);
-            $check->execute();
-            $check->store_result();
+            $check = mysqli_prepare($con, "SELECT userID FROM user WHERE email = ?");
+            mysqli_stmt_bind_param($check, "s", $email);
+            mysqli_stmt_execute($check);
+            mysqli_stmt_store_result($check);
 
-            if ($check->num_rows > 0) {
-                $check->close();
+            if (mysqli_stmt_num_rows($check) > 0) {
+                mysqli_stmt_close($check);
                 $p->dongKetNoi($con);
                 return "exists"; // Trả về trạng thái tồn tại
             }
-            $check->close();
+            mysqli_stmt_close($check);
 
             // Thêm tài khoản mới
             $roleID = 2; // Mặc định là nhân viên hoặc user thường
             $status = '1';
-            $stmt = $con->prepare("INSERT INTO user (userName, email, password, phone, status, roleID) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssi", $hoten, $email, $password, $phone, $status, $roleID);
+            $stmt = mysqli_prepare($con, "INSERT INTO user (userName, email, password, phone, status, roleID) VALUES (?, ?, ?, ?, ?, ?)");
+            mysqli_stmt_bind_param($stmt, "sssssi", $hoten, $email, $password, $phone, $status, $roleID);
 
-            if ($stmt->execute()) {
-                $stmt->close();
+            if (mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
                 $p->dongKetnoi($con);
                 return "success";
             } else {
-                $stmt->close();
+                mysqli_stmt_close($stmt);
                 $p->dongKetnoi($con);
                 return "error";
             }

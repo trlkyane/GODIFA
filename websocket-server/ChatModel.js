@@ -1,11 +1,12 @@
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
-// [QUAN TRỌNG: KẾT NỐI CSDL] Sửa thông tin kết nối CSDL Node.js của bạn
+// [QUAN TRỌNG: KẾT NỐI CSDL] Đọc từ biến môi trường để tương thích VPS
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'godifa1',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'godifa1',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -14,7 +15,7 @@ const dbConfig = {
 class ChatModel {
     constructor() {
         this.pool = mysql.createPool(dbConfig);
-        console.log("MySQL Connection Pool đã được khởi tạo.");
+        console.log(`MySQL Connection Pool đã được khởi tạo (Host: ${dbConfig.host}, DB: ${dbConfig.database}).`);
     }
     
     // ==========================================================
