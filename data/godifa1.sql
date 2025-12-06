@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 05, 2025 at 10:24 AM
+-- Generation Time: Dec 06, 2025 at 12:28 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -154,7 +154,8 @@ CREATE TABLE IF NOT EXISTS `cart` (
 INSERT INTO `cart` (`cartID`, `customerID`) VALUES
 (1, 1),
 (2, 2),
-(3, 3);
+(3, 3),
+(1225, 1225);
 
 -- --------------------------------------------------------
 
@@ -215,14 +216,14 @@ DROP TABLE IF EXISTS `chat`;
 CREATE TABLE IF NOT EXISTS `chat` (
   `chatID` int NOT NULL AUTO_INCREMENT,
   `conversation_ID` int NOT NULL,
-  `chatContent` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
+  `chatContent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `sender_ID` int NOT NULL,
-  `senderType` enum('customer','user','bot') CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_520_ci NOT NULL,
+  `senderType` enum('customer','user','bot') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `isRead` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chatID`),
   KEY `fk_chat_conversation` (`conversation_ID`)
-) ENGINE=MyISAM AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=185 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `chat`
@@ -289,7 +290,125 @@ INSERT INTO `chat` (`chatID`, `conversation_ID`, `chatContent`, `date`, `sender_
 (63, 3, 'Dạ em chào anh', '2025-12-04 19:06:17', 1, 'user', 0),
 (64, 3, 'Tôi muốn hủy đơn hàng', '2025-12-04 19:08:17', 2, 'customer', 0),
 (65, 3, 'Dạ cho em xin mã đơn hàng cần hủy', '2025-12-04 19:12:14', 1, 'user', 0),
-(66, 3, 'Mã Đơn hàng #182', '2025-12-04 19:12:28', 2, 'customer', 0);
+(66, 3, 'Mã Đơn hàng #182', '2025-12-04 19:12:28', 2, 'customer', 0),
+(67, 3, 'A ơi:(', '2025-12-05 23:42:18', 2, 'customer', 0),
+(68, 3, 'Cuối cùng thì:)', '2025-12-05 23:42:27', 1, 'user', 0),
+(69, 3, 'Nghe bạn', '2025-12-05 23:46:20', 1, 'user', 0),
+(70, 3, 'holo', '2025-12-05 23:46:27', 2, 'customer', 0),
+(71, 4, 'xin chào', '2025-12-06 17:46:54', 3, 'customer', 0),
+(72, 4, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 17:46:54', 0, 'bot', 0),
+(73, 4, 'có sản phẩm mới không', '2025-12-06 17:47:04', 3, 'customer', 0),
+(74, 4, 'Làm sao đổi hàng', '2025-12-06 17:49:04', 3, 'customer', 0),
+(75, 4, 'Tôi muốn đổi hàng', '2025-12-06 17:51:51', 3, 'customer', 0),
+(76, 3, 'xin chào', '2025-12-06 17:52:32', 2, 'customer', 0),
+(77, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 17:52:32', 0, 'bot', 0),
+(78, 3, 'tôi muốn đổi hàng', '2025-12-06 17:52:45', 2, 'customer', 0),
+(79, 3, 'Tôi muốn đổi hàng', '2025-12-06 17:55:44', 2, 'customer', 0),
+(80, 3, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Vui lòng chờ nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể! 😊', '2025-12-06 17:55:44', 0, 'bot', 0),
+(81, 3, 'OKe', '2025-12-06 17:55:50', 2, 'customer', 0),
+(82, 3, 'aaaaádasdsad', '2025-12-06 17:55:55', 2, 'customer', 0),
+(83, 3, 'Xin chào', '2025-12-06 17:56:10', 2, 'customer', 0),
+(84, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 17:56:10', 0, 'bot', 0),
+(85, 3, 'ádasfasdfkladbasdf', '2025-12-06 17:56:14', 2, 'customer', 0),
+(86, 3, 'Tôi muốn đổi hàng', '2025-12-06 17:56:27', 2, 'customer', 0),
+(87, 3, 'Cho em xin mã đơn hàng nha', '2025-12-06 17:57:33', 1, 'user', 0),
+(88, 3, 'aasdasdasdasfsd', '2025-12-06 17:57:41', 2, 'customer', 0),
+(89, 3, 'xin chào', '2025-12-06 17:57:49', 2, 'customer', 0),
+(90, 3, 'nhân viên', '2025-12-06 17:58:02', 2, 'customer', 0),
+(91, 4, 'xin chào', '2025-12-06 18:02:20', 3, 'customer', 0),
+(92, 4, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:02:20', 0, 'bot', 0),
+(93, 4, 'Tôi muốn đổi hàng', '2025-12-06 18:02:25', 3, 'customer', 0),
+(94, 4, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Vui lòng chờ nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể! 😊', '2025-12-06 18:02:25', 0, 'bot', 0),
+(95, 4, 'Oke', '2025-12-06 18:02:33', 3, 'customer', 0),
+(96, 4, 'Cho em xin mã đơn hàng nha', '2025-12-06 18:02:46', 1, 'user', 0),
+(97, 4, 'mã là ádasdasdsad', '2025-12-06 18:02:55', 3, 'customer', 0),
+(98, 4, 'dạ em đã xử lý xong cảm ơn anh', '2025-12-06 18:03:18', 1, 'user', 0),
+(99, 4, 'Thời gian giao hàng', '2025-12-06 18:03:30', 3, 'customer', 0),
+(100, 4, 'thời gian giao hàng', '2025-12-06 18:03:38', 3, 'customer', 0),
+(101, 4, 'thời gian giao hàng', '2025-12-06 18:03:47', 3, 'customer', 0),
+(102, 4, 'xin chào', '2025-12-06 18:13:41', 3, 'customer', 0),
+(103, 4, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:13:41', 0, 'bot', 0),
+(104, 4, 'Tôi muốn đổi hàng', '2025-12-06 18:13:47', 3, 'customer', 0),
+(105, 4, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Hiện tại đã ngoài giờ hành chính (8:00 - 17:00). Vui lòng quay lại vào giờ làm việc để được nhân viên hỗ trợ trực tiếp! 🙏', '2025-12-06 18:13:47', 0, 'bot', 0),
+(106, 4, 'oke', '2025-12-06 18:13:49', 3, 'customer', 0),
+(107, 4, 'Dạ em là nvcskh', '2025-12-06 18:14:01', 1, 'user', 0),
+(108, 4, 'Tôi muốn đổi hàng', '2025-12-06 18:14:06', 3, 'customer', 0),
+(109, 4, 'thời gian giao hàng', '2025-12-06 18:14:15', 3, 'customer', 0),
+(110, 4, 'xin chào', '2025-12-06 18:15:51', 3, 'customer', 0),
+(111, 4, 'xin chào', '2025-12-06 18:16:01', 3, 'customer', 0),
+(112, 4, 'xin chào', '2025-12-06 18:24:13', 3, 'customer', 0),
+(113, 4, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:24:13', 0, 'bot', 0),
+(114, 4, 'aaaa', '2025-12-06 18:24:16', 3, 'customer', 0),
+(115, 4, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Hiện tại đã ngoài giờ hành chính (8:00 - 17:00). Vui lòng quay lại vào giờ làm việc để được nhân viên hỗ trợ trực tiếp! 🙏', '2025-12-06 18:24:16', 0, 'bot', 0),
+(116, 4, 'oke', '2025-12-06 18:24:20', 3, 'customer', 0),
+(117, 4, 'AAAAAAAA', '2025-12-06 18:24:24', 3, 'customer', 0),
+(118, 4, 'Khách: \"Tôi muốn đổi hàng\"', '2025-12-06 18:29:46', 3, 'customer', 0),
+(119, 4, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Hiện tại đã ngoài giờ hành chính (8:00 - 17:00). Vui lòng quay lại vào giờ làm việc để được nhân viên hỗ trợ trực tiếp! 🙏', '2025-12-06 18:29:46', 0, 'bot', 0),
+(120, 4, 'Xin chào', '2025-12-06 18:30:05', 3, 'customer', 0),
+(121, 4, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:30:05', 0, 'bot', 0),
+(122, 4, 'Tôi muốn đổi hàng', '2025-12-06 18:30:23', 3, 'customer', 0),
+(123, 4, 'Dạ chào anh', '2025-12-06 18:30:50', 3, 'user', 0),
+(124, 4, 'Em làm nv cskh', '2025-12-06 18:30:54', 3, 'user', 0),
+(125, 4, 'Chào anh', '2025-12-06 18:35:44', 3, 'user', 0),
+(126, 4, 'xin chào', '2025-12-06 18:36:15', 3, 'customer', 0),
+(127, 4, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:36:15', 0, 'bot', 0),
+(128, 4, 'Tôi muốn đổi hàng', '2025-12-06 18:36:24', 3, 'customer', 0),
+(129, 4, 'Dạ chào anh em là nv cskh', '2025-12-06 18:36:43', 3, 'user', 0),
+(130, 3, 'xin chào', '2025-12-06 18:40:05', 2, 'customer', 0),
+(131, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:40:05', 0, 'bot', 0),
+(132, 3, 'Tôi muốn đổi hàng', '2025-12-06 18:40:11', 2, 'customer', 0),
+(133, 3, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Hiện tại đã ngoài giờ hành chính (8:00 - 17:00). Vui lòng quay lại vào giờ làm việc để được nhân viên hỗ trợ trực tiếp! 🙏', '2025-12-06 18:40:11', 0, 'bot', 0),
+(134, 3, 'Chào anh cskh', '2025-12-06 18:40:42', 1, 'user', 0),
+(135, 3, 'Oke', '2025-12-06 18:40:52', 2, 'customer', 0),
+(136, 3, 'ádasdasd', '2025-12-06 18:41:20', 2, 'customer', 0),
+(137, 3, 'xin chào', '2025-12-06 18:41:28', 2, 'customer', 0),
+(138, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:41:28', 0, 'bot', 0),
+(139, 3, 'Tôi muốn đổi hàng', '2025-12-06 18:41:34', 2, 'customer', 0),
+(140, 3, 'aaaaaaaa', '2025-12-06 18:42:10', 2, 'customer', 0),
+(141, 3, 'ádasds', '2025-12-06 18:42:11', 2, 'customer', 0),
+(142, 3, 'xin chào', '2025-12-06 18:47:50', 2, 'customer', 0),
+(143, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:47:50', 0, 'bot', 0),
+(144, 3, 'Tôi muốn đổi hàng', '2025-12-06 18:47:58', 2, 'customer', 0),
+(145, 3, 'Tôi muốn đổi hàng', '2025-12-06 18:48:07', 2, 'customer', 0),
+(146, 3, 'xin chào', '2025-12-06 18:48:59', 2, 'customer', 0),
+(147, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:48:59', 0, 'bot', 0),
+(148, 3, 'Tôi muốn đổi hàng', '2025-12-06 18:49:03', 2, 'customer', 0),
+(149, 3, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Hiện tại đã ngoài giờ hành chính (8:00 - 17:00). Vui lòng quay lại vào giờ làm việc để được nhân viên hỗ trợ trực tiếp! 🙏', '2025-12-06 18:49:03', 0, 'bot', 0),
+(150, 3, 'oke', '2025-12-06 18:49:12', 2, 'customer', 0),
+(151, 3, 'thời gian giao hang', '2025-12-06 18:49:18', 2, 'customer', 0),
+(152, 3, 'thời gian giao hàng', '2025-12-06 18:49:25', 2, 'customer', 0),
+(153, 3, 'Thời gian giao hàng tiêu chuẩn của Godifa là từ 3-5 ngày sau khi xác nhận đơn hàng !', '2025-12-06 18:49:25', 0, 'bot', 0),
+(154, 3, 'Dạ chào anh em là nv cskh', '2025-12-06 18:49:49', 3, 'user', 0),
+(155, 3, 'Tôi muốn đổi hàng', '2025-12-06 18:49:57', 2, 'customer', 0),
+(156, 3, 'xin chào', '2025-12-06 18:50:02', 2, 'customer', 0),
+(157, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 18:50:02', 0, 'bot', 0),
+(158, 3, 'xin chào', '2025-12-06 19:01:32', 2, 'customer', 0),
+(159, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 19:01:32', 0, 'bot', 0),
+(160, 3, 'ádasdsad', '2025-12-06 19:01:36', 2, 'customer', 0),
+(161, 3, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Vui lòng chờ nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể! 😊', '2025-12-06 19:01:36', 0, 'bot', 0),
+(162, 3, 'Tôi muốn đổi hàng', '2025-12-06 19:01:42', 2, 'customer', 0),
+(163, 3, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Vui lòng chờ nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể! 😊', '2025-12-06 19:01:42', 0, 'bot', 0),
+(164, 3, 'Tôi muốn đổi hàng', '2025-12-06 19:02:02', 2, 'customer', 0),
+(165, 3, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Vui lòng chờ nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể! 😊', '2025-12-06 19:02:02', 0, 'bot', 0),
+(166, 3, 'ádasdasdasd', '2025-12-06 19:02:05', 2, 'customer', 0),
+(167, 3, 'Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Vui lòng chờ nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể! 😊', '2025-12-06 19:02:05', 0, 'bot', 0),
+(168, 3, 'OKe', '2025-12-06 19:02:08', 3, 'user', 0),
+(169, 3, 'Tôi muốn đổi hàng', '2025-12-06 19:02:11', 2, 'customer', 0),
+(170, 3, 'ấdasdasdasd', '2025-12-06 19:02:14', 2, 'customer', 0),
+(171, 3, 'ádasdasd', '2025-12-06 19:02:17', 2, 'customer', 0),
+(172, 3, 'xin chào', '2025-12-06 19:02:23', 2, 'customer', 0),
+(173, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 19:02:23', 0, 'bot', 0),
+(174, 3, 'thông tin giao hàng', '2025-12-06 19:02:35', 2, 'customer', 0),
+(175, 3, 'thời gian giao hàng', '2025-12-06 19:02:40', 2, 'customer', 0),
+(176, 3, 'Thời gian giao hàng tiêu chuẩn của Godifa là từ 3-5 ngày sau khi xác nhận đơn hàng !', '2025-12-06 19:02:40', 0, 'bot', 0),
+(177, 3, 'xin chào', '2025-12-06 19:04:49', 2, 'customer', 0),
+(178, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 19:04:49', 0, 'bot', 0),
+(179, 3, 'xin chào', '2025-12-06 19:05:14', 2, 'customer', 0),
+(180, 3, 'Godifa xin chào bạn! Tôi là Chatbot hỗ trợ trả lời tự động, tôi có thể giúp gì cho bạn ?', '2025-12-06 19:05:14', 0, 'bot', 0),
+(181, 3, 'cc', '2025-12-06 19:05:19', 3, 'user', 0),
+(182, 3, 'xin chào', '2025-12-06 19:05:26', 2, 'customer', 0),
+(183, 3, 'lụm', '2025-12-06 19:05:30', 2, 'customer', 0),
+(184, 3, 'aaaaaaaaaaaaaaaaa', '2025-12-06 19:06:00', 2, 'customer', 0);
 
 -- --------------------------------------------------------
 
@@ -344,8 +463,8 @@ CREATE TABLE IF NOT EXISTS `conversation` (
 INSERT INTO `conversation` (`conversationID`, `customerID`, `userID`, `last_message_at`, `customer_unread_count`, `user_unread_count`, `status`) VALUES
 (1, 1, 0, '2025-11-01 14:34:23', 0, 2, 'open'),
 (2, 1223, 0, '2025-11-01 15:00:18', 0, 11, 'open'),
-(3, 2, 0, '2025-12-04 19:12:28', 0, 19, 'open'),
-(4, 3, 0, '2025-12-04 17:58:07', 0, 5, 'open');
+(3, 2, 0, '2025-12-06 19:06:00', 0, 66, 'open'),
+(4, 3, 0, '2025-12-06 18:36:43', 0, 32, 'open');
 
 -- --------------------------------------------------------
 
@@ -367,7 +486,7 @@ CREATE TABLE IF NOT EXISTS `customer` (
   UNIQUE KEY `email` (`email`),
   KEY `idx_status` (`status`),
   KEY `idx_groupID` (`groupID`)
-) ENGINE=MyISAM AUTO_INCREMENT=1225 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1227 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `customer`
@@ -375,11 +494,13 @@ CREATE TABLE IF NOT EXISTS `customer` (
 
 INSERT INTO `customer` (`customerID`, `customerName`, `phone`, `email`, `password`, `status`, `groupID`, `note`) VALUES
 (1, 'Ngô Hoàng Khải', '0817574722', 'ngok1708@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, NULL),
-(2, 'Lê Trung Hiếu', '0978848500', 'trunghieu@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, NULL),
+(2, 'Lê Trung Hiếu', '0978848500', 'trunghieu@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, 'oke đó con trai'),
 (3, 'Nguyễn Trung Trực', '0812412573', 'trungtruc@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, NULL),
 (4, 'nguyễn  thanh tùng', '0313212356', 'tungnguyen@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, 'oke'),
 (5, 'lê hồng minh', '0123111444', 'hongminh@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, NULL),
-(1223, 'quốc khải', '0949123123', 'quockhai@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, 'khách thường xuyên mua');
+(1223, 'quốc khải', '0949123123', 'quockhai@gmail.com', '7c6a180b36896a0a8c02787eeafb0e4c', 1, 1, 'khách thường xuyên mua'),
+(1225, 'aaa', '0912131321', '11111@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 2, ''),
+(1226, 'Letrunghieu', '01231321321', 'trunghieu2513@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 1, 1, 'aaa');
 
 -- --------------------------------------------------------
 
@@ -404,7 +525,7 @@ CREATE TABLE IF NOT EXISTS `customer_group` (
 --
 
 INSERT INTO `customer_group` (`groupID`, `groupName`, `description`, `minSpent`, `maxSpent`, `color`, `createdAt`) VALUES
-(1, 'Broze', 'Chi tieu 0-5tr', NULL, NULL, '#907c64', '2025-10-30 05:13:38'),
+(1, 'Broze', 'Chi tieu 0-5tr', NULL, NULL, '#7d7d7d', '2025-10-30 05:13:38'),
 (2, 'Sliver', 'Chi tieu 5-15tr', 5000000, 14999999, '#99a6b8', '2025-10-29 10:21:19'),
 (3, 'Gold', 'Chi tieu 15-30tr', 15000000, 29999999, '#fbbf24', '2025-10-29 10:21:19'),
 (4, 'Platinum', 'Chi tieu 30-50tr', 30000000, 49999999, '#42e9ff', '2025-10-29 10:21:19'),
@@ -443,7 +564,7 @@ CREATE TABLE IF NOT EXISTS `order` (
   KEY `idx_qr_expired` (`qrExpiredAt`,`paymentStatus`),
   KEY `idx_payment_date` (`paymentDate`),
   KEY `idx_cancelled` (`cancelledAt`,`cancelledBy`)
-) ENGINE=MyISAM AUTO_INCREMENT=206 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=207 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_520_ci;
 
 --
 -- Dumping data for table `order`
@@ -491,7 +612,8 @@ INSERT INTO `order` (`orderID`, `orderDate`, `paymentDate`, `paymentStatus`, `to
 (202, '2025-12-05 12:42:21', '2025-12-05 12:43:23', 'Đã hoàn tiền', 520500, 'COD', 2, 'test', NULL, 'Hoàn thành', 'GHN', 20500.00, NULL, NULL, NULL, 'GODIFA202512050202', NULL, NULL),
 (203, '2025-12-05 12:57:54', '2025-12-05 12:58:18', 'Đã hoàn tiền', 196500, 'COD', 2, 'Test lần cuối', NULL, '', 'GHN', 20500.00, NULL, NULL, NULL, 'GODIFA202512050203', NULL, NULL),
 (204, '2025-12-05 13:02:45', '2025-12-05 13:02:56', 'Đã hoàn tiền', 89900, 'COD', 2, '1', NULL, '', 'GHN', 24900.00, NULL, NULL, NULL, 'GODIFA202512050204', NULL, NULL),
-(205, '2025-12-05 15:05:13', '2025-12-05 15:05:49', 'Đã thanh toán', 40500, 'QR', 2, 'aa', NULL, 'Chờ xử lý hoàn tiền', 'GHN', 20500.00, 'aaaaaaaa', '2025-12-05 15:33:39', 'customer', 'GODIFA202512050205', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=40500&des=SEVQR+TKP155+GODIFA202512050205', '2025-12-05 08:20:13');
+(205, '2025-12-05 15:05:13', '2025-12-05 15:05:49', 'Đã thanh toán', 40500, 'QR', 2, 'aa', NULL, 'Chờ xử lý hoàn tiền', 'GHN', 20500.00, 'aaaaaaaa', '2025-12-05 15:33:39', 'customer', 'GODIFA202512050205', 'https://qr.sepay.vn/img?acc=105875539922&bank=VietinBank&amount=40500&des=SEVQR+TKP155+GODIFA202512050205', '2025-12-05 08:20:13'),
+(206, '2025-12-06 13:15:02', '2025-12-06 13:15:18', 'Đã thanh toán', 11295975, 'COD', 1225, 'q1212', NULL, 'Hoàn thành', 'GHN', 80975.00, NULL, NULL, NULL, 'GODIFA202512060206', NULL, NULL);
 
 --
 -- Triggers `order`
@@ -517,28 +639,31 @@ CREATE TRIGGER `after_order_update_assign_group` AFTER UPDATE ON `order` FOR EAC
     DECLARE customer_total_spent DECIMAL(15,2);
     DECLARE best_group_id INT;
     
-    -- Ch??? ch???y khi payment status thay ?????i
+    -- Chỉ chạy khi payment status thay đổi
     IF NEW.paymentStatus != OLD.paymentStatus THEN
-        -- T??nh t???ng chi ti??u c???a customer (kh??ng t??nh ????n h???y)
+        
+        -- Tính tổng chi tiêu của customer (chỉ tính đơn "Đã thanh toán")
         SELECT COALESCE(SUM(totalAmount), 0) INTO customer_total_spent
         FROM `order`
         WHERE customerID = NEW.customerID
-          AND paymentStatus = '???? thanh to??n';
+          AND paymentStatus = 'Đã thanh toán';
         
-        -- T??m nh??m ph?? h???p nh???t (REMOVED: AND status = 1)
+        -- Tìm nhóm phù hợp nhất dựa trên chi tiêu
+        -- Sử dụng COALESCE để xử lý NULL
         SELECT groupID INTO best_group_id
         FROM customer_group
-        WHERE customer_total_spent >= minSpent
+        WHERE customer_total_spent >= COALESCE(minSpent, 0)
           AND (maxSpent IS NULL OR customer_total_spent <= maxSpent)
-        ORDER BY minSpent DESC
+        ORDER BY COALESCE(minSpent, 0) DESC
         LIMIT 1;
         
-        -- C???p nh???t nh??m cho customer
+        -- Cập nhật nhóm cho customer
         IF best_group_id IS NOT NULL THEN
             UPDATE customer
             SET groupID = best_group_id
             WHERE customerID = NEW.customerID;
         END IF;
+        
     END IF;
 END
 $$
@@ -572,7 +697,7 @@ CREATE TABLE IF NOT EXISTS `order_delivery` (
   KEY `idx_orderID` (`orderID`),
   KEY `idx_province_district` (`provinceId`,`districtId`),
   KEY `idx_ward` (`wardCode`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `order_delivery`
@@ -669,7 +794,8 @@ INSERT INTO `order_delivery` (`deliveryID`, `orderID`, `recipientName`, `recipie
 (88, 202, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'aaaaaa', '600508', '1998', '253', 253, 1998, '600508', 'test', '2025-12-05 05:42:21'),
 (89, 203, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'a', '640402', '1824', '250', 250, 1824, '640402', 'Test lần cuối', '2025-12-05 05:57:54'),
 (90, 204, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'â', '190307', '1728', '249', 249, 1728, '190307', '1', '2025-12-05 06:02:45'),
-(91, 205, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'Tân Phú', '470901', '2116', '258', 258, 2116, '470901', 'aa', '2025-12-05 08:05:13');
+(91, 205, 'Lê Trung Hiếu', 'trunghieu@gmail.com', '0978848500', 'Tân Phú', '470901', '2116', '258', 258, 2116, '470901', 'aa', '2025-12-05 08:05:13'),
+(92, 206, 'aaa', '11111@gmail.com', '0912131321', '123 Đường Nguyễn Thị Minh Khai, Quận 1, TP.HCM', '140208', '2204', '266', 266, 2204, '140208', 'q1212', '2025-12-06 06:15:02');
 
 -- --------------------------------------------------------
 
@@ -792,7 +918,9 @@ INSERT INTO `order_details` (`orderID`, `productID`, `quantity`, `price`) VALUES
 (202, 1, 1, 500000),
 (203, 27, 1, 176000),
 (204, 21, 1, 65000),
-(205, 31, 1, 20000);
+(205, 31, 1, 20000),
+(206, 22, 1, 115000),
+(206, 12, 10, 1110000);
 
 -- --------------------------------------------------------
 
@@ -832,7 +960,7 @@ INSERT INTO `product` (`productID`, `productName`, `SKU_MRK`, `stockQuantity`, `
 (9, 'Set 2 gói Băng Vệ Sinh Ngày LAURIER Nội Địa Nhật Siêu Thấm Không Cánh 20.5cm (gói 28 miếng)\r\n', '4901301392404', 50, 129000, NULL, 'Tên sản phẩm :Băng vệ sinh siêu thấm\r\nThương hiệu :KAO\r\nXuất xứ :Nhật Bản\r\nChất liệu/ Thành phần :Chất liệu: Polyetylen, polypropylene, polyester', '4901301392404.jpg', 2, 1),
 (10, 'DUNG DỊCH VỆ SINH PHỤ NỮ PH CARE HƯƠNG BẠC HÀ CỦA NHẬT CHAI 150ML - HÀNG NHẬT NỘI ĐỊA nước rửa phụ khoa làm sạch vùng kín cân bằng độ PH\r\n', '4582372213388', 15, 209000, NULL, 'Dung dịch vệ sinh phụ nữ PH Japan Premium Shower Splash 150ml đến từ thương hiệu mỹ phẩm chăm sóc cơ thể PH JAPAN Premium có khả năng làm sạch và chăm sóc vùng da nhạy cảm của phái nữ.\r\n\r\n', '4582372213388.jpg', 2, 1),
 (11, 'Dầu gội Salonlink Extra Treatment siêu dưỡng 1000ml (Màu Xanh)\r\n', '4513574022812', 20, 269000, NULL, 'Dầu Gội Đầu Kumano Salon Link Extra Treatment 1000ml là sản phẩm được thiết kế chuyên biệt cho những mái tóc hư tổn và gãy rụng, không chỉ giúp làm sạch tóc hiệu quả mà còn giúp cung cấp một lượng lớn protein và các axit amin giúp nuôi dưỡng mái tóc, dưỡng ẩm và sửa chữa các tổn thương do hóa chất tạo kiểu gây ra, phục hồi lại mái tóc chắc khỏe vốn có.', '4513574022812.jpg', 2, 1),
-(12, 'Kem dưỡng trắng trị nám Transino Whitening Repair Cream EX 35g\r\n', '4987107626530', 10, 1110000, NULL, 'Kem dưỡng trắng da đặc trị nám Medicinal Whitening Repair Cream EX của Transino là dòng sản phẩm dưỡng da ban đêm, giúp tái tạo, phục hồi những hư tổn trên da. Tăng cường nuôi dưỡng và chăm sóc da trắng mịn, tươi trẻ.', '4987107626530.jpg', 2, 1),
+(12, 'Kem dưỡng trắng trị nám Transino Whitening Repair Cream EX 35g\r\n', '4987107626530', 0, 1110000, NULL, 'Kem dưỡng trắng da đặc trị nám Medicinal Whitening Repair Cream EX của Transino là dòng sản phẩm dưỡng da ban đêm, giúp tái tạo, phục hồi những hư tổn trên da. Tăng cường nuôi dưỡng và chăm sóc da trắng mịn, tươi trẻ.', '4987107626530.jpg', 2, 1),
 (13, 'Sữa Rửa Mặt Tạo Bọt ROHTO HADA LABO Dưỡng Ẩm Cho Mọi Loại Da 160ml\r\n', '4987241145614', 10, 185000, NULL, 'Sữa Rửa Mặt Tạo Bọt Hadalabo Nhật Bản Trắng là một trong những sản phẩm đang được yêu thích nhất của Hada Labo tại thị trường Việt Nam, được nhập khẩu trực tiếp từ Nhật Bản. Với dạng bọt tiện lợi, mềm mịn kết hợp cùng các thành phần giàu dưỡng chất, sản phẩm đem lại hiệu quả làm sạch vô cùng vượt trội, giúp loại bỏ tận gốc bụi bẩn, bã nhờn và vi khuẩn tích tụ trên da, giúp da khô thoáng, căng mịn. ', '4987241145614.jpg', 2, 1),
 (14, 'Sữa Rửa Mặt Kumano Deve Men Than Hoạt Tính Cho Nam 130g\r\n', '4513574031449', 10, 95000, NULL, 'ữa Rửa Mặt Kumano Deve Men Than Hoạt Tính Cho Nam 130g là dòng sữa rửa mặt cho nam đến từ thương hiệu mỹ phẩm Kumano của Nhật Bản, với thành phần than hoạt tính đem lại công dụng 2 trong 1 vừa làm sữa rửa mặt vừa tẩy da chết nhẹ nhàng giúp loại sạch bụi bẩn, dầu thừa, bã nhờn và thông thoáng lỗ chân lông đồng thời hỗ trợ ngăn ngừa mụn hiệu quả.', '4513574031449.jpg', 2, 1),
 (15, 'Xà Bông Beauty Soap Cow 90g\r\n', '4901525010900', 10, 39000, NULL, 'Với chiết xuất từ sữa bò tươi, kết hợp cùng Squalane dưỡng ẩm da mềm mại\r\nTạo nhiều bọt kem mịn, tắm sạch hoàn hảo, cho da thông thoáng\r\nLàn da sạch mịn, mềm mại, không khô ráp', '4901525010900.jpg', 2, 1),
@@ -842,7 +970,7 @@ INSERT INTO `product` (`productID`, `productName`, `SKU_MRK`, `stockQuantity`, `
 (19, 'Miếng rửa mặt Seiwapro Loven sillicon\r\n', '4982790188631', 30, 45000, NULL, 'Làm sạch là bước đầu tiên và quan trọng nhất trong quá trình chăm sóc da. Chỉ rửa mặt bằng tay cùng sữa rửa mặt thôi là chưa đủ bởi nhiều nghiên cứu chỉ ra rằng, rửa mặt bằng tay không thể làm sạch hoàn toàn da mặt. Đừng quá lo lắng vì Miếng Rửa Mặt Silicon Seiwapro Loven Make Cleansing Pad đến từ Nhật Bản sẽ giúp bạn giải quyết vấn đề này.', '4982790188631.jpg', 3, 1),
 (20, 'Set 10 dao cạo cho nữ KAI\r\n', '4901331007439', 10, 85000, NULL, 'Bộ 10 Dao Cạo Lông Mày, Lông Mặt KAI là sản phẩm dao cạo đến từ thương hiệu KAI của Nhật Bản. Sản phẩm có thiết kế nhỏ gọn và tiện lợi, với lưỡi dao làm từ thép không gỉ có độ bền cao, đảm bảo an toàn trong quá trình sử dụng và không gây ra đau rát hay tổn thương da.', '4901331007439.jpg', 3, 1),
 (21, 'Miếng thấm mồ hôi nách Kyowa 10 chiếc\r\n', '4969757106143', 9, 65000, NULL, 'Chất liệu thấm hút tốt giữ cho vùng nách áo luôn sạch sẽ, khô thoáng, không ố vàng\r\nBề mặt tiếp xúc êm, dễ chịu với da\r\nSản phẩm không mùi, không làm lấn át mùi nước hoa', '4969757106143.jpg', 3, 1),
-(22, 'Set 3 dao cạo lông mày Pretty KAI\r\n', '4901331012860', 99, 115000, NULL, '- Chất liệu:  Lưỡi dao được làm từ thép không gỉ, thân dao được làm từ nhựa dẻo cao cấp và được kháng khuẩn\r\n- Quy cách: gồm 3 cây dao cạo kèm lưỡi.\r\n- HDSD: Dao được thiết kế chuyên dụng dành cho phụ nữ giúp cạo lông mày. Phần tay cầm thiết kế dày dặn giúp cầm nắm dễ dàng. Không thay thế được lưỡi, bỏ đi sau khi lưỡi dao đã cùn.\r\n- Xuất xứ: Nhật Bản. Nhập khẩu trực tiếp từ Nhật', '4901331012860.jpg', 3, 1),
+(22, 'Set 3 dao cạo lông mày Pretty KAI\r\n', '4901331012860', 98, 115000, NULL, '- Chất liệu:  Lưỡi dao được làm từ thép không gỉ, thân dao được làm từ nhựa dẻo cao cấp và được kháng khuẩn\r\n- Quy cách: gồm 3 cây dao cạo kèm lưỡi.\r\n- HDSD: Dao được thiết kế chuyên dụng dành cho phụ nữ giúp cạo lông mày. Phần tay cầm thiết kế dày dặn giúp cầm nắm dễ dàng. Không thay thế được lưỡi, bỏ đi sau khi lưỡi dao đã cùn.\r\n- Xuất xứ: Nhật Bản. Nhập khẩu trực tiếp từ Nhật', '4901331012860.jpg', 3, 1),
 (23, 'Set 5 dao cạo lông mày KAI\r\n', '4901331010781', 17, 55000, NULL, 'MÔ TẢ SẢN PHẨM\r\nCombo 5 dao cạo lông mày KAI Nhật Bản là phụ kiện hỗ trợ tốt cho việc làm đẹp chân mày. Với dao cạo lông mày KAI, bạn có thể thỏa thích tạo đường cong chân mày sắc nét và nổi bật.\r\nDao cạo lông mày KAI​​​ - Mày xinh, mặt càng thêm xinh\r\nThông tin sản phẩm:\r\n- Chất liệu: Thép không gỉ, nhựa cao cấp', '4901331010781.jpg', 3, 1),
 (24, 'Xịt Chống Muỗi Và Côn Trùng Cho Bé SKIN VAPE 200ml Nội Địa Nhật (Chai Màu Hồng - Hương Đào) Dùng Cho Bé Từ 6 Tháng Tuổi Trở Lên\r\n', '4902424433081', 18, 225000, NULL, 'Xịt chống muỗi Skin Vape hương mơ đào của Nhật Bản thích hợp cho cả người lớn lẫn trẻ nhỏ.\r\nDùng để xịt lên da vùng tay, chân và cổ, hiệu quả trong việc xua đuổi muỗi và nhiều loại côn trùng khác.', '4902424433081.jpg', 4, 1),
 (25, 'Set 3 gói giấy ướt 80 tờ cho bé (100% tinh khiết)\n', '4589506153282', 15, 145000, NULL, 'Chứa đến 99% nước tinh khiết, dịu nhẹ và an toàn cho làn da bé nhỏ\r\nKết hợp thêm thành phần dưỡng ẩm từ collagen, hyaluronic acid giữ cho làn da bé luôn mềm mại, mịn màng\r\nKhăn giấy không chứa cồn, paraben, hương liệu', '4589506153282.jpg', 4, 1),
