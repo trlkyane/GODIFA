@@ -16,9 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ĐÃ CẬP NHẬT: Sử dụng ID mới từ HTML
     const searchConversationInput = document.getElementById('searchConversation'); 
 
-    // Lấy Socket Server URL từ metadata (tự động điều chỉnh theo môi trường)
-    const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('data-socket-url') : 'http://localhost:3000'; 
+    // Lấy Socket Server URL từ metadata hoặc window
+    const SOCKET_SERVER_URL_RAW = window.SOCKET_SERVER_URL || 
+                                   (metadata ? metadata.getAttribute('data-socket-url') : null) || 
+                                   'https://godifaproject.id.vn/ws';
     
+    // Loại bỏ /ws khỏi URL vì đã dùng trong path option
+    const SOCKET_SERVER_URL = SOCKET_SERVER_URL_RAW.replace('/ws', '');
+
     // Lấy BASE_URL từ window, đảm bảo có dấu / cuối
     let BASE_URL = window.BASE_URL || (window.location.origin + '/');
     if (!BASE_URL.endsWith('/')) {
@@ -26,8 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     console.log('Admin Chat - BASE_URL:', BASE_URL);
-    
-    const socket = io(SOCKET_SERVER_URL);
+    console.log('Admin Chat - SOCKET_SERVER_URL:', SOCKET_SERVER_URL);
+
+    const socket = io(SOCKET_SERVER_URL, {
+    path: '/ws/socket.io'
+});
     
     // ----------------------------------------------------------------
     // 2. HÀM TIỆN ÍCH

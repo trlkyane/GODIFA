@@ -1,0 +1,873 @@
+[1mdiff --git a/admin/pages/chat.php b/admin/pages/chat.php[m
+[1mindex 908b3c3..9d24d33 100644[m
+[1m--- a/admin/pages/chat.php[m
+[1m+++ b/admin/pages/chat.php[m
+[36m@@ -296,6 +296,10 @@[m [minclude __DIR__ . '/../includes/header.php';[m
+         }[m
+     }[m
+ </script>[m
+[32m+[m[32m    <script>[m
+[32m+[m[32m        window.SOCKET_SERVER_URL = '<?= SOCKET_SERVER_URL ?>';[m
+[32m+[m[32m    </script>[m
+[32m+[m[32m    <meta name="socket-server-url" content="<?= SOCKET_SERVER_URL ?>">[m
+ <script src="<?php echo BASE_URL; ?>public/js/admin_chat_client.js"></script> [m
+ [m
+ <?php include __DIR__ . '/../includes/footer.php'; ?>[m
+[36m@@ -391,4 +395,4 @@[m [minclude __DIR__ . '/../includes/header.php';[m
+     flex-direction: column;[m
+     /* justify-content: flex-end; <--- Đã loại bỏ */[m
+ }[m
+[31m-</style>[m
+\ No newline at end of file[m
+[32m+[m[32m</style>[m
+[1mdiff --git a/config/constants.php b/config/constants.php[m
+[1mindex d13c91c..897e988 100644[m
+[1m--- a/config/constants.php[m
+[1m+++ b/config/constants.php[m
+[36m@@ -22,7 +22,7 @@[m [mdefine('PAYMENT_CANCELLED', 'Đã hủy');[m
+ [m
+ // Order Delivery Status[m
+ define('DELIVERY_PENDING', 'Chờ xác nhận');[m
+[31m-define('DELIVERY_PROCESSING', 'Đang tiến hành vận chuyển');[m
+[32m+[m[32mdefine('DELIVERY_PROCESSING', 'Đang vận chuyển');[m
+ define('DELIVERY_COMPLETED', 'Hoàn thành');[m
+ define('DELIVERY_CANCELLED', 'Đã hủy');[m
+ [m
+[36m@@ -59,7 +59,7 @@[m [mif (!defined('BASE_URL')) {[m
+     // Detect environment: local vs production[m
+     $isLocal = (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || [m
+                 strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false);[m
+[31m-    define('BASE_URL', $isLocal ? 'http://localhost/GODIFA/' : 'https://godifa.id.vn/');[m
+[32m+[m[32m    define('BASE_URL', $isLocal ? 'http://localhost/GODIFA/' : 'https://godifaproject.id.vn/');[m
+ }[m
+ define('ADMIN_BASE_URL', BASE_URL . 'admin/');[m
+ [m
+[36m@@ -87,8 +87,25 @@[m [mdefine('QR_EXPIRY_MINUTES', 15);[m
+ [m
+ // ==================== CHAT & WEBSOCKET ====================[m
+ // Socket.IO Server URL (thay đổi khi deploy lên VPS)[m
+[32m+[m[32m//[m[41m [m
+[32m+[m[32m// OPTION 1: Dùng subdomain riêng (cần cấu hình DNS)[m
+[32m+[m[32m// - Local: http://localhost:3000[m
+[32m+[m[32m// - VPS: https://chat.godifa.id.vn[m
+[32m+[m[32m//[m
+[32m+[m[32m// OPTION 2: Dùng đường dẫn con (đơn giản hơn, không cần subdomain)[m
+[32m+[m[32m// - Local: http://localhost:3000[m
+[32m+[m[32m// - VPS: https://godifa.id.vn/ws[m
+[32m+[m[32m//[m
+ if (!defined('SOCKET_SERVER_URL')) {[m
+     $isLocal = (strpos($_SERVER['HTTP_HOST'] ?? 'localhost', 'localhost') !== false || [m
+[31m-                strpos($_SERVER['HTTP_HOST'] ?? '127.0.0.1', '127.0.0.1') !== false);[m
+[31m-    define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://chat.godifa.id.vn');[m
+[32m+[m[32m                strpos($_SERVER['HTTP_HOST'] ?? '127.0.0.1', '127.0.0.1') !== false ||[m
+[32m+[m[32m                strpos($_SERVER['HTTP_HOST'] ?? '', '192.168.') !== false);[m
+[32m+[m[41m    [m
+[32m+[m[32m    // Chọn 1 trong 2 options dưới đây:[m
+[32m+[m[41m    [m
+[32m+[m[32m    // OPTION 1: Subdomain (mặc định)[m
+[32m+[m[32m    //define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://chat.godifa.id.vn');[m
+[32m+[m[41m    [m
+[32m+[m[32m    // OPTION 2: Path-based (uncomment dòng dưới và comment dòng trên)[m
+[32m+[m[32m    define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://godifaproject.id.vn/ws');[m
+ }[m
+[1mdiff --git a/cron/cancel_orders.log b/cron/cancel_orders.log[m
+[1mindex d33f28f..0123a2b 100644[m
+[1m--- a/cron/cancel_orders.log[m
+[1m+++ b/cron/cancel_orders.log[m
+[36m@@ -4,3 +4,472 @@[m
+ [2025-11-07 17:43:18] ✅ Cancelled order #115 - GODIFA202511050115[m
+ [2025-11-07 17:43:18] ✅ Cancelled order #125 - GODIFA202511070125[m
+ [2025-11-07 17:43:18] === Cronjob completed: 3 succeeded, 0 failed ===[m
+[32m+[m[32m[2025-12-06 12:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 12:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:25:01] ERROR: Table 'godifa_production.order' doesn't exist[m
+[32m+[m[32m[2025-12-06 12:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:30:01] ERROR: Table 'godifa_production.order' doesn't exist[m
+[32m+[m[32m[2025-12-06 12:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:35:01] Found 2 expired orders to cancel[m
+[32m+[m[32m[2025-12-06 12:35:01] ✅ Cancelled order #169 - GODIFA202512010169 (stock restored if needed)[m
+[32m+[m[32m[2025-12-06 12:35:01] ✅ Cancelled order #183 - GODIFA202512040183 (stock restored if needed)[m
+[32m+[m[32m[2025-12-06 12:35:01] === Cronjob completed: 2 succeeded, 0 failed ===[m
+[32m+[m[32m[2025-12-06 12:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 12:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 12:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 12:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 12:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 13:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 13:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 14:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 14:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:05:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:05:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 15:55:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 15:55:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:50:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:50:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 16:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 16:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:40:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:40:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 17:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 17:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:40:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:40:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 18:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 18:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:30:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:30:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 19:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 19:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:30:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:30:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 20:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 20:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:25:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:25:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 21:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 21:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:20:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:20:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 22:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 22:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:10:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:10:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-06 23:55:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-06 23:55:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:50:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:50:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 00:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 00:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:45:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:45:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 01:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 01:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:45:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:45:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 02:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 02:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:45:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:45:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 03:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 03:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:40:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 04:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 04:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:35:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:35:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 05:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 05:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:25:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:25:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:30:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:30:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:40:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:45:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:45:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:50:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:50:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 06:55:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 06:55:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:00:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:00:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:05:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:05:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:10:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:10:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:15:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:15:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:20:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:20:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:25:02] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:25:02] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:30:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:30:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:35:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:35:01] No expired orders found. Everything is up to date.[m
+[32m+[m[32m[2025-12-07 07:40:01] === Starting auto-cancel cronjob ===[m
+[32m+[m[32m[2025-12-07 07:40:01] No expired orders found. Everything is up to date.[m
+[1mdiff --git a/image/4511413405116.jpg b/image/4511413405116.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4511413621394.jpg b/image/4511413621394.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4513574022812.jpg b/image/4513574022812.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4513574031449.jpg b/image/4513574031449.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4571157257624.jpg b/image/4571157257624.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4582372213388.jpg b/image/4582372213388.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4589506153282.jpg b/image/4589506153282.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4901301281623.jpg b/image/4901301281623.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4901301392404.jpg b/image/4901301392404.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4901331007439.jpg b/image/4901331007439.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4901331010781.jpg b/image/4901331010781.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4901331012860.jpg b/image/4901331012860.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4901525010900.jpg b/image/4901525010900.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4901616005266.jpg b/image/4901616005266.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4902424433081.jpg b/image/4902424433081.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4936613072331.jpg b/image/4936613072331.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4945904016138.jpg b/image/4945904016138.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4945904018965.jpg b/image/4945904018965.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4958349250135.jpg b/image/4958349250135.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4969757106143.jpg b/image/4969757106143.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4971493101597.jpg b/image/4971493101597.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4971493102426.jpg b/image/4971493102426.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4973228171516.jpg b/image/4973228171516.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4973430023672.jpg b/image/4973430023672.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4976631477589.jpg b/image/4976631477589.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4982790188631.jpg b/image/4982790188631.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4982790408784.jpg b/image/4982790408784.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4987107626530.jpg b/image/4987107626530.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4987241145614.jpg b/image/4987241145614.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4987426002091.jpg b/image/4987426002091.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/4992440034713.jpg b/image/4992440034713.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/68f25912d3d97.jpg b/image/68f25912d3d97.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/68f25a1902bb2.jpg b/image/68f25a1902bb2.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/68f25a2c0dffb.jpg b/image/68f25a2c0dffb.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/690e1ccdd4ff9.jpg b/image/690e1ccdd4ff9.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/691e041cdac62.png b/image/691e041cdac62.png[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/691e043f8be0f.png b/image/691e043f8be0f.png[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/691e04454b9b4.png b/image/691e04454b9b4.png[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/691e044c1b7fa.png b/image/691e044c1b7fa.png[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/692c24dd0e2b9.jpg b/image/692c24dd0e2b9.jpg[m
+[1mdeleted file mode 100644[m
+[1mindex 8c796cd..0000000[m
+Binary files a/image/692c24dd0e2b9.jpg and /dev/null differ
+[1mdiff --git a/image/Frame 1.png b/image/Frame 1.png[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/blog.jpg b/image/blog.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/logo.jpg b/image/logo.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/news.jpg b/image/news.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/refund_proofs/refund_proof_189_1764870826.jpg b/image/refund_proofs/refund_proof_189_1764870826.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/refund_proofs/refund_proof_190_1764873411.jpg b/image/refund_proofs/refund_proof_190_1764873411.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/refund_proofs/refund_proof_191_1764873847.jpg b/image/refund_proofs/refund_proof_191_1764873847.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/refund_proofs/refund_proof_192_1764874299.jpg b/image/refund_proofs/refund_proof_192_1764874299.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/refund_proofs/refund_proof_193_1764874725.jpg b/image/refund_proofs/refund_proof_193_1764874725.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/refund_proofs/refund_proof_194_1764875570.jpg b/image/refund_proofs/refund_proof_194_1764875570.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/refund_proofs/refund_proof_205_1764923619.jpg b/image/refund_proofs/refund_proof_205_1764923619.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_195_1764877449_0.jpg b/image/return_proofs/return_195_1764877449_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_196_1764878656_0.jpg b/image/return_proofs/return_196_1764878656_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_197_1764879244_0.jpg b/image/return_proofs/return_197_1764879244_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_198_1764879600_0.png b/image/return_proofs/return_198_1764879600_0.png[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_199_1764880356_0.jpg b/image/return_proofs/return_199_1764880356_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_199_1764880358_0.jpg b/image/return_proofs/return_199_1764880358_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_199_1764880465_0.jpg b/image/return_proofs/return_199_1764880465_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_199_1764880480_0.jpg b/image/return_proofs/return_199_1764880480_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_199_1764880772_0.jpg b/image/return_proofs/return_199_1764880772_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_200_1764881201_0.jpg b/image/return_proofs/return_200_1764881201_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_202_1764913438_0.jpg b/image/return_proofs/return_202_1764913438_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_203_1764914319_0.jpg b/image/return_proofs/return_203_1764914319_0.jpg[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/image/return_proofs/return_206_1764915789_0.png b/image/return_proofs/return_206_1764915789_0.png[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/logs/.gitignore b/logs/.gitignore[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mdiff --git a/model/database.php b/model/database.php[m
+[1mindex 0e853a8..7674c2d 100644[m
+[1m--- a/model/database.php[m
+[1m+++ b/model/database.php[m
+[36m@@ -8,9 +8,9 @@[m
+ class Database {[m
+     // Database credentials (sẽ cần thay đổi khi deploy lên VPS)[m
+     private const DB_HOST = 'localhost';[m
+[31m-    private const DB_USER = 'root';[m
+[31m-    private const DB_PASS = '';[m
+[31m-    private const DB_NAME = 'godifa1';[m
+[32m+[m[32m    private const DB_USER = 'godifa_user';[m
+[32m+[m[32m    private const DB_PASS = 'Godifa@2025';[m
+[32m+[m[32m    private const DB_NAME = 'godifa_production';[m
+     private const DB_CHARSET = 'utf8mb4';[m
+     [m
+     private static $instance = null;[m
+[1mdiff --git a/public/js/admin_chat_client.js b/public/js/admin_chat_client.js[m
+[1mindex 00aa56f..f66b255 100644[m
+[1m--- a/public/js/admin_chat_client.js[m
+[1m+++ b/public/js/admin_chat_client.js[m
+[36m@@ -16,9 +16,14 @@[m [mdocument.addEventListener('DOMContentLoaded', () => {[m
+     // ĐÃ CẬP NHẬT: Sử dụng ID mới từ HTML[m
+     const searchConversationInput = document.getElementById('searchConversation'); [m
+ [m
+[31m-    // Lấy Socket Server URL từ metadata (tự động điều chỉnh theo môi trường)[m
+[31m-    const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('data-socket-url') : 'http://localhost:3000'; [m
+[32m+[m[32m    // Lấy Socket Server URL từ metadata hoặc window[m
+[32m+[m[32m    const SOCKET_SERVER_URL_RAW = window.SOCKET_SERVER_URL ||[m[41m [m
+[32m+[m[32m                                   (metadata ? metadata.getAttribute('data-socket-url') : null) ||[m[41m [m
+[32m+[m[32m                                   'https://godifaproject.id.vn/ws';[m
+     [m
+[32m+[m[32m    // Loại bỏ /ws khỏi URL vì đã dùng trong path option[m
+[32m+[m[32m    const SOCKET_SERVER_URL = SOCKET_SERVER_URL_RAW.replace('/ws', '');[m
+[32m+[m
+     // Lấy BASE_URL từ window, đảm bảo có dấu / cuối[m
+     let BASE_URL = window.BASE_URL || (window.location.origin + '/');[m
+     if (!BASE_URL.endsWith('/')) {[m
+[36m@@ -26,8 +31,11 @@[m [mdocument.addEventListener('DOMContentLoaded', () => {[m
+     }[m
+     [m
+     console.log('Admin Chat - BASE_URL:', BASE_URL);[m
+[31m-    [m
+[31m-    const socket = io(SOCKET_SERVER_URL);[m
+[32m+[m[32m    console.log('Admin Chat - SOCKET_SERVER_URL:', SOCKET_SERVER_URL);[m
+[32m+[m
+[32m+[m[32m    const socket = io(SOCKET_SERVER_URL, {[m
+[32m+[m[32m    path: '/ws/socket.io'[m
+[32m+[m[32m});[m
+     [m
+     // ----------------------------------------------------------------[m
+     // 2. HÀM TIỆN ÍCH[m
+[36m@@ -385,4 +393,4 @@[m [mdocument.addEventListener('DOMContentLoaded', () => {[m
+         });[m
+     }[m
+ [m
+[31m-}); // Đóng document.addEventListener('DOMContentLoaded', ...[m
+\ No newline at end of file[m
+[32m+[m[32m}); // Đóng document.addEventListener('DOMContentLoaded', ...[m
+[1mdiff --git a/public/js/chat_client.js b/public/js/chat_client.js[m
+[1mindex 57bc9e6..f50429d 100644[m
+[1m--- a/public/js/chat_client.js[m
+[1m+++ b/public/js/chat_client.js[m
+[36m@@ -2,7 +2,9 @@[m
+ [m
+ // Khai báo SOCKET_SERVER_URL ở đầu (sẽ lấy từ metadata sau)[m
+ const SOCKET_SERVER_PORT = 3000;[m
+[31m-const SOCKET_SERVER_URL = `http://localhost:${SOCKET_SERVER_PORT}`; [m
+[32m+[m[32m// Lấy SOCKET_SERVER_URL từ metadata hoặc fallback[m
+[32m+[m[32mconst metadata = document.querySelector('meta[name="socket-server-url"]');[m
+[32m+[m[32mconst SOCKET_SERVER_URL = metadata ? metadata.getAttribute('content') : 'https://godifaproject.id.vn/ws';[m
+ [m
+ // Lấy BASE_URL từ window, đảm bảo có dấu / cuối[m
+ let BASE_URL = window.BASE_URL || (window.location.origin + '/');[m
+[36m@@ -13,7 +15,11 @@[m [mif (!BASE_URL.endsWith('/')) {[m
+ console.log('Customer Chat - BASE_URL:', BASE_URL);[m
+ [m
+ // Khởi tạo kết nối Socket.IO[m
+[31m-const socket = io(SOCKET_SERVER_URL); [m
+[32m+[m[32m// Nếu URL có /ws thì dùng path custom, không thì dùng mặc định[m
+[32m+[m[32mconst socketOptions = SOCKET_SERVER_URL.includes('/ws')[m[41m [m
+[32m+[m[32m    ? { path: '/ws/socket.io' }[m[41m [m
+[32m+[m[32m    : {};[m
+[32m+[m[32mconst socket = io(SOCKET_SERVER_URL.replace('/ws', ''), socketOptions);[m
+ [m
+ // ----------------------------------------------------------------[m
+ // HÀM TIỆN ÍCH[m
+[36m@@ -236,4 +242,4 @@[m [mdocument.addEventListener('DOMContentLoaded', function() {[m
+         });[m
+     }[m
+ [m
+[31m-});[m
+\ No newline at end of file[m
+[32m+[m[32m});[m
+[1mdiff --git a/view/chat/index.php b/view/chat/index.php[m
+[1mindex 698a654..afe591c 100644[m
+[1m--- a/view/chat/index.php[m
+[1m+++ b/view/chat/index.php[m
+[36m@@ -1,6 +1,9 @@[m
+ <?php[m
+ // FILE: GODIFA/view/chat/index.php[m
+ [m
+[32m+[m[32m// Include constants để có SOCKET_SERVER_URL[m
+[32m+[m[32mrequire_once __DIR__ . "/../../config/constants.php";[m
+[32m+[m
+ // ------------------------------------------------------------------[m
+ // LOGIC KHỞI TẠO VÀ PHÂN LOẠI NGƯỜI DÙNG (Fix Undefined Variable)[m
+ // ------------------------------------------------------------------[m
+[36m@@ -306,9 +309,11 @@[m [mif ($user_type === 'customer' && $user_id !== 'guest') {[m
+     [m
+     <script>[m
+         // Truyền BASE_URL cho JavaScript[m
+[31m-        window.BASE_URL = '<?php echo BASE_URL; ?>';[m
+[32m+[m	[32m window.BASE_URL = '<?= BASE_URL ?>';[m
+[32m+[m[32m         window.SOCKET_SERVER_URL = '<?= SOCKET_SERVER_URL ?>';[m
+     </script>[m
+     [m
+[32m+[m[32m    <meta name="socket-server-url" content="<?php echo SOCKET_SERVER_URL; ?>">[m
+     <script src="<?php echo BASE_URL; ?>public/js/chat_client.js"></script>[m
+     [m
+     <script>[m
+[36m@@ -342,4 +347,4 @@[m [mif ($user_type === 'customer' && $user_id !== 'guest') {[m
+         });[m
+     </script>[m
+ </body>[m
+[31m-</html>[m
+\ No newline at end of file[m
+[32m+[m[32m</html>[m

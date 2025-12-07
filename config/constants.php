@@ -22,7 +22,7 @@ define('PAYMENT_CANCELLED', 'Đã hủy');
 
 // Order Delivery Status
 define('DELIVERY_PENDING', 'Chờ xác nhận');
-define('DELIVERY_PROCESSING', 'Đang tiến hành vận chuyển');
+define('DELIVERY_PROCESSING', 'Đang vận chuyển');
 define('DELIVERY_COMPLETED', 'Hoàn thành');
 define('DELIVERY_CANCELLED', 'Đã hủy');
 
@@ -59,7 +59,7 @@ if (!defined('BASE_URL')) {
     // Detect environment: local vs production
     $isLocal = (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || 
                 strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false);
-    define('BASE_URL', $isLocal ? 'http://localhost/GODIFA/' : 'https://godifa.id.vn/');
+    define('BASE_URL', $isLocal ? 'http://localhost/GODIFA/' : 'https://godifaproject.id.vn/');
 }
 define('ADMIN_BASE_URL', BASE_URL . 'admin/');
 
@@ -87,8 +87,25 @@ define('QR_EXPIRY_MINUTES', 15);
 
 // ==================== CHAT & WEBSOCKET ====================
 // Socket.IO Server URL (thay đổi khi deploy lên VPS)
+// 
+// OPTION 1: Dùng subdomain riêng (cần cấu hình DNS)
+// - Local: http://localhost:3000
+// - VPS: https://chat.godifa.id.vn
+//
+// OPTION 2: Dùng đường dẫn con (đơn giản hơn, không cần subdomain)
+// - Local: http://localhost:3000
+// - VPS: https://godifa.id.vn/ws
+//
 if (!defined('SOCKET_SERVER_URL')) {
     $isLocal = (strpos($_SERVER['HTTP_HOST'] ?? 'localhost', 'localhost') !== false || 
-                strpos($_SERVER['HTTP_HOST'] ?? '127.0.0.1', '127.0.0.1') !== false);
-    define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://chat.godifa.id.vn');
+                strpos($_SERVER['HTTP_HOST'] ?? '127.0.0.1', '127.0.0.1') !== false ||
+                strpos($_SERVER['HTTP_HOST'] ?? '', '192.168.') !== false);
+    
+    // Chọn 1 trong 2 options dưới đây:
+    
+    // OPTION 1: Subdomain (mặc định)
+    //define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://chat.godifa.id.vn');
+    
+    // OPTION 2: Path-based (uncomment dòng dưới và comment dòng trên)
+    define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://godifaproject.id.vn/ws');
 }

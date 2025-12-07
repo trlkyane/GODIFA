@@ -296,6 +296,10 @@ include __DIR__ . '/../includes/header.php';
         }
     }
 </script>
+    <script>
+        window.SOCKET_SERVER_URL = '<?= SOCKET_SERVER_URL ?>';
+    </script>
+    <meta name="socket-server-url" content="<?= SOCKET_SERVER_URL ?>">
 <script src="<?php echo BASE_URL; ?>public/js/admin_chat_client.js"></script> 
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

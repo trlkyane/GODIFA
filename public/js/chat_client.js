@@ -2,7 +2,9 @@
 
 // Khai báo SOCKET_SERVER_URL ở đầu (sẽ lấy từ metadata sau)
 const SOCKET_SERVER_PORT = 3000;
-const SOCKET_SERVER_URL = `http://localhost:${SOCKET_SERVER_PORT}`; 
+// Lấy SOCKET_SERVER_URL từ metadata hoặc fallback
+const metadata = document.querySelector('meta[name="socket-server-url"]');
+const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('content') : 'https://godifaproject.id.vn/ws';
 
 // Lấy BASE_URL từ window, đảm bảo có dấu / cuối
 let BASE_URL = window.BASE_URL || (window.location.origin + '/');
@@ -13,7 +15,11 @@ if (!BASE_URL.endsWith('/')) {
 console.log('Customer Chat - BASE_URL:', BASE_URL);
 
 // Khởi tạo kết nối Socket.IO
-const socket = io(SOCKET_SERVER_URL); 
+// Nếu URL có /ws thì dùng path custom, không thì dùng mặc định
+const socketOptions = SOCKET_SERVER_URL.includes('/ws') 
+    ? { path: '/ws/socket.io' } 
+    : {};
+const socket = io(SOCKET_SERVER_URL.replace('/ws', ''), socketOptions);
 
 // ----------------------------------------------------------------
 // HÀM TIỆN ÍCH

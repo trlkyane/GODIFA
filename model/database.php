@@ -8,9 +8,9 @@
 class Database {
     // Database credentials (sẽ cần thay đổi khi deploy lên VPS)
     private const DB_HOST = 'localhost';
-    private const DB_USER = 'root';
-    private const DB_PASS = '';
-    private const DB_NAME = 'godifa1';
+    private const DB_USER = 'godifa_user';
+    private const DB_PASS = 'Godifa@2025';
+    private const DB_NAME = 'godifa_production';
     private const DB_CHARSET = 'utf8mb4';
     
     private static $instance = null;

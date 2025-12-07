@@ -1,9 +1,6 @@
 <?php
 // FILE: GODIFA/view/chat/index.php
 
-// Include constants để có SOCKET_SERVER_URL
-require_once __DIR__ . "/../../config/constants.php";
-
 // ------------------------------------------------------------------
 // LOGIC KHỞI TẠO VÀ PHÂN LOẠI NGƯỜI DÙNG (Fix Undefined Variable)
 // ------------------------------------------------------------------
@@ -309,11 +306,10 @@ if ($user_type === 'customer' && $user_id !== 'guest') {
     
     <script>
         // Truyền BASE_URL cho JavaScript
-	 window.BASE_URL = '<?= BASE_URL ?>';
          window.SOCKET_SERVER_URL = '<?= SOCKET_SERVER_URL ?>';
     </script>
+	<meta name="socket-server-url" content="<?= SOCKET_SERVER_URL ?>">
     
-    <meta name="socket-server-url" content="<?php echo SOCKET_SERVER_URL; ?>">
     <script src="<?php echo BASE_URL; ?>public/js/chat_client.js"></script>
     
     <script>
