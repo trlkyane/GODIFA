@@ -29,8 +29,8 @@ $conn = Database::getInstance()->getConnection();
 $success = '';
 $error = '';
 
-// Xử lý POST actions
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && hasPermission('update_order_status')) {
+// Xử lý POST actions - Đã kiểm tra role ở đầu file (OWNER và SALES)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $returnID = intval($_POST['returnID'] ?? 0);
     $action = $_POST['action'] ?? '';
     $adminNote = trim($_POST['adminNote'] ?? '');
@@ -365,7 +365,8 @@ function viewReturnDetail(data) {
     const color = statusColor[data.status] || 'gray';
     
     let actionsHtml = '';
-    const canUpdate = <?php echo hasPermission('update_order_status') ? 'true' : 'false'; ?>;
+    // Kiểm tra role (OWNER hoặc SALES)
+    const canUpdate = <?php echo in_array($_SESSION['role_id'], [ROLE_OWNER, ROLE_SALES]) ? 'true' : 'false'; ?>;
 
     // Hiển thị ghi chú cũ nếu có
     if (data.adminNote) {

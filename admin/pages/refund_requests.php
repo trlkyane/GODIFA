@@ -28,109 +28,106 @@ $error = '';
 
 // Xử lý CẬP NHẬT trạng thái hoàn tiền
 if (isset($_POST['update_refund_status'])) {
-    if (!hasPermission('manage_orders')) {
-        $error = 'Bạn không có quyền cập nhật trạng thái hoàn tiền!';
-    } else {
-        $refundID = intval($_POST['refundID']);
-        $action = $_POST['action']; // 'approve' hoặc 'reject'
-        $adminNote = trim($_POST['adminNote'] ?? '');
+    // Đã kiểm tra role ở đầu file (chỉ OWNER và SALES được vào), nên không cần check thêm
+    $refundID = intval($_POST['refundID']);
+    $action = $_POST['action']; // 'approve' hoặc 'reject'
+    $adminNote = trim($_POST['adminNote'] ?? '');
+    
+    $db = Database::getInstance();
+    $conn = $db->connect();
+    
+    // Xác định trạng thái dựa trên action
+    $status = ($action === 'approve') ? 'Đã hoàn tiền' : 'Từ chối';
+    
+    // Bắt đầu transaction
+    mysqli_begin_transaction($conn);
+    
+    try {
+        // Cập nhật trạng thái yêu cầu hoàn tiền
+        $sql = "UPDATE refund_requests 
+                SET status = ?, 
+                    adminNote = ?, 
+                    processedBy = ?, 
+                    processedAt = NOW()
+                WHERE refundID = ?";
         
-        $db = Database::getInstance();
-        $conn = $db->connect();
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ssii", $status, $adminNote, $_SESSION['user_id'], $refundID);
+        mysqli_stmt_execute($stmt);
         
-        // Xác định trạng thái dựa trên action
-        $status = ($action === 'approve') ? 'Đã hoàn tiền' : 'Từ chối';
-        
-        // Bắt đầu transaction
-        mysqli_begin_transaction($conn);
-        
-        try {
-            // Cập nhật trạng thái yêu cầu hoàn tiền
-            $sql = "UPDATE refund_requests 
-                    SET status = ?, 
-                        adminNote = ?, 
-                        processedBy = ?, 
-                        processedAt = NOW()
-                    WHERE refundID = ?";
+        // Nếu ĐỒNG Ý hoàn tiền, cập nhật trạng thái đơn hàng
+        if ($action === 'approve') {
+            // Lấy thông tin orderID từ refund request
+            $sqlGetOrder = "SELECT orderID FROM refund_requests WHERE refundID = ?";
+            $stmtGet = mysqli_prepare($conn, $sqlGetOrder);
+            mysqli_stmt_bind_param($stmtGet, "i", $refundID);
+            mysqli_stmt_execute($stmtGet);
+            $resultGet = mysqli_stmt_get_result($stmtGet);
+            $orderData = mysqli_fetch_assoc($resultGet);
             
-            $stmt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmt, "ssii", $status, $adminNote, $_SESSION['user_id'], $refundID);
-            mysqli_stmt_execute($stmt);
+            if ($orderData && isset($orderData['orderID'])) {
+                $orderIDToUpdate = $orderData['orderID'];
             
-            // Nếu ĐỒNG Ý hoàn tiền, cập nhật trạng thái đơn hàng
-            if ($action === 'approve') {
-                // Lấy thông tin orderID từ refund request
-                $sqlGetOrder = "SELECT orderID FROM refund_requests WHERE refundID = ?";
-                $stmtGet = mysqli_prepare($conn, $sqlGetOrder);
-                mysqli_stmt_bind_param($stmtGet, "i", $refundID);
-                mysqli_stmt_execute($stmtGet);
-                $resultGet = mysqli_stmt_get_result($stmtGet);
-                $orderData = mysqli_fetch_assoc($resultGet);
+            // Kiểm tra trạng thái trước khi update
+            $sqlCheck = "SELECT deliveryStatus, paymentStatus FROM `order` WHERE orderID = ?";
+            $stmtCheck = mysqli_prepare($conn, $sqlCheck);
+            mysqli_stmt_bind_param($stmtCheck, "i", $orderIDToUpdate);
+            mysqli_stmt_execute($stmtCheck);
+            $resultCheck = mysqli_stmt_get_result($stmtCheck);
+            $beforeUpdate = mysqli_fetch_assoc($resultCheck);
                 
-                if ($orderData && isset($orderData['orderID'])) {
-                    $orderIDToUpdate = $orderData['orderID'];
-                    
-                    // Kiểm tra trạng thái trước khi update
-                    $sqlCheck = "SELECT deliveryStatus, paymentStatus FROM `order` WHERE orderID = ?";
-                    $stmtCheck = mysqli_prepare($conn, $sqlCheck);
-                    mysqli_stmt_bind_param($stmtCheck, "i", $orderIDToUpdate);
-                    mysqli_stmt_execute($stmtCheck);
-                    $resultCheck = mysqli_stmt_get_result($stmtCheck);
-                    $beforeUpdate = mysqli_fetch_assoc($resultCheck);
-                    
-                    // Cập nhật trạng thái đơn hàng khi Admin xác nhận đã hoàn tiền
-                    // ĐƠN HỦY: deliveryStatus = "Đã hủy"
-                    $sqlUpdateOrder = "UPDATE `order` 
-                                     SET deliveryStatus = 'Đã hủy',
-                                         paymentStatus = 'Đã hoàn tiền'
-                                     WHERE orderID = " . intval($orderIDToUpdate);
-                    
-                    if (!mysqli_query($conn, $sqlUpdateOrder)) {
-                        throw new Exception('Lỗi khi cập nhật trạng thái đơn hàng: ' . mysqli_error($conn));
-                    }
-                    
-                    $affectedRows = mysqli_affected_rows($conn);
-                    
-                    // Log để debug (có thể bỏ sau)
-                    error_log("REFUND UPDATE - OrderID: $orderIDToUpdate | Before: {$beforeUpdate['deliveryStatus']}/{$beforeUpdate['paymentStatus']} | Affected: $affectedRows");
-                    
-                    // Verify update thành công
-                    if ($affectedRows === 0) {
-                        // Có thể đơn hàng đã ở trạng thái đúng rồi
-                        // Kiểm tra lại
-                        mysqli_stmt_execute($stmtCheck);
-                        $resultAfter = mysqli_stmt_get_result($stmtCheck);
-                        $afterUpdate = mysqli_fetch_assoc($resultAfter);
-                        
-                        // ĐƠN HỦY: deliveryStatus phải là "Đã hủy", paymentStatus phải là "Đã hoàn tiền"
-                        if ($afterUpdate['deliveryStatus'] !== 'Đã hủy' || $afterUpdate['paymentStatus'] !== 'Đã hoàn tiền') {
-                            throw new Exception('Không thể cập nhật đơn hàng #' . $orderIDToUpdate . '. Affected rows: 0');
-                        }
-                        // Nếu đã đúng rồi thì OK
-                    }
-                } else {
-                    throw new Exception('Không tìm thấy thông tin đơn hàng liên kết với yêu cầu hoàn tiền này');
+                // Cập nhật trạng thái đơn hàng khi Admin xác nhận đã hoàn tiền
+                // ĐƠN HỦY: deliveryStatus = "Đã hủy"
+                $sqlUpdateOrder = "UPDATE `order` 
+                                 SET deliveryStatus = 'Đã hủy',
+                                     paymentStatus = 'Đã hoàn tiền'
+                                 WHERE orderID = " . intval($orderIDToUpdate);
+                
+                if (!mysqli_query($conn, $sqlUpdateOrder)) {
+                    throw new Exception('Lỗi khi cập nhật trạng thái đơn hàng: ' . mysqli_error($conn));
                 }
-            }
-            
-            // Commit transaction
-            mysqli_commit($conn);
-            
-            if ($action === 'approve') {
-                $success = '✅ Đã xác nhận hoàn tiền thành công! Đơn hàng #' . ($orderData['orderID'] ?? 'N/A') . ' đã được cập nhật sang trạng thái "Đã hoàn tiền".';
+                
+                $affectedRows = mysqli_affected_rows($conn);
+                
+                // Log để debug (có thể bỏ sau)
+                error_log("REFUND UPDATE - OrderID: $orderIDToUpdate | Before: {$beforeUpdate['deliveryStatus']}/{$beforeUpdate['paymentStatus']} | Affected: $affectedRows");
+                
+                // Verify update thành công
+                if ($affectedRows === 0) {
+                    // Có thể đơn hàng đã ở trạng thái đúng rồi
+                    // Kiểm tra lại
+                    mysqli_stmt_execute($stmtCheck);
+                    $resultAfter = mysqli_stmt_get_result($stmtCheck);
+                    $afterUpdate = mysqli_fetch_assoc($resultAfter);
+                    
+                    // ĐƠN HỦY: deliveryStatus phải là "Đã hủy", paymentStatus phải là "Đã hoàn tiền"
+                    if ($afterUpdate['deliveryStatus'] !== 'Đã hủy' || $afterUpdate['paymentStatus'] !== 'Đã hoàn tiền') {
+                        throw new Exception('Không thể cập nhật đơn hàng #' . $orderIDToUpdate . '. Affected rows: 0');
+                    }
+                    // Nếu đã đúng rồi thì OK
+                }
             } else {
-                $success = '❌ Đã từ chối yêu cầu hoàn tiền.';
+                throw new Exception('Không tìm thấy thông tin đơn hàng liên kết với yêu cầu hoàn tiền này');
             }
-            
-            // Redirect để tránh submit lại khi refresh
-            header('Location: ' . ADMIN_BASE_URL . '?page=refund_requests&status=' . ($action === 'approve' ? 'success' : 'rejected'));
-            exit;
-            
-        } catch (Exception $e) {
-            // Rollback nếu có lỗi
-            mysqli_rollback($conn);
-            $error = 'Lỗi khi xử lý: ' . $e->getMessage();
         }
+        
+        // Commit transaction
+        mysqli_commit($conn);
+        
+        if ($action === 'approve') {
+            $success = '✅ Đã xác nhận hoàn tiền thành công! Đơn hàng #' . ($orderData['orderID'] ?? 'N/A') . ' đã được cập nhật sang trạng thái "Đã hoàn tiền".';
+        } else {
+            $success = '❌ Đã từ chối yêu cầu hoàn tiền.';
+        }
+        
+        // Redirect để tránh submit lại khi refresh
+        header('Location: ' . ADMIN_BASE_URL . '?page=refund_requests&status=' . ($action === 'approve' ? 'success' : 'rejected'));
+        exit;
+        
+    } catch (Exception $e) {
+        // Rollback nếu có lỗi
+        mysqli_rollback($conn);
+        $error = 'Lỗi khi xử lý: ' . $e->getMessage();
     }
 }
 
@@ -322,8 +319,8 @@ include __DIR__ . '/../includes/header.php';
                                             <i class="fas fa-eye"></i>
                                         </button>
                                         
-                                        <!-- Xác nhận hoàn tiền -->
-                                        <?php if ($refund['status'] === 'Chờ xử lý' && hasPermission('manage_orders')): ?>
+                                        <!-- Xác nhận hoàn tiền - Chỉ OWNER và SALES -->
+                                        <?php if ($refund['status'] === 'Chờ xử lý' && in_array($_SESSION['role_id'], [ROLE_OWNER, ROLE_SALES])): ?>
                                         <button onclick="updateRefundStatus(<?php echo $refund['refundID']; ?>)" 
                                                 class="text-green-600 hover:text-green-800 text-lg" title="Xác nhận hoàn tiền">
                                             <i class="fas fa-check-circle"></i>
