@@ -8,6 +8,14 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../middleware/auth.php';
 requireStaff();
 
+// Giới hạn quyền: Chỉ Chủ doanh nghiệp (1) và Nhân viên bán hàng (3)
+if (!in_array($_SESSION['role_id'], [ROLE_OWNER, ROLE_SALES])) {
+    die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">
+        <i class="fas fa-lock mr-2"></i>
+        Chỉ Chủ doanh nghiệp và Nhân viên bán hàng mới có quyền truy cập trang này!
+    </div></div>');
+}
+
 // Check permission
 if (!hasPermission('view_orders') && !hasPermission('manage_orders')) {
     die('<div class="p-8"><div class="bg-red-100 text-red-700 p-4 rounded">Bạn không có quyền truy cập trang này!</div></div>');

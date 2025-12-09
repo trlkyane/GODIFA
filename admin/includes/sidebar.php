@@ -88,7 +88,7 @@ if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
         </a>
         <?php endif; ?>
 
-        <?php if (hasPermission('view_orders') || hasPermission('manage_orders')): ?>
+        <?php if ((hasPermission('view_orders') || hasPermission('manage_orders')) && in_array($_SESSION['role_id'], [ROLE_OWNER, ROLE_SALES])): ?>
         <?php
         // Đếm số yêu cầu hoàn tiền chờ xử lý
         $pendingRefundsCount = 0;
