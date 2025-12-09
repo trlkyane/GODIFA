@@ -260,6 +260,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div id="admin-metadata" style="display: none;" 
     data-user-id="<?php echo $currentUserID; ?>"
+    data-role-id="<?php echo $currentRoleID; ?>"
     data-user-type="user"
     data-init-conv-id="<?php echo $currentConversationID; ?>"
     data-init-customer-id="<?php echo $currentCustomerID; ?>"
@@ -300,7 +301,7 @@ include __DIR__ . '/../includes/header.php';
         window.SOCKET_SERVER_URL = '<?= SOCKET_SERVER_URL ?>';
     </script>
     <meta name="socket-server-url" content="<?= SOCKET_SERVER_URL ?>">
-<script src="<?php echo BASE_URL; ?>public/js/admin_chat_client.js"></script> 
+<script src="<?php echo BASE_URL; ?>public/js/admin_chat_client.js?v=<?= time() ?>"></script> 
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 
