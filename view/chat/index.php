@@ -286,12 +286,25 @@ if ($user_type === 'customer' && $user_id !== 'guest') {
             <div class="chat-main">
                 
                 <div id="messages-display" class="messages-display">
-                    </div>
+                    <?php if ($user_id === 'guest'): ?>
+                        <div style="padding: 20px; text-align: center; color: #666;">
+                            <i class="fas fa-lock" style="font-size: 48px; color: #ee4d2d; margin-bottom: 15px;"></i>
+                            <h3 style="margin: 10px 0; color: #333;">Vui lòng đăng nhập để chat</h3>
+                            <p style="margin-bottom: 20px;">Bạn cần đăng nhập tài khoản để sử dụng tính năng chat hỗ trợ</p>
+                            <a href="<?php echo BASE_URL; ?>customer-login" 
+                               style="display: inline-block; background-color: #ee4d2d; color: white; padding: 10px 30px; 
+                                      border-radius: 4px; text-decoration: none; font-weight: bold;">
+                                Đăng nhập ngay
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
-                <div class="chat-input-area">
+                <div class="chat-input-area" <?php if ($user_id === 'guest') echo 'style="display: none;"'; ?>>
                     <form id="message-form" class="message-form">
-                        <input type="text" id="message-input" placeholder="Nhập tin nhắn..." class="message-input">
-                        <button type="submit" class="send-button">Gửi</button>
+                        <input type="text" id="message-input" placeholder="Nhập tin nhắn..." class="message-input" 
+                               <?php if ($user_id === 'guest') echo 'disabled'; ?>>
+                        <button type="submit" class="send-button" <?php if ($user_id === 'guest') echo 'disabled'; ?>>Gửi</button>
                     </form>
                 </div>
             </div>
@@ -314,7 +327,7 @@ if ($user_type === 'customer' && $user_id !== 'guest') {
     </script>
     
     <meta name="socket-server-url" content="<?php echo SOCKET_SERVER_URL; ?>">
-    <script src="<?php echo BASE_URL; ?>public/js/chat_client.js"></script>
+    <script src="<?php echo BASE_URL; ?>public/js/chat_client.js?v=<?= time() ?>"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {

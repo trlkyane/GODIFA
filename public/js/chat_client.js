@@ -1,10 +1,26 @@
 ﻿// FILE: GODIFA/public/js/chat_client.js - ĐÃ HOÀN CHỈNH VỚI CHỨC NĂNG TẢI LỊCH SỬ & FIX VỊ TRÍ TIN NHẮN
 
-// Khai báo SOCKET_SERVER_URL ở đầu (sẽ lấy từ metadata sau)
-const SOCKET_SERVER_PORT = 3000;
+// Kiểm tra xem user có đăng nhập không trước khi khởi tạo socket
+const chatMetadata = document.getElementById('chat-metadata');
+const userId = chatMetadata ? chatMetadata.getAttribute('data-user-id') : 'guest';
+
+// Nếu là guest, không khởi tạo socket và dừng việc load script
+if (userId === 'guest') {
+    console.log('[CHAT] Guest user detected - Socket connection disabled. Please login to chat.');
+    // Không khởi tạo socket cho guest
+} else {
+    // Chỉ khởi tạo socket cho user đã đăng nhập
+    initializeChat();
+}
+
+function initializeChat() {
 // Lấy SOCKET_SERVER_URL từ metadata hoặc fallback
 const metadata = document.querySelector('meta[name="socket-server-url"]');
-const SOCKET_SERVER_URL = metadata ? metadata.getAttribute('content') : 'https://godifaproject.id.vn/ws';
+const SOCKET_SERVER_URL_RAW = metadata ? metadata.getAttribute('content') : 'http://localhost:3000';
+
+// Xử lý path cho production (có /ws) vs local (không có /ws)
+const needsCustomPath = SOCKET_SERVER_URL_RAW.includes('/ws');
+const SOCKET_SERVER_URL = SOCKET_SERVER_URL_RAW.replace('/ws', '');
 
 // Lấy BASE_URL từ window, đảm bảo có dấu / cuối
 let BASE_URL = window.BASE_URL || (window.location.origin + '/');
@@ -13,13 +29,60 @@ if (!BASE_URL.endsWith('/')) {
 }
 
 console.log('Customer Chat - BASE_URL:', BASE_URL);
+console.log('Customer Chat - SOCKET_SERVER_URL_RAW:', SOCKET_SERVER_URL_RAW);
+console.log('Customer Chat - SOCKET_SERVER_URL:', SOCKET_SERVER_URL);
+console.log('Customer Chat - needsCustomPath:', needsCustomPath);
 
-// Khởi tạo kết nối Socket.IO
-// Nếu URL có /ws thì dùng path custom, không thì dùng mặc định
-const socketOptions = SOCKET_SERVER_URL.includes('/ws') 
-    ? { path: '/ws/socket.io' } 
-    : {};
-const socket = io(SOCKET_SERVER_URL.replace('/ws', ''), socketOptions);
+// Khởi tạo kết nối Socket.IO với path tùy thuộc môi trường
+const socketConfig = needsCustomPath 
+    ? { path: '/ws/socket.io' }  // Production: https://domain.com/ws
+    : {};                         // Local: http://localhost:3000
+
+const socket = io(SOCKET_SERVER_URL, socketConfig);
+
+// 🔐 XÁC THỰC NGAY SAU KHI KẾT NỐI
+socket.on('connect', () => {
+    console.log('[SOCKET] Connected, authenticating as customer...');
+    
+    // Lấy customer_id từ window hoặc data attribute
+    const customerId = window.CURRENT_USER_ID || document.querySelector('[data-user-id]')?.getAttribute('data-user-id') || 'guest';
+    
+    // Gửi thông tin xác thực
+    socket.emit('authenticate', {
+        role_id: 0, // Customer không có role_id
+        user_id: customerId === 'guest' ? 0 : parseInt(customerId),
+        type: 'customer'
+    });
+});
+
+// Lắng nghe kết quả xác thực
+socket.on('auth_success', (data) => {
+    console.log('[AUTH] Authentication successful:', data.message);
+    
+    // 🔹 SAU KHI XÁC THỰC THÀNH CÔNG, JOIN ROOM NẾU CÓ
+    const chatMetadata = document.getElementById('chat-metadata');
+    const currentConvID = chatMetadata ? chatMetadata.getAttribute('data-conversation-id') : 'null';
+    
+    if (currentConvID !== 'null') {
+        socket.emit('join_room', { conversationID: currentConvID });
+        console.log(`[JOIN] Tham gia phòng chat conv:${currentConvID}`);
+    }
+});
+
+socket.on('auth_failed', (data) => {
+    console.error('[AUTH] Authentication failed:', data.message);
+    alert('Xác thực thất bại: ' + data.message);
+});
+
+socket.on('auth_required', (data) => {
+    console.error('[AUTH] Authentication required:', data.message);
+    alert('Vui lòng đăng nhập để sử dụng chat');
+});
+
+socket.on('permission_denied', (data) => {
+    console.error('[PERMISSION] Permission denied:', data.message);
+    alert(data.message);
+});
 
 // ----------------------------------------------------------------
 // HÀM TIỆN ÍCH
@@ -97,7 +160,9 @@ function loadChatHistory(convID, currentUserID) {
     }
 
     // Sử dụng BASE_URL để tương thích VPS
-    const apiUrl = `${BASE_URL}controller/ChatController.php?action=getMessages&conv_id=${convID}`; 
+    // Thêm timestamp để tránh cache
+    const timestamp = new Date().getTime();
+    const apiUrl = `${BASE_URL}controller/ChatController.php?action=getMessages&conv_id=${convID}&_=${timestamp}`; 
     
     fetch(apiUrl)
         .then(response => {
@@ -152,16 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadChatHistory(currentConvID, currentUserID);
     }
     
-    // --- SOCKET LISTENERS & ROOM JOIN ---
-
-    socket.on('connect', () => {
-        console.log('Socket.IO: Connected.');
-        
-        // Tham gia Phòng Trò chuyện hiện tại nếu có ConvID
-        if (currentConvID !== 'null') {
-             socket.emit('join_room', { conversationID: currentConvID });
-        }
-    });
+    // --- SOCKET LISTENERS ---
     
     // SỬ DỤNG SỰ KIỆN ĐÚNG: 'receive_message'
     socket.on('receive_message', (messageData) => {
@@ -242,4 +298,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-});
+}); // Đóng initializeChat function
+
+} // Đóng if-else check guest user
