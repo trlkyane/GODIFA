@@ -11,9 +11,9 @@ const chatModel = new ChatModel();
 let faqs = {}; 
 let sortedKeywords = []; // Danh sách từ khóa đã sắp xếp
 
-// 🆕 MAP THEO DÕI TRẠNG THÁI BOT CHO MỖI CUỘC HỘI THOẠI
-// Key: conversationID, Value: { hasStaffJoined: boolean }
-const conversationStates = new Map();
+// 🆕 MAP THEO DÕI NHÂN VIÊN ONLINE CHO MỖI CONVERSATION
+// Key: conversationID, Value: Set of staff socket IDs
+const staffOnlineByConversation = new Map();
 
 // Cấu hình CORS
 const io = new Server(server, {
@@ -31,64 +31,47 @@ chatModel.loadFAQs().then(loadedFaqs => {
     console.log(`[BOT] Đã tải ${sortedKeywords.length} mục FAQ từ CSDL.`);
     
     // 🆕 Xóa toàn bộ state cũ khi restart server
-    conversationStates.clear();
-    console.log(`[BOT] Đã xóa toàn bộ trạng thái cũ của bot (conversationStates cleared).`);
+    staffOnlineByConversation.clear();
+    console.log(`[BOT] Đã xóa toàn bộ trạng thái cũ của bot (staffOnlineByConversation cleared).`);
 }).catch(e => {
     console.error("Lỗi khi tải FAQ ban đầu:", e);
 });
 
 // ==========================================================
-// HÀM KIỂM TRA GIỜ HÀNH CHÍNH
-// ==========================================================
-/**
- * Kiểm tra xem hiện tại có phải giờ hành chính không
- * Giờ hành chính: 8:00 - 17:00 (Thứ 2 - Chủ nhật)
- * @returns {boolean} true nếu đang trong giờ hành chính
- */
-function isBusinessHours() {
-    const now = new Date();
-    const hour = now.getHours();
-    
-    // 🔍 DEBUG: Log giờ hiện tại
-    console.log(`[TIME CHECK] Giờ hiện tại: ${hour}:${now.getMinutes()}`);
-    
-    // Giờ hành chính: 8h sáng đến 5h chiều (17h)
-    const isWithinHours = hour >= 8 && hour < 17;
-    console.log(`[TIME CHECK] Trong giờ hành chính? ${isWithinHours ? 'CÓ ✅' : 'KHÔNG ❌'}`);
-    
-    return isWithinHours;
-}
-
-// ==========================================================
-// HÀM XỬ LÝ PHẢN HỒI BOT (CHỈ DÙNG FAQ)
-// LOGIC MỚI: Chỉ dựa vào hasStaffJoined
+// HÀM XỬ LÝ PHẢN HỒI BOT
+// LOGIC MỚI: 
+// - CÓ NHÂN VIÊN ONLINE → Bot im lặng hoàn toàn
+// - KHÔNG CÓ NHÂN VIÊN ONLINE:
+//   + Trúng keyword FAQ → Bot trả lời
+//   + Không trúng keyword → Thông báo chờ nhân viên
 // ==========================================================
 /**
  * Xử lý phản hồi của Bot theo logic mới:
  * 
- * 🔹 KHÔNG CÓ ADMIN ONLINE (hasStaffJoined = false):
- *    - Có từ khóa FAQ: Bot trả lời ✅
- *    - Ngoài FAQ: Bot luôn phản hồi "Chờ nhân viên..." (lặp lại mỗi lần hỏi) ⚠️
+ * 🔹 CÓ NHÂN VIÊN ONLINE (staffOnlineByConversation has entries):
+ *    - Bot im lặng HOÀN TOÀN ✅
  * 
- * 🔹 CÓ ADMIN ONLINE (hasStaffJoined = true):
- *    - Bot im lặng HOÀN TOÀN (cả FAQ lẫn ngoài FAQ) 🔇
+ * 🔹 KHÔNG CÓ NHÂN VIÊN ONLINE:
+ *    - Có từ khóa FAQ → Bot trả lời ✅
+ *    - Không trúng keyword → Bot thông báo "Xin lỗi, tôi chưa được đào tạo..." ⚠️
  */
 async function handleBotResponse(io, conversationID, message) {
-    // 🔍 KIỂM TRA TRẠNG THÁI CUỘC HỘI THOẠI
-    const state = conversationStates.get(conversationID) || { hasStaffJoined: false };
+    // 🔍 KIỂM TRA CÓ NHÂN VIÊN ONLINE KHÔNG
+    const staffSockets = staffOnlineByConversation.get(conversationID) || new Set();
+    const hasStaffOnline = staffSockets.size > 0;
     
-    console.log(`[BOT DEBUG] ConvID ${conversationID}: hasStaffJoined = ${state.hasStaffJoined}, Message: "${message}"`);
+    console.log(`[BOT DEBUG] ConvID ${conversationID}: staffOnline = ${hasStaffOnline} (${staffSockets.size} nhân viên), Message: "${message}"`);
 
-    // ❌ NẾU ADMIN ĐÃ ONLINE → Bot im lặng hoàn toàn (không phản hồi gì cả)
-    if (state.hasStaffJoined) {
-        console.log(`[BOT] ConvID ${conversationID}: Admin đã online, Bot im lặng HOÀN TOÀN.`);
+    // ❌ NẾU CÓ NHÂN VIÊN ONLINE → Bot im lặng hoàn toàn
+    if (hasStaffOnline) {
+        console.log(`[BOT] ConvID ${conversationID}: Có ${staffSockets.size} nhân viên online, Bot im lặng HOÀN TOÀN.`);
         return;
     }
 
     let botResponse = null;
     let foundKeyword = false;
 
-    // 1. TÌM KIẾM FAQ CỐ ĐỊNH TRƯỚC
+    // 1. TÌM KIẾM FAQ
     const normalizedMessage = message.toLowerCase().trim();
     
     for (const keyword of sortedKeywords) {
@@ -96,7 +79,7 @@ async function handleBotResponse(io, conversationID, message) {
         if (normalizedMessage.includes(keyword)) {
             botResponse = faqs[keyword];
             foundKeyword = true;
-            console.log(`[BOT] Phản hồi FAQ cố định (Keyword: ${keyword}) cho ConvID: ${conversationID}`);
+            console.log(`[BOT] Phản hồi FAQ (Keyword: "${keyword}") cho ConvID: ${conversationID}`);
             // Đã tìm thấy từ khóa khớp dài nhất, thoát vòng lặp
             break; 
         }
@@ -107,13 +90,13 @@ async function handleBotResponse(io, conversationID, message) {
         console.log(`[BOT] ConvID ${conversationID}: Tìm thấy FAQ, trả lời.`);
         // (Lưu và broadcast sẽ ở cuối hàm)
     }
-    // 3. NẾU KHÔNG TÌM THẤY FAQ → Gửi "Chờ nhân viên..." (lặp lại mỗi lần)
+    // 3. NẾU KHÔNG TÌM THẤY FAQ → Thông báo chờ nhân viên
     else {
-        console.log(`[BOT] ConvID ${conversationID}: Chưa có admin, gửi thông báo chờ nhân viên.`);
-        botResponse = "Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Vui lòng chờ nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất có thể! 😊";
+        console.log(`[BOT] ConvID ${conversationID}: Không trúng keyword, gửi thông báo chờ nhân viên.`);
+        botResponse = "Xin lỗi, tôi chưa được đào tạo để trả lời câu hỏi này. Nhân viên sẽ phản hồi bạn sớm nhất có thể (Giờ làm việc là 8h-17h)!";
     }
 
-    // 3. Lưu và gửi phản hồi của Bot (nếu có)
+    // Lưu và gửi phản hồi của Bot (nếu có)
     if (botResponse) { 
         const chatID = await chatModel.saveMessage({
             conversation_ID: conversationID, 
@@ -139,15 +122,73 @@ async function handleBotResponse(io, conversationID, message) {
         } else {
              console.error("Lỗi: Lưu tin nhắn Bot thất bại (ChatID null/undefined). Bỏ qua broadcast.");
         }
-    } else {
-        // Bot đã gửi thông báo chờ trước đó, giờ im lặng
-        console.log(`[BOT] ConvID ${conversationID}: Đã gửi thông báo chờ trước đó, bỏ qua tin nhắn này.`);
     }
 }
 
 
 io.on('connection', (socket) => {
-    console.log(`Socket ID: ${socket.id} Connected.`);
+    console.log(`Socket ID: ${socket.id} Connected. Waiting for authentication...`);
+    
+    // 🔐 BIẾN THEO DÕI XÁC THỰC
+    let isAuthenticated = false;
+    let userRole = null;
+    let userId = null;
+    let userType = null; // 'customer' hoặc 'staff'
+    
+    // 🔐 SỰ KIỆN XÁC THỰC (BẮT BUỘC)
+    socket.on('authenticate', (authData) => {
+        console.log('[AUTH] Nhận yêu cầu xác thực:', authData);
+        
+        const { role_id, user_id, type } = authData;
+        
+        // Kiểm tra type: chỉ cho phép 'customer' hoặc 'staff'
+        if (type !== 'customer' && type !== 'staff') {
+            console.error('[AUTH] FAILED: Invalid type:', type);
+            socket.emit('auth_failed', { message: 'Invalid user type' });
+            socket.disconnect(true);
+            return;
+        }
+        
+        // Nếu là staff, PHẢI là CSKH (role_id = 4)
+        if (type === 'staff') {
+            if (parseInt(role_id) !== 4) {
+                console.error(`[AUTH] FAILED: Staff role ${role_id} is not CSKH (4)`);
+                socket.emit('auth_failed', { message: 'Chỉ nhân viên CSKH mới có quyền chat!' });
+                socket.disconnect(true);
+                return;
+            }
+        }
+        
+        // Xác thực thành công
+        isAuthenticated = true;
+        userRole = parseInt(role_id);
+        userId = parseInt(user_id);
+        userType = type;
+        
+        console.log(`[AUTH] SUCCESS: User ${userId} (${type}, role: ${userRole}) authenticated`);
+        socket.emit('auth_success', { message: 'Authenticated successfully' });
+    });
+    
+    // 🔐 HÀM KIỂM TRA XÁC THỰC TRƯỚC MỖI HÀNH ĐỘNG
+    const requireAuth = (action) => {
+        if (!isAuthenticated) {
+            console.error(`[SECURITY] Unauthorized attempt to ${action} from socket ${socket.id}`);
+            socket.emit('auth_required', { message: 'Please authenticate first' });
+            return false;
+        }
+        return true;
+    };
+    
+    // 🔐 HÀM KIỂM TRA CHỈ CSKH (cho một số hành động đặc biệt)
+    const requireCSKH = (action) => {
+        if (!requireAuth(action)) return false;
+        if (userType !== 'staff' || userRole !== 4) {
+            console.error(`[SECURITY] Non-CSKH attempt to ${action} from socket ${socket.id}`);
+            socket.emit('permission_denied', { message: 'Chỉ CSKH mới có quyền thực hiện hành động này' });
+            return false;
+        }
+        return true;
+    };
     
     // Hàm xử lý việc lưu và broadcast tin nhắn
     const handleMessage = async (msg) => {
@@ -197,16 +238,6 @@ io.on('connection', (socket) => {
             if (msg.senderType === 'customer') {
                 await handleBotResponse(io, conversationID_int, msg.chatContent);
             }
-            
-            // 🆕 Đánh dấu nhân viên đã tham gia khi admin/user gửi tin nhắn
-            if (msg.senderType === 'user') {
-                const state = conversationStates.get(conversationID_int) || { hasStaffJoined: false };
-                if (!state.hasStaffJoined) {
-                    state.hasStaffJoined = true;
-                    conversationStates.set(conversationID_int, state);
-                    console.log(`[STAFF] ConvID ${conversationID_int}: Nhân viên đã tham gia, Bot sẽ im lặng với câu ngoài FAQ.`);
-                }
-            }
 
             return finalMessage;
 
@@ -220,6 +251,16 @@ io.on('connection', (socket) => {
     // SỰ KIỆN 1: KHÁCH HÀNG GỬI TIN NHẮN ĐẦU TIÊN (YÊU CẦU TẠO CONV)
     // -------------------------------------------------------------------
     socket.on('create_new_conversation', async (msg) => {
+        // 🔐 Kiểm tra xác thực
+        if (!requireAuth('create_new_conversation')) return;
+        
+        // 🔐 Chỉ customer mới được tạo conversation mới
+        if (userType !== 'customer') {
+            console.error('[SECURITY] Non-customer attempt to create conversation');
+            socket.emit('permission_denied', { message: 'Chỉ khách hàng mới có thể tạo hội thoại mới' });
+            return;
+        }
+        
         console.log("--- Nhận sự kiện create_new_conversation ---", msg);
         try {
             const customerID = parseInt(msg.senderID); 
@@ -265,15 +306,35 @@ io.on('connection', (socket) => {
     // SỰ KIỆN 2: CẢ KHÁCH HÀNG VÀ ADMIN GỬI TIN NHẮN BÌNH THƯỜNG
     // -------------------------------------------------------------------
     socket.on('send_message', async (msg) => {
+        // 🔐 Kiểm tra xác thực
+        if (!requireAuth('send_message')) return;
+        
+        // 🔐 Validate senderType
+        // - Customer phải dùng 'customer'
+        // - Staff có thể dùng 'user' (để lưu vào DB) hoặc 'staff'
+        const isValidSenderType = (
+            (userType === 'customer' && msg.senderType === 'customer') ||
+            (userType === 'staff' && (msg.senderType === 'user' || msg.senderType === 'staff'))
+        );
+        
+        if (!isValidSenderType) {
+            console.error(`[SECURITY] senderType mismatch: claimed ${msg.senderType}, actual userType ${userType}`);
+            socket.emit('permission_denied', { message: 'Invalid sender type' });
+            return;
+        }
+        
         // Xử lý lưu và broadcast tin nhắn
         await handleMessage(msg);
     });
     
     // -------------------------------------------------------------------
-    // SỰ KIỆN 3: ADMIN/USER THAM GIA PHÒNG CHAT CÓ SẴN (Cho phép nhận tin nhắn)
-    // 🆕 Đánh dấu nhân viên đã tham gia khi join room
+    // SỰ KIỆN 3: ADMIN/USER THAM GIA PHÒNG CHAT (JOIN ROOM)
+    // 🆕 Theo dõi nhân viên online khi join vào conversation
     // -------------------------------------------------------------------
     socket.on('join_room', (data) => {
+        // 🔐 Kiểm tra xác thực
+        if (!requireAuth('join_room')) return;
+        
         const conversationID_int = parseInt(data.conversationID);
         if (isNaN(conversationID_int) || conversationID_int <= 0) {
             console.error("LỖI JOIN ROOM: ConversationID không hợp lệ.", data);
@@ -281,17 +342,15 @@ io.on('connection', (socket) => {
         }
         const roomName = `conv:${conversationID_int}`;
         socket.join(roomName);
-        console.log(`Socket ID: ${socket.id} tham gia phòng ${roomName} (Quản lý/Khách cũ)`);
+        console.log(`Socket ID: ${socket.id} (${userType}, role: ${userRole}) tham gia phòng ${roomName}`);
         
-        // 🆕 Nếu là admin/user join vào -> Đánh dấu nhân viên đã tham gia
-        // (Giả sử client gửi thêm trường userType: 'admin' hoặc 'user')
-        if (data.userType === 'admin' || data.userType === 'user') {
-            const state = conversationStates.get(conversationID_int) || { hasStaffJoined: false };
-            if (!state.hasStaffJoined) {
-                state.hasStaffJoined = true;
-                conversationStates.set(conversationID_int, state);
-                console.log(`[STAFF] ConvID ${conversationID_int}: Nhân viên join room, Bot sẽ im lặng với câu ngoài FAQ.`);
+        // 🆕 Nếu là staff (CSKH) join vào -> Thêm vào danh sách online
+        if (userType === 'staff') {
+            if (!staffOnlineByConversation.has(conversationID_int)) {
+                staffOnlineByConversation.set(conversationID_int, new Set());
             }
+            staffOnlineByConversation.get(conversationID_int).add(socket.id);
+            console.log(`[STAFF] ConvID ${conversationID_int}: CSKH (socket ${socket.id}) join room, Bot sẽ im lặng. Total staff online: ${staffOnlineByConversation.get(conversationID_int).size}`);
         }
     });
     
@@ -299,21 +358,30 @@ io.on('connection', (socket) => {
     // SỰ KIỆN 4: 🆕 NHÂN VIÊN RỜI/ĐÓNG CONVERSATION
     // -------------------------------------------------------------------
     socket.on('staff_leave_conversation', (data) => {
+        // 🔐 Kiểm tra xác thực
+        if (!requireAuth('staff_leave_conversation')) return;
+        
         const conversationID_int = parseInt(data.conversationID);
         if (isNaN(conversationID_int) || conversationID_int <= 0) {
             console.error("LỖI STAFF LEAVE: ConversationID không hợp lệ.", data);
             return;
         }
         
-        const state = conversationStates.get(conversationID_int);
-        if (state) {
-            // Reset cờ để bot hoạt động lại từ đầu
-            state.hasStaffJoined = false;
-            conversationStates.set(conversationID_int, state);
-            console.log(`[STAFF] ConvID ${conversationID_int}: Nhân viên đã rời, Bot hoạt động trở lại. State reset: ${JSON.stringify(state)}`);
+        // Xóa staff khỏi danh sách online
+        if (staffOnlineByConversation.has(conversationID_int)) {
+            staffOnlineByConversation.get(conversationID_int).delete(socket.id);
+            const remainingStaff = staffOnlineByConversation.get(conversationID_int).size;
+            
+            // Nếu không còn staff nào, xóa entry
+            if (remainingStaff === 0) {
+                staffOnlineByConversation.delete(conversationID_int);
+                console.log(`[STAFF] ConvID ${conversationID_int}: Không còn nhân viên online, Bot sẽ hoạt động trở lại.`);
+            } else {
+                console.log(`[STAFF] ConvID ${conversationID_int}: Còn ${remainingStaff} nhân viên online, Bot vẫn im lặng.`);
+            }
         }
         
-        // Rời khỏi phòng (optional)
+        // Rời khỏi phòng
         const roomName = `conv:${conversationID_int}`;
         socket.leave(roomName);
         console.log(`Socket ID: ${socket.id} đã rời phòng ${roomName}`);
@@ -322,6 +390,22 @@ io.on('connection', (socket) => {
     // --- Xử lý ngắt kết nối ---
     socket.on('disconnect', () => {
         console.log(`Socket ID: ${socket.id} Disconnected.`);
+        
+        // 🆕 Xóa staff khỏi tất cả conversation khi disconnect
+        if (userType === 'staff') {
+            staffOnlineByConversation.forEach((staffSet, conversationID) => {
+                if (staffSet.has(socket.id)) {
+                    staffSet.delete(socket.id);
+                    console.log(`[STAFF] Socket ${socket.id} removed from ConvID ${conversationID} due to disconnect`);
+                    
+                    // Xóa entry nếu không còn staff
+                    if (staffSet.size === 0) {
+                        staffOnlineByConversation.delete(conversationID);
+                        console.log(`[STAFF] ConvID ${conversationID}: Không còn nhân viên online, Bot hoạt động trở lại.`);
+                    }
+                }
+            });
+        }
     });
 });
 
