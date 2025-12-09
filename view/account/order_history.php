@@ -312,10 +312,22 @@ $countCancelled = count(array_filter($allOrders, function($o) { return $o['payme
                         </button>
                         <?php endif; ?>
                         
-                        <?php if ($order['paymentStatus'] === 'Chưa thanh toán'): ?>
+                        <?php 
+                        // Chỉ hiện nút thanh toán với đơn QR chưa thanh toán
+                        $showPaymentButton = false;
+                        $paymentButtonText = 'Thanh Toán';
+                        
+                        if ($order['paymentMethod'] === 'QR') {
+                            if ($order['paymentStatus'] === 'Chưa thanh toán' || $order['paymentStatus'] === 'Chờ thanh toán') {
+                                $showPaymentButton = true;
+                                $paymentButtonText = ($order['paymentStatus'] === 'Chưa thanh toán') ? 'Thanh Toán' : 'Thanh toán lại';
+                            }
+                        }
+                        
+                        if ($showPaymentButton): ?>
                         <a href="<?php echo BASE_URL; ?>view/cart/checkout_qr.php?orderID=<?= $order['orderID'] ?>" 
                            class="flex-1 text-center bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition text-sm font-semibold">
-                            <i class="fas fa-credit-card mr-2"></i>Thanh Toán
+                            <i class="fas fa-credit-card mr-2"></i><?= $paymentButtonText ?>
                         </a>
                         <?php endif; ?>
                         

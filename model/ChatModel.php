@@ -6,25 +6,26 @@ class ChatModel {
 
     public function __construct() {
         try {
-            // Sử dụng Database class chung để tương thích VPS
-            require_once __DIR__ . '/database.php';
-            $dbInstance = Database::getInstance();
+            // Load environment config
+            require_once __DIR__ . '/../config/env.php';
             
-            // Lấy thông tin kết nối từ Database class
-            $reflection = new ReflectionClass('Database');
-            $dbHost = $reflection->getConstant('DB_HOST') ?: 'localhost';
-            $dbName = $reflection->getConstant('DB_NAME') ?: 'godifa1';
-            $dbUser = $reflection->getConstant('DB_USER') ?: 'root';
-            $dbPass = $reflection->getConstant('DB_PASS') ?: '';
+            // Get database credentials from environment
+            $dbHost = Env::get('DB_HOST', 'localhost');
+            $dbName = Env::get('DB_NAME', 'godifa_production');
+            $dbUser = Env::get('DB_USER', 'root');
+            $dbPass = Env::get('DB_PASS', '');
             
+            // Create PDO connection
             $this->db = new PDO(
-                "mysql:host={$dbHost};dbname={$dbName}",
+                "mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4",
                 $dbUser,
-                $dbPass
-            );
-            
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->db->exec("set names utf8"); 
+                $dbPass,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ]
+            ); 
         } catch (\PDOException $e) {
             die("Lỗi kết nối CSDL trong ChatModel: " . $e->getMessage()); 
         }

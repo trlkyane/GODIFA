@@ -103,22 +103,35 @@ class ChatController {
 }
 
 // Xá»­ lÃ½ request AJAX Ä‘á»ƒ táº£i lá»‹ch sá»­ chat
-// â¬…ï¸ ÄÃƒ Sá»¬A Lá»–I: Äá»•i action tá»« 'getChatHistory' thÃ nh 'getMessages' Ä‘á»ƒ khá»›p vá»›i JS
+// â¬…ï¸ ÄÃƒ Sá»¬A Lá»–I: Äá»•i action tá»« 'getChatHistory' thÃ nh 'getMessages' Ä'á»ƒ khá»›p vá»›i JS
 if (isset($_GET['action']) && $_GET['action'] === 'getMessages') {
+    // 🚫 Tắt cache cho API response
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    header('Content-Type: application/json');
+    
     $controller = new ChatController();
     
-    // â¬…ï¸ ÄÃƒ Sá»¬A Lá»–I: Äá»•i tham sá»‘ GET tá»« 'convID' thÃ nh 'conv_id' Ä‘á»ƒ khá»›p vá»›i JS
+    // â¬…ï¸ ÄÃƒ Sá»¬A Lá»–I: Äá»•i tham sá»' GET tá»« 'convID' thÃ nh 'conv_id' Ä'á»ƒ khá»›p vá»›i JS
     $convID = $_GET['conv_id'] ?? 0;
+    
+    // Clear any OPcache
+    if (function_exists('opcache_invalidate')) {
+        opcache_invalidate(__FILE__, true);
+    }
     
     $result = $controller->getChatHistory($convID);
     
-    // â¬…ï¸ ÄÃƒ Sá»¬A Lá»–I: TÃ¡i cáº¥u trÃºc output Ä‘á»ƒ khá»›p vá»›i JavaScript mong muá»‘n: {success: true, messages: [...]}
+    // Debug: Log số lượng messages
+    error_log("ChatController: Conv $convID returned " . count($result['data']) . " messages");
+    
+    // â¬…ï¸ ÄÃƒ Sá»¬A Lá»–I: TÃ¡i cáº¥u trÃºc output Ä'á»ƒ khá»›p vá»›i JavaScript mong muá»'n: {success: true, messages: [...]}
     $output = [
         'success' => $result['success'],
         'messages' => $result['data'] // Đổi key 'data' thành 'messages'
     ];
     
-    header('Content-Type: application/json');
     echo json_encode($output);
     exit;
 }

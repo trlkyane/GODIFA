@@ -19,10 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Lấy Socket Server URL từ metadata hoặc window
     const SOCKET_SERVER_URL_RAW = window.SOCKET_SERVER_URL || 
                                    (metadata ? metadata.getAttribute('data-socket-url') : null) || 
-                                   'https://godifaproject.id.vn/ws';
+                                   'http://localhost:3000';
     
-    // Loại bỏ /ws khỏi URL vì đã dùng trong path option
+    // Xử lý path cho production (có /ws) vs local (không có /ws)
+    const needsCustomPath = SOCKET_SERVER_URL_RAW.includes('/ws');
     const SOCKET_SERVER_URL = SOCKET_SERVER_URL_RAW.replace('/ws', '');
+    
+    console.log('Admin Chat - SOCKET_SERVER_URL_RAW:', SOCKET_SERVER_URL_RAW);
+    console.log('Admin Chat - SOCKET_SERVER_URL:', SOCKET_SERVER_URL);
+    console.log('Admin Chat - needsCustomPath:', needsCustomPath);
 
     // Lấy BASE_URL từ window, đảm bảo có dấu / cuối
     let BASE_URL = window.BASE_URL || (window.location.origin + '/');
@@ -31,11 +36,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     console.log('Admin Chat - BASE_URL:', BASE_URL);
-    console.log('Admin Chat - SOCKET_SERVER_URL:', SOCKET_SERVER_URL);
 
-    const socket = io(SOCKET_SERVER_URL, {
-    path: '/ws/socket.io'
-});
+    // Kết nối Socket.IO với path tùy thuộc môi trường
+    const socketConfig = needsCustomPath 
+        ? { path: '/ws/socket.io' }  // Production: https://domain.com/ws
+        : {};                         // Local: http://localhost:3000
+    
+    const socket = io(SOCKET_SERVER_URL, socketConfig);
+    
+    // 🔐 XÁC THỰC NGAY SAU KHI KẾT NỐI
+    socket.on('connect', () => {
+        console.log('[SOCKET] Connected, authenticating as CSKH staff...');
+        
+        // Lấy role_id từ metadata hoặc session
+        const roleId = metadata ? metadata.getAttribute('data-role-id') : '4';
+        
+        // Gửi thông tin xác thực
+        socket.emit('authenticate', {
+            role_id: parseInt(roleId),
+            user_id: parseInt(currentUserID),
+            type: 'staff'
+        });
+    });
+    
+    // Lắng nghe kết quả xác thực
+    socket.on('auth_success', (data) => {
+        console.log('[AUTH] Authentication successful:', data.message);
+        console.log('[AUTH] currentConvID:', currentConvID);
+        
+        // 🔹 SAU KHI XÁC THỰC THÀNH CÔNG, JOIN ROOM NẾU CÓ
+        if (currentConvID !== 'null') {
+            socket.emit('join_room', { conversationID: currentConvID }); 
+            console.log(`[JOIN] Tham gia phòng chat conv:${currentConvID}`);
+            
+            // ⚠️ KHÔNG CẦN LOAD CONVERSATION Ở ĐÂY NỮA
+            // Vì đã auto-load trong DOMContentLoaded rồi
+            // Chỉ cần join_room để nhận tin nhắn realtime
+        } else {
+            console.log('[AUTH] Không có conversation mặc định (currentConvID = null)');
+        }
+    });
+    
+    socket.on('auth_failed', (data) => {
+        console.error('[AUTH] Authentication failed:', data.message);
+        alert('Xác thực thất bại: ' + data.message);
+        window.location.href = BASE_URL + 'admin/';
+    });
+    
+    socket.on('auth_required', (data) => {
+        console.error('[AUTH] Authentication required:', data.message);
+        alert('Vui lòng đăng nhập lại');
+        window.location.href = BASE_URL + 'admin/login.php';
+    });
+    
+    socket.on('permission_denied', (data) => {
+        console.error('[PERMISSION] Permission denied:', data.message);
+        alert(data.message);
+    });
     
     // ----------------------------------------------------------------
     // 2. HÀM TIỆN ÍCH
@@ -48,7 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function scrollToBottom() {
         if (messagesList) {
-            messagesList.scrollTop = messagesList.scrollHeight;
+            // Use requestAnimationFrame to ensure DOM has been rendered
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    messagesList.scrollTop = messagesList.scrollHeight;
+                });
+            });
         }
     }
 
@@ -184,15 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------------------
     // 3. XỬ LÝ SOCKET.IO
     // ----------------------------------------------------------------
-
-    socket.on('connect', () => {
-        console.log('Connected to Socket.IO Server');
-        
-        if (currentConvID !== 'null') {
-             socket.emit('join_room', { conversationID: currentConvID }); 
-             console.log(`Tham gia phòng chat conv:${currentConvID}`);
-        }
-    });
     
     socket.on('connect_error', (error) => {
         console.error('Lỗi kết nối Socket.IO:', error);
@@ -207,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 String(msg.senderType) === 'user' && 
                 parseInt(msg.senderID) === parseInt(currentUserID)
             );
+            
             if (isSentByMe) {
                 return;
             }
@@ -268,10 +322,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let lastConvID = 'null'; 
 
+    // Hàm phụ: Chỉ load content (dùng sau authenticate, không join room lại)
+    function loadConversationContent(element) {
+        currentConvID = element.getAttribute('data-conv-id');
+        currentCustomerID = element.getAttribute('data-customer-id');
+        const customerName = element.getAttribute('data-customer-name');
+
+        const headerDisplay = document.getElementById('current-customer-name-display');
+        const inputArea = document.getElementById('chatInputArea');
+        if (headerDisplay) {
+            headerDisplay.innerHTML = `<i class="fas fa-user-circle mr-2"></i>${customerName}`;
+        }
+        if (inputArea) {
+            inputArea.classList.remove('hidden');
+        }
+        
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.classList.remove('bg-blue-50', 'border-blue-500'); 
+            item.classList.add('border-transparent');
+        });
+        element.classList.remove('border-transparent');
+        element.classList.add('bg-blue-50', 'border-blue-500'); 
+
+        if (messagesList) {
+            messagesList.innerHTML = '<div class="w-full text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải...</div>';
+        }
+
+        // Thêm timestamp để tránh cache
+        const timestamp = new Date().getTime();
+        fetch(`${BASE_URL}controller/ChatController.php?action=getMessages&conv_id=${currentConvID}&_=${timestamp}`, {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // ⚠️ QUAN TRỌNG: Xóa nội dung cũ TRƯỚC KHI append messages mới
+                if (messagesList) {
+                    messagesList.innerHTML = '';
+                }
+                
+                if (data.success && data.messages) {
+                    data.messages.forEach(msg => {
+                        appendMessageToChat(msg, currentUserID);
+                    });
+                    scrollToBottom();
+                }
+                
+                const badge = document.getElementById(`badge-${currentConvID}`);
+                if (badge) badge.remove();
+            })
+            .catch(error => console.error('Lỗi tải chat:', error));
+    }
+
     window.loadConversation = function(element) {
         // 1. Cập nhật biến
+        const newConvID = element.getAttribute('data-conv-id');
+        
+        // 🔹 NẾU ĐANG XEM CONVERSATION NÀY RỒI THÌ BỎ QUA
+        if (newConvID === currentConvID) {
+            return;
+        }
+        
         lastConvID = currentConvID; 
-        currentConvID = element.getAttribute('data-conv-id');
+        currentConvID = newConvID;
         currentCustomerID = element.getAttribute('data-customer-id');
         const customerName = element.getAttribute('data-customer-name');
 
@@ -306,11 +423,17 @@ document.addEventListener('DOMContentLoaded', () => {
             messagesList.innerHTML = '<div class="w-full text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải lịch sử chat...</div>';
         }
 
-        const apiUrl = `${BASE_URL}controller/ChatController.php?action=getMessages&conv_id=${currentConvID}`; 
-        console.log('🔗 API URL:', apiUrl);
-        console.log('📍 BASE_URL:', BASE_URL);
+        const timestamp = new Date().getTime();
+        const apiUrl = `${BASE_URL}controller/ChatController.php?action=getMessages&conv_id=${currentConvID}&_=${timestamp}`; 
         
-        fetch(apiUrl)
+        fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -345,14 +468,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-
-    // --- Thêm logic để load cuộc hội thoại mặc định sau khi DOMContentLoaded ---
-
+    // 🚀 AUTO-LOAD LỊCH SỬ NGAY KHI TRANG LOAD (không cần đợi socket authenticate)
+    // Socket authenticate chỉ cần để join room và nhận tin realtime
     if (currentConvID !== 'null') {
-        const defaultConvElement = document.querySelector(`.conversation-item[data-conv-id="${currentConvID}"]`);
-        if (defaultConvElement) {
-            window.loadConversation(defaultConvElement); 
-        }
+        // ⏱️ Delay nhỏ để đảm bảo DOM đã render xong
+        setTimeout(() => {
+            const defaultConvElement = document.querySelector(`.conversation-item[data-conv-id="${currentConvID}"]`);
+            if (defaultConvElement) {
+                // Chỉ load UI + history, KHÔNG join room (sẽ join sau khi authenticate)
+                loadConversationContent(defaultConvElement);
+            }
+        }, 100); // 100ms delay
     }
 
     // ----------------------------------------------------------------

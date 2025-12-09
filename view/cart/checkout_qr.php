@@ -38,7 +38,7 @@ if (!$qrUrl || !$qrExpiredAt) {
     $bank = 'VietinBank';
     $description = 'SEVQR TKP155 ' . $order['transactionCode'];
     $qrUrl = "https://qr.sepay.vn/img?acc=$account&bank=$bank&amount={$order['totalAmount']}&des=" . urlencode($description);
-    $qrExpiredAt = date('Y-m-d H:i:s', time() + 15 * 60); // 15 phút
+    $qrExpiredAt = date('Y-m-d H:i:s', time() + 2 * 60); // 2 phút
     
     // ✅ Lưu vào database
     $stmtUpdate = mysqli_prepare($conn, "UPDATE `order` SET qrUrl = ?, qrExpiredAt = ? WHERE orderID = ?");
