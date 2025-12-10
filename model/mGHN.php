@@ -1,8 +1,8 @@
 <?php
 /**
- * Giao HÃ ng Nhanh (GHN) Model
+ * Giao Hang Nhanh (GHN) Model
  * File: model/mGHN.php
- * Xá»­ lÃ½ tÃ­ch há»£p API GHN
+ * Xu ly tich hop API GHN
  */
 
 class GHN {
@@ -19,7 +19,7 @@ class GHN {
     }
     
     /**
-     * Gá»i API GHN
+     * Goi API GHN
      */
     private function callAPI($endpoint, $method = 'POST', $data = []) {
         $url = $this->apiUrl . $endpoint;
@@ -34,7 +34,7 @@ class GHN {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Bá» qua SSL verify cho localhost
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Bo qua SSL verify cho localhost
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
         if ($method === 'POST') {

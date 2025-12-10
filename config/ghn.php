@@ -12,10 +12,26 @@
  * 4. Tài liệu API: https://api.ghn.vn/home/docs/detail
  */
 
+// Load environment variables
+require_once __DIR__ . '/env.php';
+
+// Get token from .env, nếu là placeholder thì dùng token mặc định
+$envToken = Env::get('GHN_API_TOKEN', '');
+$envShopId = Env::get('GHN_SHOP_ID', '');
+
+// Check if token is placeholder or empty
+$isPlaceholder = empty($envToken) || 
+                 strpos($envToken, 'your_') !== false || 
+                 strpos($envToken, 'token_here') !== false;
+
+// Sử dụng token thật nếu có, nếu không dùng token dev mặc định
+$finalToken = $isPlaceholder ? '05213622-ba7c-11f0-bdfd-7a69b8ccea68' : $envToken;
+$finalShopId = ($isPlaceholder || empty($envShopId)) ? 197971 : (int)$envShopId;
+
 return [
     // API Credentials
-    'token' => '05213622-ba7c-11f0-bdfd-7a69b8ccea68',
-    'shop_id' => 197971,
+    'token' => $finalToken,
+    'shop_id' => $finalShopId,
     
     // API URLs
     'api_url' => 'https://dev-online-gateway.ghn.vn/shiip/public-api',

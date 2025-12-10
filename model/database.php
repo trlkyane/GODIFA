@@ -1,16 +1,31 @@
 <?php
 /**
  * Database Configuration & Connection
- * File: model/mketnoi.php
+ * File: model/database.php
  * SINGLE SOURCE - File duy nhất quản lý database
  */
 
+// Load environment variables
+require_once __DIR__ . '/../config/env.php';
+
 class Database {
-    // Database credentials (sẽ cần thay đổi khi deploy lên VPS)
-    private const DB_HOST = 'localhost';
-    private const DB_USER = 'godifa_user';
-    private const DB_PASS = 'Godifa@2025';
-    private const DB_NAME = 'godifa_production';
+    // Database credentials - Đọc từ .env file
+    private static function getHost() {
+        return Env::get('DB_HOST', 'localhost');
+    }
+    
+    private static function getUser() {
+        return Env::get('DB_USER', 'godifa_user');
+    }
+    
+    private static function getPass() {
+        return Env::get('DB_PASS', 'Godifa@2025');
+    }
+    
+    private static function getName() {
+        return Env::get('DB_NAME', 'godifa_production');
+    }
+    
     private const DB_CHARSET = 'utf8mb4';
     
     private static $instance = null;
@@ -22,10 +37,10 @@ class Database {
     private function __construct() {
         try {
             $this->connection = mysqli_connect(
-                self::DB_HOST,
-                self::DB_USER,
-                self::DB_PASS,
-                self::DB_NAME
+                self::getHost(),
+                self::getUser(),
+                self::getPass(),
+                self::getName()
             );
             
             if (!$this->connection) {

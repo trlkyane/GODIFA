@@ -9,12 +9,15 @@
  * 3. Điền thông tin tài khoản ngân hàng của bạn
  */
 
+// Load environment variables
+require_once __DIR__ . '/env.php';
+
 return [
-    // ⚠️ QUAN TRỌNG: Thay đổi thông tin này
-    'account_number' => '0123456789',  // Số tài khoản ngân hàng
-    'account_name' => 'CONG TY GODIFA', // Tên chủ tài khoản (IN HOA, không dấu)
+    // Lấy thông tin từ .env file
+    'account_number' => Env::get('SEPAY_ACCOUNT_NUMBER', '0123456789'),  // Số tài khoản ngân hàng
+    'account_name' => Env::get('SEPAY_ACCOUNT_NAME', 'CONG TY GODIFA'), // Tên chủ tài khoản (IN HOA, không dấu)
     'bank_code' => 'VCB', // Mã ngân hàng: VCB, TCB, MB, ACB, VPB, TPB, etc.
-    'api_key' => '', // API Key từ SePay (để trống nếu chưa có)
+    'api_key' => Env::get('SEPAY_API_TOKEN', ''), // API Key từ SePay (để trống nếu chưa có)
     
     // Cấu hình webhook
     'webhook_url' => 'https://yourdomain.com/webhook/sepay.php',

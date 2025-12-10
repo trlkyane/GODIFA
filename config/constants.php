@@ -6,6 +6,9 @@
  * Định nghĩa các hằng số sử dụng trong toàn project
  */
 
+// Load environment variables
+require_once __DIR__ . '/env.php';
+
 // ==================== ROLE CONSTANTS ====================
 define('ROLE_CUSTOMER', 0);        // Khách hàng
 define('ROLE_OWNER', 1);           // Chủ Doanh Nghiệp
@@ -54,12 +57,9 @@ define('UPLOAD_PATH', BASE_PATH . '/image/');
 define('LOG_PATH', BASE_PATH . '/logs/');
 
 // ==================== URLS ====================
-// Lấy BASE_URL từ database.php nếu đã được define, nếu không thì define mặc định
+// Lấy BASE_URL từ .env file
 if (!defined('BASE_URL')) {
-    // Detect environment: local vs production
-    $isLocal = (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || 
-                strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false);
-    define('BASE_URL', $isLocal ? 'http://localhost/GODIFA/' : 'https://godifaproject.id.vn/');
+    define('BASE_URL', Env::get('BASE_URL', 'http://localhost/godifaproject.id.vn/'));
 }
 define('ADMIN_BASE_URL', BASE_URL . 'admin/');
 
@@ -86,26 +86,7 @@ define('VOUCHER_FIXED', 'fixed');
 define('QR_EXPIRY_MINUTES', 15);
 
 // ==================== CHAT & WEBSOCKET ====================
-// Socket.IO Server URL (thay đổi khi deploy lên VPS)
-// 
-// OPTION 1: Dùng subdomain riêng (cần cấu hình DNS)
-// - Local: http://localhost:3000
-// - VPS: https://chat.godifa.id.vn
-//
-// OPTION 2: Dùng đường dẫn con (đơn giản hơn, không cần subdomain)
-// - Local: http://localhost:3000
-// - VPS: https://godifa.id.vn/ws
-//
+// Socket.IO Server URL - Lấy từ .env file
 if (!defined('SOCKET_SERVER_URL')) {
-    $isLocal = (strpos($_SERVER['HTTP_HOST'] ?? 'localhost', 'localhost') !== false || 
-                strpos($_SERVER['HTTP_HOST'] ?? '127.0.0.1', '127.0.0.1') !== false ||
-                strpos($_SERVER['HTTP_HOST'] ?? '', '192.168.') !== false);
-    
-    // Chọn 1 trong 2 options dưới đây:
-    
-    // OPTION 1: Subdomain (mặc định)
-    //define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://chat.godifa.id.vn');
-    
-    // OPTION 2: Path-based (uncomment dòng dưới và comment dòng trên)
-    define('SOCKET_SERVER_URL', $isLocal ? 'http://localhost:3000' : 'https://godifaproject.id.vn/ws');
+    define('SOCKET_SERVER_URL', Env::get('SOCKET_SERVER_URL', 'http://localhost:3000'));
 }

@@ -140,5 +140,22 @@ class CartSync {
     public function clearDatabaseCart($customerID) {
         return $this->cartModel->clearCart($customerID);
     }
+    
+    /**
+     * Xóa 1 sản phẩm khỏi giỏ hàng trong DATABASE
+     * Dùng khi: Mua ngay 1 sản phẩm
+     */
+    public function removeFromDatabaseCart($customerID, $productID) {
+        require_once __DIR__ . '/../model/database.php';
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        $stmt = mysqli_prepare($conn, "DELETE FROM cart WHERE customerID = ? AND productID = ?");
+        mysqli_stmt_bind_param($stmt, "ii", $customerID, $productID);
+        $result = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        
+        return $result;
+    }
 }
 ?>
