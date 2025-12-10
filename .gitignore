@@ -1,23 +1,46 @@
 # Dependencies
 /vendor/
 composer.lock
+node_modules/
 
 # Logs
 *.log
 logs/*.log
+logs/*.txt
 
 # Environment files
 .env
 .env.local
+.env.*.local
+
+# Database backups
+data/*.sql
+data/backup/
+*.sql
+*.sql.gz
+
+# Upload files
+image/refund_proofs/*
+image/return_proofs/*
+!image/refund_proofs/.gitkeep
+!image/return_proofs/.gitkeep
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Temporary files
 *.tmp
 *.temp
+*.cache
+
+# Websocket
+websocket-server/node_modules/
+websocket-server/.env
