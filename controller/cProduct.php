@@ -22,7 +22,7 @@ class ProductController {
         $this->reviewModel = new Review();
     }
     
-    // Hi?n th? danh sách s?n ph?m
+    // Hiển thị danh sách sản phẩm
     public function index() {
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $limit = 12;
@@ -31,14 +31,14 @@ class ProductController {
         $categoryId = isset($_GET['category']) && $_GET['category'] !== '' ? (int)$_GET['category'] : null;
         $keyword = isset($_GET['search']) && trim($_GET['search']) !== '' ? trim($_GET['search']) : null;
         
-        // S? d?ng method m?i h? tr? c? category và keyword
+        // Sử dụng method mới hỗ trợ cả category và keyword
         if ($categoryId || $keyword) {
             $products = $this->productModel->searchProductsByFilters($categoryId, $keyword);
         } else {
             $products = $this->productModel->getActiveProducts($limit, $offset);
         }
         
-        // L?y rating và review count cho t?ng s?n ph?m
+        // Lấy rating và review count cho từng sản phẩm
         foreach ($products as &$product) {
             $ratingData = $this->reviewModel->getAverageRating($product['productID']);
             $product['avgRating'] = $ratingData['avgRating'] ?? 0;
@@ -58,7 +58,7 @@ class ProductController {
         ];
     }
     
-    // Hi?n th? chi ti?t s?n ph?m
+    // Hiển thị chi tiết sản phẩm
     public function detail($productId) {
         $product = $this->productModel->getProductById($productId);
         
@@ -66,7 +66,7 @@ class ProductController {
             return null;
         }
         
-        // Ki?m tra n?u s?n ph?m b? khóa thì không cho khách hàng xem
+        // Kiểm tra nếu sản phẩm bị khóa thì không cho khách hàng xem
         if ($product['status'] == 0) {
             return null;
         }
@@ -100,7 +100,7 @@ class ProductController {
             }
             
             if ($this->reviewModel->addReview($productId, $customerId, $rating, $comment)) {
-                return ['success' => true, 'message' => 'Ðánh giá thành công'];
+                return ['success' => true, 'message' => 'Đánh giá thành công'];
             }
             
             return ['success' => false, 'message' => 'Đánh giá thất bại'];
@@ -141,7 +141,7 @@ if (!defined('CONTROLLER_INCLUDED')) {
                 if ($data) {
                     extract($data);
                     include '../view/product/detail.php';
-                    exit(); // D?ng l?i sau khi include view
+                    exit(); // Dừng lại sau khi include view
                 } else {
                     error_log("cProduct.php - Product not found, redirect to 404");
                     header('Location: ' . BASE_URL . 'view/404.php');

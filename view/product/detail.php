@@ -324,19 +324,37 @@ function addCart(id) {
         body: `productId=${id}&quantity=${qty}`
     })
     .then(r => r.json())
-    .then(d => { alert(d.success ? '? ï¿½ï¿½ thï¿½m vï¿½o gi? hï¿½ng!' : '? ' + (d.message || 'L?i!')); })
-    .catch(() => alert('? L?i k?t n?i!'));
+    .then(d => {
+        if (d.success) {
+            alert('✓ Đã thêm vào giỏ hàng!');
+            // Optional: Update cart count in header
+            if (typeof updateCartCount === 'function') {
+                updateCartCount();
+            }
+        } else {
+            alert('✗ ' + (d.message || 'Lỗi khi thêm sản phẩm!'));
+        }
+    })
+    .catch(() => alert('✗ Lỗi kết nối!'));
 }
+
 function buyNow(id) {
     const qty = document.getElementById('qty').value;
     fetch('<?php echo BASE_URL; ?>controller/cCart.php?action=add', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `productId=${id}&quantity=${qty}`
+        body: `productId=${id}&quantity=${qty}&buyNow=1`
     })
     .then(r => r.json())
-    .then(d => { if(d.success) window.location.href = '<?php echo BASE_URL; ?>view/cart/checkout.php'; else alert('? L?i!'); })
-    .catch(() => alert('? L?i k?t n?i!'));
+    .then(d => {
+        if (d.success) {
+            // Redirect với tham số buyNow
+            window.location.href = '<?php echo BASE_URL; ?>view/cart/checkout.php?buyNow=1&productId=' + id;
+        } else {
+            alert('✗ ' + (d.message || 'Lỗi khi thêm sản phẩm!'));
+        }
+    })
+    .catch(() => alert('✗ Lỗi kết nối!'));
 }
 </script>
 

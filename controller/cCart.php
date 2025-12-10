@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_NONE) {
     session_name('GODIFA_USER_SESSION');
     session_start();
@@ -156,7 +156,7 @@ class CartController {
             if (isset($_SESSION['cart'][$productId])) {
                 unset($_SESSION['cart'][$productId]);
                 
-                // âœ… LÆ°u vÃ o database náº¿u Ä‘Ã£ Ä‘Äƒng nháº­p
+                // Lưu vào database nếu đã đăng nhập
                 $this->syncToDatabase();
                 
                 $cartCount = count($_SESSION['cart']);
@@ -195,22 +195,22 @@ if (isset($_GET['action'])) {
     switch ($action) {
         case 'add':
             $result = $controller->addToCart();
-            echo json_encode($result);
+            echo json_encode($result, JSON_UNESCAPED_UNICODE);
             break;
             
         case 'update':
             $result = $controller->updateCart();
-            echo json_encode($result);
+            echo json_encode($result, JSON_UNESCAPED_UNICODE);
             break;
             
         case 'remove':
             $result = $controller->removeFromCart();
-            echo json_encode($result);
+            echo json_encode($result, JSON_UNESCAPED_UNICODE);
             break;
             
         case 'clear':
             $result = $controller->clearCart();
-            echo json_encode($result);
+            echo json_encode($result, JSON_UNESCAPED_UNICODE);
             break;
             
         case 'view':

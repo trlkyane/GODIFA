@@ -235,29 +235,25 @@ function removeItem(productId) {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `productId=${productId}`
     })
-    .then(r => r.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            // Cập nhật giao diện không cần reload
-            if (data.cart && Object.keys(data.cart).length > 0) {
-                updateCartDisplay(data.cart);
-                
-                // Xóa dòng sản phẩm khỏi bảng
-                let row = document.getElementById('qty-' + productId);
-                if (row) {
-                    row.closest('tr').remove();
-                }
-            } else {
-                // Giỏ hàng trống, reload để hiển thị thông báo
-                location.reload();
-            }
+            // Luôn reload để đảm bảo UI đồng bộ
+            location.reload();
         } else {
-            alert('❌ Xóa thất bại!');
+            alert('❌ ' + (data.message || 'Xóa thất bại!'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
         alert('❌ Lỗi kết nối!');
+        // Vẫn reload để kiểm tra xem đã xóa thành công chưa
+        location.reload();
     });
 }
 

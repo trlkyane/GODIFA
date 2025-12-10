@@ -26,6 +26,20 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     exit;
 }
 
+// Kiểm tra chế độ "Mua ngay" - chỉ thanh toán 1 sản phẩm
+$buyNowMode = isset($_GET['buyNow']) && isset($_GET['productId']);
+$buyNowProductId = $buyNowMode ? (int)$_GET['productId'] : null;
+
+// Lấy danh sách sản phẩm cần thanh toán
+$checkoutCart = [];
+if ($buyNowMode && $buyNowProductId && isset($_SESSION['cart'][$buyNowProductId])) {
+    // Chỉ lấy 1 sản phẩm vừa chọn "Mua ngay"
+    $checkoutCart[$buyNowProductId] = $_SESSION['cart'][$buyNowProductId];
+} else {
+    // Thanh toán tất cả sản phẩm trong giỏ
+    $checkoutCart = $_SESSION['cart'];
+}
+
 // Lấy thông tin customer từ database để pre-fill form
 require_once __DIR__ . '/../../model/database.php';
 $db = Database::getInstance();
@@ -47,9 +61,9 @@ if (!$customer) {
     ];
 }
 
-// Tính tổng tiền
+// Tính tổng tiền (dựa trên checkoutCart, không phải toàn bộ cart)
 $totalAmount = 0;
-foreach ($_SESSION['cart'] as $item) {
+foreach ($checkoutCart as $item) {
     $totalAmount += ($item['price'] ?? 0) * ($item['quantity'] ?? 0);
 }
 ?>
@@ -82,6 +96,16 @@ foreach ($_SESSION['cart'] as $item) {
         <h1 class="text-3xl font-bold text-gray-800 mb-6">
             <i class="fas fa-shopping-cart text-indigo-600"></i> Thanh toán đơn hàng
         </h1>
+
+        <?php if ($buyNowMode): ?>
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3">
+            <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+            <div>
+                <p class="text-blue-800 font-medium">Chế độ: Mua ngay</p>
+                <p class="text-blue-600 text-sm">Bạn đang thanh toán cho 1 sản phẩm vừa chọn. Các sản phẩm khác trong giỏ hàng vẫn được giữ nguyên.</p>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
@@ -245,6 +269,12 @@ foreach ($_SESSION['cart'] as $item) {
                         <input type="hidden" id="total-amount-value" name="totalAmount" value="<?= $totalAmount ?>">
                         <input type="hidden" id="voucher-id" name="voucherID" value="">
                         <input type="hidden" id="discount-amount" name="discountAmount" value="0">
+                        
+                        <!-- Buy Now Mode -->
+                        <?php if ($buyNowMode): ?>
+                            <input type="hidden" name="buyNowMode" value="1">
+                            <input type="hidden" name="buyNowProductId" value="<?= $buyNowProductId ?>">
+                        <?php endif; ?>
 
                         <button type="submit" 
                                 class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-lg">
@@ -265,14 +295,14 @@ foreach ($_SESSION['cart'] as $item) {
                     </h2>
 
                     <div class="space-y-3 mb-4">
-                        <?php foreach ($_SESSION['cart'] as $item): ?>
+                        <?php foreach ($checkoutCart as $item): ?>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">
-                                    <?= htmlspecialchars($item['name'] ?? 'Sản phẩm') ?> 
+                                    <?= htmlspecialchars($item['productName'] ?? $item['name'] ?? 'Sản phẩm') ?> 
                                     <span class="text-gray-400">x<?= $item['quantity'] ?? 0 ?></span>
                                 </span>
                                 <span class="font-semibold">
-                                    <?= number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 0), 0, ',', '.') ?>?
+                                    <?= number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 0), 0, ',', '.') ?>₫
                                 </span>
                             </div>
                         <?php endforeach; ?>
