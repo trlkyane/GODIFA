@@ -243,7 +243,8 @@ class Product {
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
                 LEFT JOIN review r ON p.productID = r.productID
                 LEFT JOIN order_details od ON p.productID = od.productID
-                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('ÄÃ£ giao', 'HoÃ n thÃ nh')
+                LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('ÄÃ£ giao', 'HoÃ n thÃ nh')
+                WHERE p.status = 1 AND c.status = 1
                 GROUP BY p.productID
                 ORDER BY p.productID DESC";
         

@@ -23,6 +23,28 @@ $errorMessage = '';
 
 $profileController = new ProfileController();
 
+// Xử lý đổi mật khẩu
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
+    $oldPassword = $_POST['old_password'] ?? '';
+    $newPassword = $_POST['new_password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+    
+    if (empty($oldPassword) || empty($newPassword) || empty($confirmPassword)) {
+        $errorMessage = 'Vui lòng điền đầy đủ thông tin!';
+    } elseif (strlen($newPassword) < 6) {
+        $errorMessage = 'Mật khẩu mới phải có ít nhất 6 ký tự!';
+    } elseif ($newPassword !== $confirmPassword) {
+        $errorMessage = 'Mật khẩu xác nhận không khớp!';
+    } else {
+        $result = $profileController->changePassword($customerID, $oldPassword, $newPassword);
+        if ($result['success']) {
+            $successMessage = $result['message'];
+        } else {
+            $errorMessage = $result['message'];
+        }
+    }
+}
+
 // Xử lý cập nhật thông tin (CHỈ TÊN VÀ SỐ ĐIỆN THOẠI)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $data = [
@@ -224,6 +246,62 @@ $stats = $profileController->getOrderStats($customerID);
                     </form>
                 </div>
 
+                <!-- Change Password Form -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-lock mr-2 text-indigo-600"></i>Đổi Mật Khẩu
+                    </h2>
+                    
+                    <form method="POST" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-key mr-2 text-gray-500"></i>Mật khẩu cũ <span class="text-red-500">*</span>
+                            </label>
+                            <input type="password" name="old_password"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                   placeholder="Nhập mật khẩu hiện tại"
+                                   required>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-lock mr-2 text-gray-500"></i>Mật khẩu mới <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" name="new_password" id="new_password"
+                                       minlength="6"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                       placeholder="Ít nhất 6 ký tự"
+                                       required>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-info-circle"></i> Tối thiểu 6 ký tự
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-lock mr-2 text-gray-500"></i>Xác nhận mật khẩu mới <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" name="confirm_password" id="confirm_password"
+                                       minlength="6"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                       placeholder="Nhập lại mật khẩu mới"
+                                       required>
+                                <p class="text-xs text-red-500 mt-1 hidden" id="password-match-error">
+                                    <i class="fas fa-exclamation-circle"></i> Mật khẩu không khớp!
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" name="change_password"
+                                    class="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold shadow-md">
+                                <i class="fas fa-shield-alt mr-2"></i>Đổi Mật Khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Customer Group Information -->
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">
@@ -285,6 +363,26 @@ $stats = $profileController->getOrderStats($customerID);
     <?php include __DIR__ . '/../layout/footer.php'; ?>
 
     <script>
+        // Check password match
+        const newPassword = document.getElementById('new_password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const errorMsg = document.getElementById('password-match-error');
+        
+        function checkPasswordMatch() {
+            if (confirmPassword.value && newPassword.value !== confirmPassword.value) {
+                errorMsg.classList.remove('hidden');
+                confirmPassword.setCustomValidity('Mật khẩu không khớp');
+            } else {
+                errorMsg.classList.add('hidden');
+                confirmPassword.setCustomValidity('');
+            }
+        }
+        
+        if (newPassword && confirmPassword) {
+            newPassword.addEventListener('input', checkPasswordMatch);
+            confirmPassword.addEventListener('input', checkPasswordMatch);
+        }
+        
         // Confirm delete account
         function confirmDeleteAccount() {
             if (confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
