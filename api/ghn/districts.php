@@ -4,9 +4,13 @@
  * URL: /api/ghn/districts.php?provinceId=202
  */
 
-// Táº¯t error display Ä‘á»ƒ khÃ´ng lÃ m há»ng JSON
+// Tắt error display để không làm hỏng JSON
 error_reporting(0);
 ini_set('display_errors', 0);
+
+// Xóa mọi output buffer trước đó
+if (ob_get_level()) ob_end_clean();
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -39,18 +43,22 @@ try {
         echo json_encode([
             'success' => true,
             'data' => $filteredData
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
     } else {
         http_response_code(500);
         echo json_encode([
             'success' => false,
             'error' => $result['error']
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
     }
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'error' => $e->getMessage()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 }
+
+// Flush output buffer
+ob_end_flush();
+exit;

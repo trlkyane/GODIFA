@@ -1,17 +1,35 @@
 <?php
 /**
- * AJAX Endpoint cho Chat (Admin Client)
- * File: GODIFA/api/chat_ajax.php
+ * AJAX Endpoint cho Chat (Admin Client - CHỈ CSKH)
+ * File: api/chat_ajax.php
+ * Chỉ nhân viên CSKH (role_id = 4) được truy cập
  */
 
-// Äáº£m báº£o Ä‘Æ°á»ng dáº«n nÃ y trá» Ä‘áº¿n ChatController.php Ä‘Ãºng. 
-// Giáº£ sá»­ 'api' vÃ  'controller' náº±m cÃ¹ng cáº¥p trong thÆ° má»¥c GODIFA
-require_once __DIR__ . '/../controller/ChatController.php'; 
-// Báº£o máº­t: Äáº£m báº£o ngÆ°á»i dÃ¹ng Ä‘Ã£ Ä‘Äƒng nháº­p (Staff)
-// require_once __DIR__ . '/../middleware/auth.php';
-// requireStaff(); 
+// Start session
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('GODIFA_ADMIN_SESSION');
+    session_start();
+}
 
-header('Content-Type: application/json');
+// Bảo mật: Đảm bảo người dùng đã đăng nhập và là CSKH
+require_once __DIR__ . '/../admin/middleware/auth.php';
+requireStaff();
+
+// Kiểm tra ROLE: Chỉ CSKH (role_id = 4) được truy cập
+$currentRoleID = $_SESSION['role_id'] ?? 0;
+if ($currentRoleID != 4) {
+    header('Content-Type: application/json; charset=utf-8');
+    http_response_code(403);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Chỉ nhân viên CSKH mới có quyền truy cập Chat!'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+require_once __DIR__ . '/../controller/ChatController.php'; 
+
+header('Content-Type: application/json; charset=utf-8');
 
 // Khá»Ÿi táº¡o Controller Má»šI
 $chatController = new ChatController();

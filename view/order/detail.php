@@ -382,11 +382,6 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
                                 class="block w-full text-center bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition font-semibold">
                             <i class="fas fa-print mr-2"></i>In Đơn Hàng
                         </button>
-                        
-                        <a href="mailto:support@godifa.com?subject=Hỗ trợ đơn hàng #<?= $orderID ?>" 
-                           class="block w-full text-center bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold">
-                            <i class="fas fa-envelope mr-2"></i>Liên Hệ Hỗ Trợ
-                        </a>
                     </div>
                 </div>
             </div>

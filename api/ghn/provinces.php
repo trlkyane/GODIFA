@@ -4,9 +4,13 @@
  * URL: /api/ghn/provinces.php
  */
 
-// Táº¯t error display Ä‘á»ƒ khÃ´ng lÃ m há»ng JSON
+// Tắt error display để không làm hỏng JSON
 error_reporting(0);
 ini_set('display_errors', 0);
+
+// Xóa mọi output buffer trước đó
+if (ob_get_level()) ob_end_clean();
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -20,7 +24,7 @@ try {
         // Filter out test data from GHN dev environment
         $filteredData = array_filter($result['data'], function($province) {
             $name = strtolower($province['ProvinceName'] ?? '');
-            // Remove provinces with "test", "demo", or numbered variations like "HÃ  Ná»™i 02"
+            // Remove provinces with "test", "demo", or numbered variations like "Ha Noi 02"
             return !preg_match('/(test|demo|\s\d{2}$)/i', $name);
         });
         
@@ -51,3 +55,7 @@ try {
         'error' => 'Server error: ' . $t->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 }
+
+// Flush output buffer
+ob_end_flush();
+exit;

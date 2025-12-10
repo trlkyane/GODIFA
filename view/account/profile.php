@@ -220,10 +220,6 @@ $stats = $profileController->getOrderStats($customerID);
                                     class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold shadow-md">
                                 <i class="fas fa-save mr-2"></i>Lưu Thay Đổi
                             </button>
-                            <button type="button" onclick="window.location.reload()" 
-                                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold">
-                                <i class="fas fa-undo mr-2"></i>Hủy
-                            </button>
                         </div>
                     </form>
                 </div>
