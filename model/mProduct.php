@@ -32,13 +32,15 @@ class Product {
         }
         return $products;
     }
-    
-    // Láº¥y sáº£n pháº©m Ä‘ang hoáº¡t Ä‘á»™ng
+
     public function getActiveProducts($limit = null, $offset = 0) {
         $sql = "SELECT p.*, c.categoryName,
+                COALESCE(AVG(r.rating), 0) as avgRating,
+                COALESCE(COUNT(DISTINCT r.reviewID), 0) as reviewCount,
                 COALESCE(SUM(od.quantity), 0) as soldCount
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
+                LEFT JOIN review r ON p.productID = r.productID
                 LEFT JOIN order_details od ON p.productID = od.productID
                 LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
                 WHERE p.status = 1 AND (c.status = 1 OR c.status IS NULL)
@@ -123,9 +125,12 @@ class Product {
     // Tìm kiếm sản phẩm theo category và keyword
     public function searchProductsByFilters($categoryId = null, $keyword = null) {
         $sql = "SELECT p.*, c.categoryName,
+                COALESCE(AVG(r.rating), 0) as avgRating,
+                COALESCE(COUNT(DISTINCT r.reviewID), 0) as reviewCount,
                 COALESCE(SUM(od.quantity), 0) as soldCount
                 FROM product p 
                 LEFT JOIN category c ON p.categoryID = c.categoryID 
+                LEFT JOIN review r ON p.productID = r.productID
                 LEFT JOIN order_details od ON p.productID = od.productID
                 LEFT JOIN `order` o ON od.orderID = o.orderID AND o.deliveryStatus IN ('Đã giao', 'Hoàn thành')
                 WHERE p.status = 1 AND (c.status = 1 OR c.status IS NULL)";

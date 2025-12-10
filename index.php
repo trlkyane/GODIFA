@@ -216,7 +216,10 @@ $activeVouchers = $voucherModel->getActiveVouchers();
                                 </svg>
                             <?php endfor; ?>
                         </div>
-                        <span class="text-xs text-gray-500 ml-2">
+                        <span class="text-[10px] text-gray-500">
+                            (<?php echo $reviewCount > 0 ? $reviewCount : 'Chưa có'; ?>)
+                        </span>
+                        <span class="text-[10px] text-gray-500 ml-1">
                             Bán <?php echo isset($soldCount) && $soldCount > 0 ? $soldCount : 0; ?>
                         </span>
                     </div>
