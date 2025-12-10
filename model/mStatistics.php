@@ -31,8 +31,8 @@ class Statistics {
         
         // Doanh thu ká»³ hiá»‡n táº¡i
         $sql = "SELECT 
-            SUM(CASE WHEN paymentStatus = 'Đã thanh toán' THEN totalAmount ELSE 0 END) as completed,
-            SUM(CASE WHEN paymentStatus = 'Chờ thanh toán' THEN totalAmount ELSE 0 END) as pending,
+            SUM(CASE WHEN paymentStatus IN ('Đã thanh toán', 'Đã hoàn tiền') THEN totalAmount ELSE 0 END) as completed,
+            SUM(CASE WHEN paymentStatus IN ('Chờ thanh toán', 'Chờ thanh toán (COD)') THEN totalAmount ELSE 0 END) as pending,
             SUM(totalAmount) as total
         FROM `order` 
         WHERE paymentStatus != 'Đã hủy'";
