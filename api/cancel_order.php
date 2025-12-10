@@ -99,20 +99,19 @@ if ($order['deliveryStatus'] === 'Hoàn thành') {
     exit;
 }
 
-// Kiểm tra nếu đơn đã được admin xác nhận (đang vận chuyển/giao)
-// Logic mới: Chỉ CẤM hủy khi admin ĐÃ XÁC NHẬN đơn
-if (in_array($order['deliveryStatus'], ['Đang tiến hành vận chuyển', 'Đang giao', 'Đã giao'])) {
+// Kiểm tra nếu đơn đã được admin xác nhận (đang vận chuyển)
+if ($order['deliveryStatus'] === 'Đang tiến hành vận chuyển') {
     echo json_encode([
         'success' => false,
-        'message' => 'Đơn hàng đã được xác nhận và đang xử lý. Vui lòng liên hệ CSKH để được hỗ trợ!'
+        'message' => 'Đơn hàng đã được xác nhận và đang giao. Vui lòng liên hệ CSKH để được hỗ trợ!'
     ]);
     exit;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// LOGIC HỦY ĐỠN - CẬP NHẬT 2025-12-05
+// LOGIC HỦY ĐƠN - CẬP NHẬT 2025-12-11
 // ═══════════════════════════════════════════════════════════════════════════
-// Nếu đến đây nghĩa là: deliveryStatus = "Chờ xử lý" hoặc "Chờ xác nhận"
+// Nếu đến đây nghĩa là: deliveryStatus = "Chờ xác nhận"
 // → Admin CHƯA XÁC NHẬN đơn → Cho phép khách hàng hủy
 // 
 // Trường hợp cần xử lý:
@@ -204,10 +203,9 @@ try {
     // - Nếu CHƯA THANH TOÁN: Hủy luôn
     
     if ($needRefund) {
-        // Trường hợp QR đã thanh toán: GIỮ LẠI paymentStatus và paymentDate
-        // Chỉ đổi deliveryStatus để đánh dấu là "yêu cầu hủy/hoàn tiền"
+        // Trường hợp QR đã thanh toán: Đổi deliveryStatus = 'Đã hủy' + Tạo refund_request
         $sql = "UPDATE `order` SET 
-                deliveryStatus = 'Chờ xử lý hoàn tiền',
+                deliveryStatus = 'Đã hủy',
                 cancelReason = ?,
                 cancelledAt = NOW(),
                 cancelledBy = 'customer'

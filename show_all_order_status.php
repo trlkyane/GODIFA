@@ -150,7 +150,7 @@ $groupQuery = "SELECT
                     WHEN paymentStatus IN ('Đã thanh toán', 'Đã hoàn tiền') AND deliveryStatus = 'Hoàn thành' THEN 'Đơn hoàn tất'
                     WHEN paymentStatus = 'Đã hủy' OR deliveryStatus = 'Đã hủy' THEN 'Đơn đã hủy'
                     WHEN paymentStatus = 'Đã hoàn tiền' THEN 'Đơn hoàn tiền'
-                    WHEN deliveryStatus IN ('Đang tiến hành vận chuyển', 'Đang chuẩn bị hàng') THEN 'Đơn đang xử lý'
+                    WHEN deliveryStatus = 'Đang tiến hành vận chuyển' THEN 'Đơn đang xử lý'
                     WHEN paymentStatus LIKE 'Chờ%' OR deliveryStatus LIKE 'Chờ%' THEN 'Đơn chờ xử lý'
                     ELSE 'Khác'
                 END as nhom,
@@ -187,7 +187,6 @@ function evaluateOrderStatus($payment, $delivery) {
     if ($payment == 'Chờ thanh toán' && $delivery == 'Chờ xác nhận') return '✅ OK';
     if ($payment == 'Chờ thanh toán (COD)' && $delivery == 'Chờ xác nhận') return '✅ OK';
     if ($payment == 'Đã thanh toán' && $delivery == 'Đang tiến hành vận chuyển') return '✅ OK';
-    if ($payment == 'Đã thanh toán' && $delivery == 'Đang chuẩn bị hàng') return '✅ OK';
     
     // Hoàn tiền
     if ($payment == 'Đã hoàn tiền' && $delivery == 'Đã hủy') return '✅ OK';

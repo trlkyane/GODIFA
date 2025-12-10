@@ -145,5 +145,5 @@ php fix_refunded_orders.php
 
 ---
 
-*Báo cáo được tạo bởi `show_all_order_status.php`*  
+*Báo cáo được tạo bởi `show_all_order_status.php`*
 *Ngày: <?php echo date('d/m/Y H:i:s'); ?>*

@@ -71,9 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Chấp nhận → Giữ nguyên paymentStatus = "Đã thanh toán", không update gì
                     // (Vì đơn đã thanh toán rồi, chỉ chấp nhận yêu cầu hoàn trả thôi)
                 } elseif ($action === 'refund') {
-                    // ĐƠN HOÀN TRẢ: Xác nhận hoàn tiền → deliveryStatus = "Đã hoàn trả", paymentStatus = "Đã hoàn tiền"
+                    // ĐƠN HOÀN TRẢ: Xác nhận hoàn tiền → deliveryStatus = "Đã hoàn tiền", paymentStatus = "Đã hoàn tiền"
                     $sqlOrder = "UPDATE `order` 
-                                SET deliveryStatus = 'Đã hoàn trả',
+                                SET deliveryStatus = 'Đã hoàn tiền',
                                     paymentStatus = 'Đã hoàn tiền' 
                                 WHERE orderID = $orderID";
                     mysqli_query($conn, $sqlOrder);

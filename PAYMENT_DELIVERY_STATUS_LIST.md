@@ -35,53 +35,40 @@ Chờ thanh toán / Đã thanh toán
 
 **Field**: `order.deliveryStatus` - ENUM
 
-### Các giá trị định nghĩa:
+### Các giá trị sử dụng:
 
-| Trạng thái | Mô tả | Điều kiện |
-|-----------|-------|----------|
+| Trạng thái | Mô tả | Khi nào |
+|-----------|-------|---------|
 | `Chờ xác nhận` | Đơn mới, chờ admin xác nhận | Trạng thái mặc định khi tạo đơn |
-| `Đang tiến hành vận chuyển` | Admin đã xác nhận, đã gửi lên hãng VC | Bước middle của quy trình |
-| `Đang giao` | Hàng đang trên đường giao | Cập nhật từ webhook GHN |
+| `Đang tiến hành vận chuyển` | Đơn đang được giao | Admin xác nhận và bắt đầu giao hàng |
 | `Hoàn thành` | Giao hàng thành công | Khách hàng đã nhận hàng |
-| `Đã hủy` | Đơn hàng bị hủy | Hủy trước khi giao |
-| `Chờ xử lý hoàn tiền` | Chờ xử lý hoàn tiền cho khách | Khi đơn bị hủy sau khi thanh toán |
-| `Đã hoàn tiền` | Đã hoàn tiền cho khách | Hoàn tiền thành công |
-| `Yêu cầu hoàn trả` | Khách yêu cầu hoàn trả hàng | Sau khi nhận hàng |
-| `Đang hoàn trả` | Hàng đang được hoàn về kho | Khách/Admin đã xác nhận |
-| `Đã hoàn trả` | Hàng đã hoàn về kho | Hoàn tất quy trình hoàn trả |
+| `Đã hủy` | Đơn hàng bị hủy | Hủy bởi khách hoặc admin |
+| `Đã hoàn tiền` | Đã hoàn tiền/hoàn trả | Đơn trả hàng hoặc hoàn tiền thành công |
 
 ### Luồng giao hàng:
 
+**Flow đơn hàng bình thường:**
 ```
 Chờ xác nhận
     ↓ [Admin xác nhận]
 Đang tiến hành vận chuyển
-    ↓ [GHN update]
-Đang giao
     ↓ [Giao thành công]
 Hoàn thành
-    ↓ [Khách yêu cầu hoàn trả]
-Yêu cầu hoàn trả
-    ↓ [Admin/Khách xác nhận]
-Đang hoàn trả
-    ↓ [Hàng về kho]
-Đã hoàn trả
+```
 
----
-
-Chờ xác nhận / Đang tiến hành vận chuyển
-    ↓ [Hủy đơn]
+**Flow hủy đơn:**
+```
+Chờ xác nhận
+    ↓ [Khách/Admin hủy]
 Đã hủy
++ Nếu đã thanh toán → Tạo refund_request (status='Chờ xử lý')
 ```
 
-### Trạng thái hoàn tiền:
-
+**Flow hoàn trả (Return):**
 ```
-Đã thanh toán + Đã hủy
-    ↓ [Chờ xử lý hoàn tiền]
-Chờ xử lý hoàn tiền
-    ↓ [Admin xử lý/webhook xác nhận]
-Đã hoàn tiền
+Hoàn thành
+    ↓ [Khách tạo return_request]
+(Admin xác nhận) → deliveryStatus = 'Đã hoàn tiền'
 ```
 
 ---

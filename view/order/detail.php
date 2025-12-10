@@ -80,8 +80,8 @@ $resultDetails = mysqli_stmt_get_result($stmt);
 $rawOrderDetails = mysqli_fetch_all($resultDetails, MYSQLI_ASSOC);
 
 $orderDetails = [];
-// Điều kiện đánh giá: Đơn hàng phải ở trạng thái "Hoàn thành" hoặc "Đã giao"
-$canReviewOrder = ($order['deliveryStatus'] === 'Hoàn thành' || $order['deliveryStatus'] === 'Đã giao');
+// Điều kiện đánh giá: Đơn hàng phải ở trạng thái "Hoàn thành"
+$canReviewOrder = ($order['deliveryStatus'] === 'Hoàn thành');
 
 // Chuẩn bị statement để kiểm tra từng sản phẩm đã được đánh giá chưa
 // ⚠️ LƯU Ý: Bảng review phải tồn tại để câu lệnh này không báo lỗi.
@@ -203,10 +203,7 @@ unset($_SESSION['notify_success'], $_SESSION['notify_error']);
                         'Đang tiến hành vận chuyển' => 'bg-blue-100 text-blue-800',
                         'Chờ xác nhận' => 'bg-yellow-100 text-yellow-800',
                         'Đã hủy' => 'bg-red-100 text-red-800',
-                        'Đã giao' => 'bg-green-100 text-green-800',
-                        'Đang giao' => 'bg-blue-100 text-blue-800',
-                        'Đang xử lý' => 'bg-blue-100 text-blue-800',
-                        'Chờ xử lý' => 'bg-yellow-100 text-yellow-800',
+                        'Đã hoàn tiền' => 'bg-purple-100 text-purple-800',
                     ];
                     $deliveryColor = $deliveryColors[$order['deliveryStatus']] ?? 'bg-gray-100 text-gray-800';
                     ?>

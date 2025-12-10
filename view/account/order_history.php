@@ -221,14 +221,8 @@ $countCancelled = count(array_filter($allOrders, function($o) { return $o['payme
                                 'Hoàn thành' => 'bg-green-100 text-green-800',
                                 'Đang tiến hành vận chuyển' => 'bg-blue-100 text-blue-800',
                                 'Chờ xác nhận' => 'bg-yellow-100 text-yellow-800',
-                                'Chờ xử lý hoàn tiền' => 'bg-orange-100 text-orange-800',
                                 'Đã hủy' => 'bg-red-100 text-red-800',
                                 'Đã hoàn tiền' => 'bg-purple-100 text-purple-800',
-                                // Backward compatibility
-                                'Đã giao' => 'bg-green-100 text-green-800',
-                                'Đang giao' => 'bg-blue-100 text-blue-800',
-                                'Đang xử lý' => 'bg-blue-100 text-blue-800',
-                                'Chờ xử lý' => 'bg-yellow-100 text-yellow-800',
                             ];
                             $deliveryColor = $deliveryColors[$order['deliveryStatus']] ?? 'bg-gray-100 text-gray-800';
                             ?>
@@ -343,19 +337,15 @@ $countCancelled = count(array_filter($allOrders, function($o) { return $o['payme
                         } elseif ($order['paymentStatus'] === 'Đã hoàn tiền' || $order['deliveryStatus'] === 'Đã hoàn tiền') {
                             // Đơn đã hoàn tiền - KHÔNG cho hủy nữa
                             $canCancel = false;
-                        } elseif ($order['deliveryStatus'] === 'Chờ xử lý hoàn tiền') {
-                            // Đơn đang chờ admin xác nhận hoàn tiền - KHÔNG cho hủy thêm
-                            $canCancel = false;
-                        } elseif ($order['deliveryStatus'] === 'Hoàn thành' || $order['deliveryStatus'] === 'Đã giao') {
+                        } elseif ($order['deliveryStatus'] === 'Hoàn thành') {
                             // Đơn đã hoàn thành
                             $canCancel = false;
-                        } elseif (in_array($order['deliveryStatus'], ['Đang giao', 'Đang tiến hành vận chuyển'])) {
-                            // Đơn đã được admin xác nhận và đang giao - KHÔNG cho hủy
+                        } elseif ($order['deliveryStatus'] === 'Đang tiến hành vận chuyển') {
+                            // Đơn đang giao - KHÔNG cho hủy
                             $cancelMessage = 'Đơn hàng đã được xác nhận và đang giao. Vui lòng liên hệ CSKH để hỗ trợ!';
                             $canCancel = false;
                         } else {
-                            // Các trường hợp khác (Chờ xử lý, Chờ xác nhận) - CHO PHÉP HỦY
-                            // Bất kể đã thanh toán hay chưa, nếu admin chưa xác nhận thì vẫn cho hủy
+                            // Trường hợp còn lại: Chờ xác nhận - CHO PHÉP HỦY
                             $canCancel = true;
                         }
                         
