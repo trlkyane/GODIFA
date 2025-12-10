@@ -28,6 +28,20 @@ if (!$provinceId) {
 }
 
 try {
+    // Fallback: Trả về data đơn giản để user có thể nhập text
+    // Chỉ cần ID để form submit, không cần gọi GHN API
+    $districts = [
+        ['DistrictID' => 1, 'DistrictName' => 'Nhập quận/huyện của bạn', 'Code' => '1']
+    ];
+    
+    echo json_encode([
+        'success' => true,
+        'data' => $districts,
+        'source' => 'manual-input',
+        'note' => 'Vui lòng nhập chính xác tên quận/huyện'
+    ], JSON_UNESCAPED_UNICODE);
+    
+    /* GHN API disabled - uncomment to re-enable
     $ghn = new GHN();
     $result = $ghn->getDistricts((int)$provinceId);
     
@@ -51,11 +65,18 @@ try {
             'error' => $result['error']
         ], JSON_UNESCAPED_UNICODE);
     }
+    */
 } catch (Exception $e) {
-    http_response_code(500);
+    // Fallback on error
+    $districts = [
+        ['DistrictID' => 1, 'DistrictName' => 'Nhập quận/huyện của bạn', 'Code' => '1']
+    ];
+    
     echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
+        'success' => true,
+        'data' => $districts,
+        'source' => 'fallback',
+        'note' => 'GHN API error - manual input mode'
     ], JSON_UNESCAPED_UNICODE);
 }
 

@@ -33,20 +33,29 @@ try {
         
         echo json_encode([
             'success' => true,
-            'data' => $filteredData
+            'data' => $filteredData,
+            'source' => 'ghn-api'
         ], JSON_UNESCAPED_UNICODE);
     } else {
-        http_response_code(500);
+        // Fallback to static data if GHN API fails
+        $staticData = include __DIR__ . '/../../data/provinces_static.php';
+        
         echo json_encode([
-            'success' => false,
-            'error' => $result['error']
+            'success' => true,
+            'data' => $staticData,
+            'source' => 'static-fallback',
+            'note' => 'GHN API unavailable, using static data'
         ], JSON_UNESCAPED_UNICODE);
     }
 } catch (Exception $e) {
-    http_response_code(500);
+    // Fallback to static data on exception
+    $staticData = include __DIR__ . '/../../data/provinces_static.php';
+    
     echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
+        'success' => true,
+        'data' => $staticData,
+        'source' => 'static-fallback',
+        'note' => 'GHN API error, using static data'
     ], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $t) {
     http_response_code(500);

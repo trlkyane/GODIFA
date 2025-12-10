@@ -1,0 +1,82 @@
+<?php
+/**
+ * Static Vietnam Provinces Data (for GHN)
+ * Dữ liệu tỉnh thành Việt Nam tĩnh - backup khi GHN API lỗi
+ * File: api/ghn/provinces_static.php
+ */
+
+header('Content-Type: application/json; charset=utf-8');
+
+// Dữ liệu 63 tỉnh thành Việt Nam theo GHN format
+$provinces = [
+    ["ProvinceID" => 201, "ProvinceName" => "Hà Nội", "Code" => "201"],
+    ["ProvinceID" => 202, "ProvinceName" => "Hồ Chí Minh", "Code" => "202"],
+    ["ProvinceID" => 203, "ProvinceName" => "Đà Nẵng", "Code" => "203"],
+    ["ProvinceID" => 204, "ProvinceName" => "Hải Phòng", "Code" => "204"],
+    ["ProvinceID" => 205, "ProvinceName" => "Cần Thơ", "Code" => "205"],
+    ["ProvinceID" => 206, "ProvinceName" => "An Giang", "Code" => "206"],
+    ["ProvinceID" => 207, "ProvinceName" => "Bà Rịa - Vũng Tàu", "Code" => "207"],
+    ["ProvinceID" => 208, "ProvinceName" => "Bắc Giang", "Code" => "208"],
+    ["ProvinceID" => 209, "ProvinceName" => "Bắc Kạn", "Code" => "209"],
+    ["ProvinceID" => 210, "ProvinceName" => "Bạc Liêu", "Code" => "210"],
+    ["ProvinceID" => 211, "ProvinceName" => "Bắc Ninh", "Code" => "211"],
+    ["ProvinceID" => 212, "ProvinceName" => "Bến Tre", "Code" => "212"],
+    ["ProvinceID" => 213, "ProvinceName" => "Bình Định", "Code" => "213"],
+    ["ProvinceID" => 214, "ProvinceName" => "Bình Dương", "Code" => "214"],
+    ["ProvinceID" => 215, "ProvinceName" => "Bình Phước", "Code" => "215"],
+    ["ProvinceID" => 216, "ProvinceName" => "Bình Thuận", "Code" => "216"],
+    ["ProvinceID" => 217, "ProvinceName" => "Cà Mau", "Code" => "217"],
+    ["ProvinceID" => 218, "ProvinceName" => "Cao Bằng", "Code" => "218"],
+    ["ProvinceID" => 219, "ProvinceName" => "Đắk Lắk", "Code" => "219"],
+    ["ProvinceID" => 220, "ProvinceName" => "Đắk Nông", "Code" => "220"],
+    ["ProvinceID" => 221, "ProvinceName" => "Điện Biên", "Code" => "221"],
+    ["ProvinceID" => 222, "ProvinceName" => "Đồng Nai", "Code" => "222"],
+    ["ProvinceID" => 223, "ProvinceName" => "Đồng Tháp", "Code" => "223"],
+    ["ProvinceID" => 224, "ProvinceName" => "Gia Lai", "Code" => "224"],
+    ["ProvinceID" => 225, "ProvinceName" => "Hà Giang", "Code" => "225"],
+    ["ProvinceID" => 226, "ProvinceName" => "Hà Nam", "Code" => "226"],
+    ["ProvinceID" => 227, "ProvinceName" => "Hà Tĩnh", "Code" => "227"],
+    ["ProvinceID" => 228, "ProvinceName" => "Hải Dương", "Code" => "228"],
+    ["ProvinceID" => 229, "ProvinceName" => "Hậu Giang", "Code" => "229"],
+    ["ProvinceID" => 230, "ProvinceName" => "Hòa Bình", "Code" => "230"],
+    ["ProvinceID" => 231, "ProvinceName" => "Hưng Yên", "Code" => "231"],
+    ["ProvinceID" => 232, "ProvinceName" => "Khánh Hòa", "Code" => "232"],
+    ["ProvinceID" => 233, "ProvinceName" => "Kiên Giang", "Code" => "233"],
+    ["ProvinceID" => 234, "ProvinceName" => "Kon Tum", "Code" => "234"],
+    ["ProvinceID" => 235, "ProvinceName" => "Lai Châu", "Code" => "235"],
+    ["ProvinceID" => 236, "ProvinceName" => "Lâm Đồng", "Code" => "236"],
+    ["ProvinceID" => 237, "ProvinceName" => "Lạng Sơn", "Code" => "237"],
+    ["ProvinceID" => 238, "ProvinceName" => "Lào Cai", "Code" => "238"],
+    ["ProvinceID" => 239, "ProvinceName" => "Long An", "Code" => "239"],
+    ["ProvinceID" => 240, "ProvinceName" => "Nam Định", "Code" => "240"],
+    ["ProvinceID" => 241, "ProvinceName" => "Nghệ An", "Code" => "241"],
+    ["ProvinceID" => 242, "ProvinceName" => "Ninh Bình", "Code" => "242"],
+    ["ProvinceID" => 243, "ProvinceName" => "Ninh Thuận", "Code" => "243"],
+    ["ProvinceID" => 244, "ProvinceName" => "Phú Thọ", "Code" => "244"],
+    ["ProvinceID" => 245, "ProvinceName" => "Phú Yên", "Code" => "245"],
+    ["ProvinceID" => 246, "ProvinceName" => "Quảng Bình", "Code" => "246"],
+    ["ProvinceID" => 247, "ProvinceName" => "Quảng Nam", "Code" => "247"],
+    ["ProvinceID" => 248, "ProvinceName" => "Quảng Ngãi", "Code" => "248"],
+    ["ProvinceID" => 249, "ProvinceName" => "Quảng Ninh", "Code" => "249"],
+    ["ProvinceID" => 250, "ProvinceName" => "Quảng Trị", "Code" => "250"],
+    ["ProvinceID" => 251, "ProvinceName" => "Sóc Trăng", "Code" => "251"],
+    ["ProvinceID" => 252, "ProvinceName" => "Sơn La", "Code" => "252"],
+    ["ProvinceID" => 253, "ProvinceName" => "Tây Ninh", "Code" => "253"],
+    ["ProvinceID" => 254, "ProvinceName" => "Thái Bình", "Code" => "254"],
+    ["ProvinceID" => 255, "ProvinceName" => "Thái Nguyên", "Code" => "255"],
+    ["ProvinceID" => 256, "ProvinceName" => "Thanh Hóa", "Code" => "256"],
+    ["ProvinceID" => 257, "ProvinceName" => "Thừa Thiên Huế", "Code" => "257"],
+    ["ProvinceID" => 258, "ProvinceName" => "Tiền Giang", "Code" => "258"],
+    ["ProvinceID" => 259, "ProvinceName" => "Trà Vinh", "Code" => "259"],
+    ["ProvinceID" => 260, "ProvinceName" => "Tuyên Quang", "Code" => "260"],
+    ["ProvinceID" => 261, "ProvinceName" => "Vĩnh Long", "Code" => "261"],
+    ["ProvinceID" => 262, "ProvinceName" => "Vĩnh Phúc", "Code" => "262"],
+    ["ProvinceID" => 263, "ProvinceName" => "Yên Bái", "Code" => "263"],
+];
+
+echo json_encode([
+    'success' => true,
+    'data' => $provinces,
+    'source' => 'static',
+    'note' => 'Dữ liệu tĩnh - dùng khi GHN API không khả dụng'
+], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

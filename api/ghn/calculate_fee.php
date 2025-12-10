@@ -48,6 +48,39 @@ if (!$districtId || !$wardCode) {
 }
 
 try {
+    // Fallback: Tính phí ship cố định hoặc theo tỉnh
+    // Phí ship mặc định: 30,000 VND
+    $shippingFee = 30000;
+    
+    // Nếu có provinceId trong request, tính theo khu vực
+    $provinceId = $input['provinceId'] ?? 202; // Default: HCM
+    
+    // Định nghĩa phí ship theo tỉnh (ID từ data/provinces_static.php)
+    $feeByProvince = [
+        201 => 35000,  // Hà Nội
+        202 => 25000,  // Hồ Chí Minh
+        203 => 30000,  // Đà Nẵng
+        204 => 35000,  // Hải Phòng
+        205 => 28000,  // Cần Thơ
+    ];
+    
+    // Lấy phí theo tỉnh, nếu không có thì dùng mặc định 30k
+    $shippingFee = $feeByProvince[$provinceId] ?? 30000;
+    
+    error_log("Shipping Fee Calculated: {$shippingFee} VND for province {$provinceId}");
+    
+    echo json_encode([
+        'success' => true,
+        'data' => [
+            'total' => $shippingFee,
+            'service_fee' => $shippingFee,
+            'insurance_fee' => 0,
+        ],
+        'source' => 'static-calculation',
+        'note' => 'Phí ship tính theo tỉnh thành (không dùng GHN API)'
+    ]);
+    
+    /* GHN API disabled
     $ghn = new GHN();
     $result = $ghn->calculateFee((int)$districtId, $wardCode, (int)$weight, (int)$insurance, (int)$serviceTypeId);
     
@@ -71,11 +104,18 @@ try {
             'details' => $result['response'] ?? null
         ]);
     }
+    */
 } catch (Exception $e) {
-    error_log("GHN Calculate Fee Exception: " . $e->getMessage());
-    http_response_code(500);
+    error_log("Shipping Fee Exception: " . $e->getMessage());
+    
+    // Fallback on error
     echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
+        'success' => true,
+        'data' => [
+            'total' => 30000,
+            'service_fee' => 30000,
+            'insurance_fee' => 0,
+        ],
+        'source' => 'fallback'
     ]);
 }

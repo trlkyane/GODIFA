@@ -194,12 +194,9 @@ foreach ($checkoutCart as $item) {
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100">
                                     <option value="">-- Chọn Quận/Huyện --</option>
                                 </select>
-                                <!-- Hidden inputs for GHN IDs -->
-                                <input type="hidden" id="district-id" name="districtId">
-                                <input type="hidden" id="district-name" name="districtName">
                             </div>
                             
-                            <!-- Ward (MỚI THÊM) -->
+                            <!-- Ward -->
                             <div>
                                 <label class="block text-gray-700 font-medium mb-2">
                                     <i class="fas fa-map-marker-alt text-indigo-600"></i> Phường/Xã *
@@ -211,9 +208,6 @@ foreach ($checkoutCart as $item) {
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100">
                                     <option value="">-- Chọn Phường/Xã --</option>
                                 </select>
-                                <!-- Hidden inputs for GHN IDs -->
-                                <input type="hidden" id="ward-code" name="wardCode">
-                                <input type="hidden" id="ward-name" name="wardName">
                             </div>
                         </div>
 
@@ -426,7 +420,7 @@ foreach ($checkoutCart as $item) {
     <script>
     // Global variables
     const SUBTOTAL = <?= $totalAmount ?>;
-    let shippingFee = 0;
+    var shippingFee = 0;  // Use var to make it global
     let discountAmount = 0;
     let selectedVoucher = null;
     let availableVouchers = [];
@@ -464,8 +458,8 @@ foreach ($checkoutCart as $item) {
     window.BASE_URL = '<?php echo BASE_URL; ?>';
     </script>
     
-    <!-- GHN Address Selector Script -->
-    <script src="<?php echo BASE_URL; ?>public/js/ghn-address.js?v=3.1"></script>
+    <!-- Vietnam Address API - Full data from provinces.open-api.vn -->
+    <script src="<?php echo BASE_URL; ?>public/js/vietnam-address-api.js?v=3.3"></script>
     
     <script>
     // Load vouchers khi trang load

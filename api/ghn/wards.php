@@ -28,6 +28,19 @@ if (!$districtId) {
 }
 
 try {
+    // Fallback: Trả về data đơn giản để user có thể nhập text
+    $wards = [
+        ['WardCode' => '1', 'WardName' => 'Nhập phường/xã của bạn']
+    ];
+    
+    echo json_encode([
+        'success' => true,
+        'data' => $wards,
+        'source' => 'manual-input',
+        'note' => 'Vui lòng nhập chính xác tên phường/xã'
+    ], JSON_UNESCAPED_UNICODE);
+    
+    /* GHN API disabled
     $ghn = new GHN();
     $result = $ghn->getWards((int)$districtId);
     
@@ -51,11 +64,17 @@ try {
             'error' => $result['error']
         ], JSON_UNESCAPED_UNICODE);
     }
+    */
 } catch (Exception $e) {
-    http_response_code(500);
+    // Fallback on error
+    $wards = [
+        ['WardCode' => '1', 'WardName' => 'Nhập phường/xã của bạn']
+    ];
+    
     echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
+        'success' => true,
+        'data' => $wards,
+        'source' => 'fallback'
     ], JSON_UNESCAPED_UNICODE);
 }
 
