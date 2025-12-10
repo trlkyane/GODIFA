@@ -123,40 +123,4 @@ class ProfileController {
         
         return $success;
     }
-    
-    /**
-     * Đổi mật khẩu khách hàng
-     */
-    public function changePassword($customerID, $oldPassword, $newPassword) {
-        $conn = $this->db->connect();
-        
-        // Kiểm tra mật khẩu cũ
-        $stmt = mysqli_prepare($conn, "SELECT password FROM customer WHERE customerID = ?");
-        mysqli_stmt_bind_param($stmt, "i", $customerID);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $customer = mysqli_fetch_assoc($result);
-        
-        if (!$customer) {
-            return ['success' => false, 'message' => 'Không tìm thấy tài khoản!'];
-        }
-        
-        // Verify old password
-        if (!password_verify($oldPassword, $customer['password'])) {
-            return ['success' => false, 'message' => 'Mật khẩu cũ không đúng!'];
-        }
-        
-        // Hash new password
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-        
-        // Update password
-        $stmt = mysqli_prepare($conn, "UPDATE customer SET password = ? WHERE customerID = ?");
-        mysqli_stmt_bind_param($stmt, "si", $hashedPassword, $customerID);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            return ['success' => true, 'message' => 'Đổi mật khẩu thành công!'];
-        } else {
-            return ['success' => false, 'message' => 'Có lỗi xảy ra. Vui lòng thử lại!'];
-        }
-    }
 }
