@@ -85,7 +85,7 @@ include __DIR__ . '/../includes/header.php';
                                 <span class="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-semibold rounded">-<?php echo round((($product['price'] - $product['promotional_price']) / $product['price']) * 100); ?>%</span>
                             </div>
                         <?php else: ?>
-                            <div class="mb-4"><span class="text-2xl font-bold text-gray-800"><?php echo number_format($product['price'], 0, ',', '.'); ?>?</span></div>
+                            <div class="mb-4"><span class="text-2xl font-bold text-gray-800"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</span></div>
                         <?php endif; ?>
                         <div class="grid grid-cols-2 gap-3 text-sm">
                             <div class="bg-gray-50 p-3 rounded">
@@ -127,7 +127,7 @@ include __DIR__ . '/../includes/header.php';
                         </a>
                     </div>
                     <div class="bg-white rounded-lg shadow p-5 text-xs text-gray-500">
-                        <p><strong>ưu ý:</strong> Đây là trang xem chi tiết dành cho Admin. Chỉnh sửa, khóa hoặc xóa chỉ thực hiện ở trang danh sách sản phẩm.</p>
+                        <p><strong>Lưu ý:</strong> Đây là trang xem chi tiết dành cho Admin. Chỉnh sửa, khóa hoặc xóa chỉ thực hiện ở trang danh sách sản phẩm.</p>
                     </div>
                 </div>
             </div>
@@ -136,6 +136,6 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Không nhúng l?i products.php d? tránh trùng l?p giao di?n -->
+<!-- Không nhúng lại products.php để tránh trùng lặp giao diện -->
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

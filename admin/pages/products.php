@@ -364,16 +364,16 @@ echo $product['productID']; ?>)"
                                             <?php
 endif; ?>
                                             
-                                            <!-- Xóa -->
+                                            <!-- Xóa - ĐÃ ẨN -->
                                             <?php
-if (hasPermission('delete_product')): ?>
+/*if (hasPermission('delete_product')): ?>
                                             <button onclick="deleteProduct(<?php
 echo $product['productID']; ?>)" 
                                                     class="text-red-600 hover:text-red-800" title="Xóa">
                                                 <i class="fas fa-trash text-lg"></i>
                                             </button>
                                             <?php
-endif; ?>
+endif;*/ ?>
                                             <?php
 else: ?>
                                             <!-- Chỉ xem -->

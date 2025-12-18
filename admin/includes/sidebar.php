@@ -172,11 +172,6 @@ if (hasPermission('view_reviews') || hasPermission('manage_reviews')) {
         <a href="?page=reviews" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700">
             <i class="fas fa-star-half-alt w-5"></i>
             <span>Đánh giá</span>
-            <?php if ($pendingReviewsCount > 0): ?>
-            <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold" title="Đánh giá chờ duyệt">
-                <?php echo $pendingReviewsCount; ?>
-            </span>
-            <?php endif; ?>
         </a>
         <?php endif; ?>
         <?php if (hasPermission('view_customer_groups') || hasPermission('full_access')): ?>

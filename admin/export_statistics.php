@@ -4,14 +4,14 @@
  * Xuáº¥t bÃ¡o cÃ¡o thá»‘ng kÃª ra file Excel
  */
 
-// Báº­t output buffering ngay tá»« Ä‘áº§u Ä‘á»ƒ trÃ¡nh output khÃ´ng mong muá»‘n
+// Bật output buffering ngay từ đầu để tránh output không mong muốn
 ob_start();
 
-// Load auth vÃ  constants
+// Load auth và constants
 require_once __DIR__ . '/middleware/auth.php';
 require_once __DIR__ . '/../config/constants.php';
 
-// Start session náº¿u chÆ°a cÃ³
+// Start session nếu chưa có
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_ADMIN);
     session_start();

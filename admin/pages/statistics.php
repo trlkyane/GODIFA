@@ -18,7 +18,7 @@ $controller = new cStatistics();
 // Get all statistics data
 $data = $controller->getAllStatistics();
 
-// Hiển thị thông báo l?i Nếu có
+// Hiển thị thông báo lỗi nếu có
 $errorMessage = '';
 if (isset($_GET['error'])) {
     switch ($_GET['error']) {
@@ -279,7 +279,7 @@ echo htmlspecialchars($product['productName']); ?>"
                             <div class="flex-1 min-w-0">
                                 <h3 class="font-semibold text-sm text-gray-900 truncate"><?php
 echo htmlspecialchars($product['productName']); ?></h3>
-                                <p class="text-xs text-gray-600">Ðã bán: <?php
+                                <p class="text-xs text-gray-600">Đã bán: <?php
 echo number_format($product['totalSold']); ?> sản phẩm</p>
                             </div>
                             <div class="text-right">
@@ -376,7 +376,7 @@ echo json_encode($chartData); ?>;
         data: {
             labels: labels,
             datasets: [{
-                label: 'Doanh thu (VNÐ)',
+                label: 'Doanh thu (VNĐ)',
                 data: revenues,
                 borderColor: 'rgb(59, 130, 246)',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -394,7 +394,7 @@ echo json_encode($chartData); ?>;
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' d';
+                            return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' ₫';
                         }
                     }
                 }
