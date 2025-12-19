@@ -276,17 +276,19 @@ include __DIR__ . '/../includes/header.php';
                                                 <i class="fas fa-key text-lg"></i>
                                             </button>
                                             
-                                            <!-- Khóa/Mở khóa -->
-                                            <?php if ($status == '1'): ?>
-                                            <button onclick="toggleUserStatus(<?php echo $userID; ?>, '<?php echo htmlspecialchars($userName); ?>', 0)" 
-                                                    class="text-orange-600 hover:text-orange-800" title="Khóa tài khoản">
-                                                <i class="fas fa-lock text-lg"></i>
-                                            </button>
-                                            <?php else: ?>
-                                            <button onclick="toggleUserStatus(<?php echo $userID; ?>, '<?php echo htmlspecialchars($userName); ?>', 1)" 
-                                                    class="text-green-600 hover:text-green-800" title="Mở khóa tài khoản">
-                                                <i class="fas fa-unlock text-lg"></i>
-                                            </button>
+                                            <!-- Khóa/Mở khóa (Không hiển thị cho Chủ doanh nghiệp) -->
+                                            <?php if ($roleID != ROLE_OWNER): ?>
+                                                <?php if ($status == '1'): ?>
+                                                <button onclick="toggleUserStatus(<?php echo $userID; ?>, '<?php echo htmlspecialchars($userName); ?>', 0)" 
+                                                        class="text-orange-600 hover:text-orange-800" title="Khóa tài khoản">
+                                                    <i class="fas fa-lock text-lg"></i>
+                                                </button>
+                                                <?php else: ?>
+                                                <button onclick="toggleUserStatus(<?php echo $userID; ?>, '<?php echo htmlspecialchars($userName); ?>', 1)" 
+                                                        class="text-green-600 hover:text-green-800" title="Mở khóa tài khoản">
+                                                    <i class="fas fa-unlock text-lg"></i>
+                                                </button>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                             <?php endif; ?>
                                             
